@@ -66,7 +66,7 @@ The following attributes are exported:
 
 * `owner` - The Circonus ID of the user who owns this account.
 
-* `state_prov` - The state or province of the address associated with the account.
+* `state` - The state or province of the address associated with the account.
 
 * `timezone` - The timezone that events will be displayed in the web interface
   for this account.
