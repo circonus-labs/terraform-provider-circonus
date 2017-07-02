@@ -46,7 +46,7 @@ EOF
   json {
     url = "https://api.circonus.com/v2"
 
-    http_headers = {
+    headers = {
       Accept                = "application/json"
       X-Circonus-App-Name   = "TerraformCheck"
       X-Circonus-Auth-Token = "${var.api_token}"
@@ -661,7 +661,7 @@ resource "circonus_check" "usage" {
   json {
     url = "https://api.circonus.com/account/current"
 
-    http_headers = {
+    headers = {
       "Accept"                = "application/json"
       "X-Circonus-App-Name"   = "TerraformCheck"
       "X-Circonus-Auth-Token" = "${var.api_token}"
