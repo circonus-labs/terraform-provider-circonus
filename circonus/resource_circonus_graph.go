@@ -216,7 +216,7 @@ func resourceGraph() *schema.Resource {
 						graphMetricFunctionAttr: &schema.Schema{
 							Type:         schema.TypeString,
 							Optional:     true,
-							Default:      defaultGraphFunction,
+							Computed:     true,
 							ValidateFunc: validateStringIn(graphMetricFunctionAttr, validGraphFunctionValues),
 						},
 						graphMetricMetricTypeAttr: &schema.Schema{
@@ -378,10 +378,10 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 			dataPointAttrs[string(graphMetricFormulaAttr)] = *datapoint.DataFormula
 		}
 
-		switch datapoint.Derive.(type) {
+		switch u := datapoint.Derive.(type) {
 		case bool:
 		case string:
-			dataPointAttrs[string(graphMetricFunctionAttr)] = datapoint.Derive.(string)
+			dataPointAttrs[string(graphMetricFunctionAttr)] = u
 		default:
 			return fmt.Errorf("PROVIDER BUG: Unsupported type for derive: %T", datapoint.Derive)
 		}
@@ -917,6 +917,15 @@ func (g *circonusGraph) Validate() error {
 
 		if datapoint.CAQL != nil && (datapoint.CheckID != 0 || datapoint.MetricName != "") {
 			return fmt.Errorf("Error with %s[%d] name=%q: %q attribute is mutually exclusive with attributes %s or %s", graphMetricAttr, i, datapoint.Name, graphMetricCAQLAttr, graphMetricNameAttr, graphMetricCheckAttr)
+		}
+
+		if datapoint.MetricType == "text" && datapoint.Derive != nil {
+			v := datapoint.Derive
+			switch v.(type) {
+			case bool:
+			default:
+				return fmt.Errorf("Error with %s[%d] (name=%q): attribute %q is mutually exclusive when %s=%q", graphMetricAttr, i, datapoint.Name, graphMetricFunctionAttr, graphMetricMetricTypeAttr, "text")
+			}
 		}
 	}
 
