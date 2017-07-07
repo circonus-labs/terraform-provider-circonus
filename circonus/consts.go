@@ -53,7 +53,6 @@ const (
 	defaultGraphDatapoints = 8
 	defaultGraphLineStyle  = "stepped"
 	defaultGraphStyle      = "line"
-	defaultGraphFunction   = "gauge"
 
 	metricUnit       = ""
 	metricUnitRegexp = `^.*$`
