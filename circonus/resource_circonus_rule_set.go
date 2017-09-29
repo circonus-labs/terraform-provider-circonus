@@ -130,6 +130,7 @@ func resourceRuleSet() *schema.Resource {
 			ruleSetCheckAttr: &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetCheckAttr, config.CheckCIDRegex),
 			},
 			ruleSetIfAttr: &schema.Schema{
@@ -294,6 +295,7 @@ func resourceRuleSet() *schema.Resource {
 			ruleSetMetricNameAttr: &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricNameAttr, `^[\S]+$`),
 			},
 			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
