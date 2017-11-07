@@ -11,7 +11,7 @@ description: |-
 The ``circonus_check`` resource creates and manages a
 [Circonus Check](https://login.circonus.com/resources/api/calls/check_bundle).
 
-~> **NOTE regarding `cirocnus_check` vs a Circonus Check Bundle:** The
+~> **NOTE regarding `circonus_check` vs a Circonus Check Bundle:** The
 `circonus_check` resource is implemented in terms of a
 [Circonus Check Bundle](https://login.circonus.com/resources/api/calls/check_bundle).
 The `circonus_check` creates a higher-level abstraction over the implementation
