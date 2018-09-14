@@ -21,7 +21,7 @@ const (
 	defaultCirconusTimeoutMax            = "300s"
 	defaultCirconusTimeoutMin            = "0s"
 	maxSeverity                          = 5
-	minSeverity                          = 1
+	minSeverity                          = 0
 )
 
 var providerDescription = map[string]string{

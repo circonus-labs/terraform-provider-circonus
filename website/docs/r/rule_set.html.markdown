@@ -323,7 +323,7 @@ A `then` block can have the following attributes:
 * `notify` - (Optional) A list of contact group IDs to notify when this rule is
   sends off a notification.
 * `severity` - (Optional) The severity level of the notification.  This can be
-  set to any value between `1` and `5`.  Defaults to `1`.
+  set to any value between `0` and `5`.  Defaults to `1`.
 
 ## Import Example
 
