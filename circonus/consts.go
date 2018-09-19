@@ -50,6 +50,12 @@ const (
 
 	defaultCollectorDetailAttrs = 10
 
+	defaultDashboardShared         = true
+	defaultDashboardAccountDefault = false
+	defaultDashboardActive         = true
+	defaultDashboardGridHeight     = 4
+	defaultDashboardGridWidth      = 4
+
 	defaultGraphDatapoints = 8
 	defaultGraphLineStyle  = "stepped"
 	defaultGraphStyle      = "line"

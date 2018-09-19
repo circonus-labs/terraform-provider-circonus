@@ -90,6 +90,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"circonus_check":          resourceCheck(),
 			"circonus_contact_group":  resourceContactGroup(),
+			"circonus_dashboard":      resourceDashboard(),
 			"circonus_graph":          resourceGraph(),
 			"circonus_metric":         resourceMetric(),
 			"circonus_metric_cluster": resourceMetricCluster(),
