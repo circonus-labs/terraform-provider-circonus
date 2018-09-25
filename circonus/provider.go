@@ -94,6 +94,7 @@ func Provider() terraform.ResourceProvider {
 			"circonus_metric":         resourceMetric(),
 			"circonus_metric_cluster": resourceMetricCluster(),
 			"circonus_rule_set":       resourceRuleSet(),
+			"circonus_worksheet":      resourceWorksheet(),
 		},
 
 		ConfigureFunc: providerConfigure,
