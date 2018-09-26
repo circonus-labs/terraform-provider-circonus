@@ -64,7 +64,7 @@ func Provider() terraform.ResourceProvider {
 			providerAPIURLAttr: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "https://api.circonus.com/v2",
+				DefaultFunc: schema.EnvDefaultFunc("CIRCONUS_API_URL", "https://api.circonus.com/v2"),
 				Description: providerDescription[providerAPIURLAttr],
 			},
 			providerAutoTagAttr: {
