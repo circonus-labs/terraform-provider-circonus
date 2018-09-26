@@ -18,9 +18,6 @@ const (
 	metricClusterQueryAttr       = "query"
 	metricClusterTagsAttr        = "tags"
 
-	// circonus_metric_cluster.* out parameters
-	metricClusterIDAttr = "id"
-
 	// circonus_metric_cluster.query.* resource attribute names
 	metricClusterDefinitionAttr = "definition"
 	metricClusterTypeAttr       = "type"
@@ -28,7 +25,6 @@ const (
 
 var metricClusterDescriptions = attrDescrs{
 	metricClusterDescriptionAttr: "A description of the metric cluster",
-	metricClusterIDAttr:          "The ID of this metric cluster",
 	metricClusterNameAttr:        "The name of the metric cluster",
 	metricClusterQueryAttr:       "A metric cluster query definition",
 	metricClusterTagsAttr:        "A list of tags assigned to the metric cluster",
@@ -81,12 +77,6 @@ func resourceMetricCluster() *schema.Resource {
 				},
 			},
 			metricClusterTagsAttr: tagMakeConfigSchema(metricClusterTagsAttr),
-
-			// Out parameters
-			metricClusterIDAttr: &schema.Schema{
-				Computed: true,
-				Type:     schema.TypeString,
-			},
 		}),
 	}
 }
@@ -157,8 +147,6 @@ func metricClusterRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set(metricClusterTagsAttr, tagsToState(apiToTags(mc.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store metric cluster %q attribute: {{err}}", metricClusterTagsAttr), err)
 	}
-
-	d.Set(metricClusterIDAttr, mc.CID)
 
 	return nil
 }
