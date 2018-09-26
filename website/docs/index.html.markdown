@@ -24,5 +24,5 @@ provider "circonus" {
 
 The following arguments are supported:
 
-* `key` - (Required) The Circonus API Key.
-* `api_url` - (Optional) The API URL to use to talk with. The default is `https://api.circonus.com/v2`.
+* `key` - (Required) The Circonus API Key. It can be sourced from the `CIRCONUS_API_KEY` environment variable.
+* `api_url` - (Optional) The API URL to use to talk with. The default is `https://api.circonus.com/v2`. It can be sourced from the `CIRCONUS_API_URL` environment variable.
