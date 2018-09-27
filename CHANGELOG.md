@@ -1,4 +1,14 @@
 ## 0.1.2 (Unreleased)
+
+ENHANCEMENTS:
+
+* `provider`: Accept the `CIRCONUS_API_URL` environment variable to configure the API URL ([#18](https://github.com/terraform-providers/terraform-provider-circonus/pull/18))
+
+NOTES:
+
+* Minimum version of Go required to build the provider is now 1.10
+* Deprecated `govendor` in favor of using `dep` for vendor management ([#19](https://github.com/terraform-providers/terraform-provider-circonus/pull/19))
+
 ## 0.1.1 (September 19, 2018)
 
 BUG FIXES:
