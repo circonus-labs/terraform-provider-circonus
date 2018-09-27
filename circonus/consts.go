@@ -63,6 +63,8 @@ const (
 	defaultAlertSeverity     = 1
 	defaultRuleSetWindowFunc = "average"
 	ruleSetAbsentMin         = "70s"
+
+	defaultWorkspaceFavourite = false
 )
 
 // Consts and their close relative, Go pseudo-consts.
