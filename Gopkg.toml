@@ -30,12 +30,8 @@ ignored = [
 ]
 
 [[constraint]]
-  name = "github.com/circonus-labs/circonus-gometrics"
-  version = "0.1.0"
-
-[[constraint]]
   name = "github.com/hashicorp/terraform"
-  version = "0.10.0"
+  version = "0.11.3"
 
 [prune]
   go-tests = true
