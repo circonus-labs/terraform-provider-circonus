@@ -98,15 +98,15 @@
   version = "v3.5.1"
 
 [[projects]]
-  digest = "1:58bb1c5fc3f3f352b7e963e3689c804ed5902b1b47c0651737267365bf9162ac"
+  digest = "1:97b1b04f85350861d8b3c6755dc12d41875c98a91933d4eda5a1c17e82467f7f"
   name = "github.com/circonus-labs/circonus-gometrics"
   packages = [
     "api",
     "api/config",
   ]
   pruneopts = "UT"
-  revision = "45b42878bb7aca6fc64fe0a6641a2aa1a5cb2723"
-  version = "v2.2.3"
+  revision = "03033123293bfe2241d1f7e1a3de8fb508265251"
+  version = "v2.2.4"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
