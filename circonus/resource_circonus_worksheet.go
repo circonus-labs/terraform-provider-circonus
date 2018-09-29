@@ -274,6 +274,7 @@ func (w *circonusWorksheet) ParseConfig(d *schema.ResourceData) error {
 
 		for _, queryListRaw := range queriesList {
 			var query api.WorksheetSmartQuery
+			query.Order = []string{}
 			queryAttrs := queryListRaw.(map[string]interface{})
 
 			if v, found := queryAttrs[queryNameAttr]; found {
