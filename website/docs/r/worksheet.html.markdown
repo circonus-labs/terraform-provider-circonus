@@ -47,10 +47,20 @@ resource "circonus_graph" "latency-graph" {
   tags = [ "${var.myapp-tags}" ]
 }
 
-resource "circonus_worksheet" "latency_worksheet" {
-  title = "%s"
+resource "circonus_worksheet" "myapp_latency" {
+  title = "MyApp: Latencies"
   graphs = [
     "${circonus_graph.latency-graph.id}",
+  ]
+}
+
+resource "circonus_worksheet" "service_myapp" {
+  title = "Service: MyApp"
+  smart_queries = [
+    {
+      name  = "MyApp"
+      query = "(tags:${var.myapp-tags})"
+    }
   ]
 }
 ```
@@ -72,6 +82,9 @@ resource "circonus_worksheet" "latency_worksheet" {
 * `tags` - (Optional) A list of tags assigned to this worksheet.
 
 ### `smart_queries` Attributes
+
+`smart_queries` is a list of smart query objects.  Each smart query object has
+the following required attributes:
 
 * `name` - (Required) The name (heading) for the smart graph section in the worksheet.
 
