@@ -47,28 +47,28 @@ func resourceMetricCluster() *schema.Resource {
 		},
 
 		Schema: convertToHelperSchema(metricClusterDescriptions, map[schemaAttr]*schema.Schema{
-			metricClusterDescriptionAttr: &schema.Schema{
+			metricClusterDescriptionAttr: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Computed:  true,
 				StateFunc: suppressWhitespace,
 			},
-			metricClusterNameAttr: &schema.Schema{
+			metricClusterNameAttr: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			metricClusterQueryAttr: &schema.Schema{
+			metricClusterQueryAttr: {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(metricClusterQueryDescriptions, map[schemaAttr]*schema.Schema{
-						metricClusterDefinitionAttr: &schema.Schema{
+						metricClusterDefinitionAttr: {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validateRegexp(metricClusterDefinitionAttr, `.+`),
 						},
-						metricClusterTypeAttr: &schema.Schema{
+						metricClusterTypeAttr: {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validateStringIn(metricClusterTypeAttr, supportedMetricClusterTypes),

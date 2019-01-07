@@ -23,7 +23,7 @@ var schemaCheckStatsd = &schema.Schema{
 	MinItems: 1,
 	Elem: &schema.Resource{
 		Schema: convertToHelperSchema(checkStatsdDescriptions, map[schemaAttr]*schema.Schema{
-			checkStatsdSourceIPAttr: &schema.Schema{
+			checkStatsdSourceIPAttr: {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateRegexp(checkStatsdSourceIPAttr, `.+`),

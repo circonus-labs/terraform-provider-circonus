@@ -13,7 +13,7 @@ func TestAccDataSourceCirconusCollector(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDataSourceCirconusCollectorConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceCirconusCollectorCheck("data.circonus_collector.by_id", "/broker/1"),
