@@ -13,7 +13,7 @@ func TestAccDataSourceCirconusAccount(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDataSourceCirconusAccountCurrentConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceCirconusAccountCheck("data.circonus_account.by_current", "/account/3081"),
@@ -26,7 +26,7 @@ func TestAccDataSourceCirconusAccount(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDataSourceCirconusAccountIDConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceCirconusAccountCheck("data.circonus_account.by_id", "/account/3081"),

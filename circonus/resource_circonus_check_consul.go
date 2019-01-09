@@ -57,27 +57,27 @@ var schemaCheckConsul = &schema.Schema{
 	MaxItems: 1,
 	Elem: &schema.Resource{
 		Schema: convertToHelperSchema(checkConsulDescriptions, map[schemaAttr]*schema.Schema{
-			checkConsulACLTokenAttr: &schema.Schema{
+			checkConsulACLTokenAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulACLTokenAttr, `^[a-zA-Z0-9\-]+$`),
 			},
-			checkConsulAllowStaleAttr: &schema.Schema{
+			checkConsulAllowStaleAttr: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			checkConsulCAChainAttr: &schema.Schema{
+			checkConsulCAChainAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulCAChainAttr, `.+`),
 			},
-			checkConsulCertFileAttr: &schema.Schema{
+			checkConsulCertFileAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulCertFileAttr, `.+`),
 			},
-			checkConsulCheckNameBlacklistAttr: &schema.Schema{
+			checkConsulCheckNameBlacklistAttr: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -85,34 +85,34 @@ var schemaCheckConsul = &schema.Schema{
 					ValidateFunc: validateRegexp(checkConsulCheckNameBlacklistAttr, `^[A-Za-z0-9_-]+$`),
 				},
 			},
-			checkConsulCiphersAttr: &schema.Schema{
+			checkConsulCiphersAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulCiphersAttr, `.+`),
 			},
-			checkConsulDatacenterAttr: &schema.Schema{
+			checkConsulDatacenterAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulCertFileAttr, `^[a-zA-Z0-9]+$`),
 			},
-			checkConsulHTTPAddrAttr: &schema.Schema{
+			checkConsulHTTPAddrAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      defaultCheckConsulHTTPAddr,
 				ValidateFunc: validateHTTPURL(checkConsulHTTPAddrAttr, urlIsAbs|urlWithoutPath),
 			},
-			checkConsulHeadersAttr: &schema.Schema{
+			checkConsulHeadersAttr: {
 				Type:         schema.TypeMap,
 				Elem:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateHTTPHeaders,
 			},
-			checkConsulKeyFileAttr: &schema.Schema{
+			checkConsulKeyFileAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulKeyFileAttr, `.+`),
 			},
-			checkConsulNodeAttr: &schema.Schema{
+			checkConsulNodeAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulNodeAttr, `^[a-zA-Z0-9_\-]+$`),
@@ -121,7 +121,7 @@ var schemaCheckConsul = &schema.Schema{
 					checkConsulAttr + "." + checkConsulStateAttr,
 				},
 			},
-			checkConsulNodeBlacklistAttr: &schema.Schema{
+			checkConsulNodeBlacklistAttr: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -129,7 +129,7 @@ var schemaCheckConsul = &schema.Schema{
 					ValidateFunc: validateRegexp(checkConsulNodeBlacklistAttr, `^[A-Za-z0-9_-]+$`),
 				},
 			},
-			checkConsulServiceAttr: &schema.Schema{
+			checkConsulServiceAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulServiceAttr, `^[a-zA-Z0-9_\-]+$`),
@@ -138,7 +138,7 @@ var schemaCheckConsul = &schema.Schema{
 					checkConsulAttr + "." + checkConsulStateAttr,
 				},
 			},
-			checkConsulServiceNameBlacklistAttr: &schema.Schema{
+			checkConsulServiceNameBlacklistAttr: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -146,7 +146,7 @@ var schemaCheckConsul = &schema.Schema{
 					ValidateFunc: validateRegexp(checkConsulServiceNameBlacklistAttr, `^[A-Za-z0-9_-]+$`),
 				},
 			},
-			checkConsulStateAttr: &schema.Schema{
+			checkConsulStateAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkConsulStateAttr, `^(any|passing|warning|critical)$`),
@@ -281,10 +281,10 @@ func checkAPIToStateConsul(c *circonusCheck, d *schema.ResourceData) error {
 	consulConfig[string(checkConsulHeadersAttr)] = headers
 
 	whitelistedConfigKeys := map[config.Key]struct{}{
-		config.Port:             struct{}{},
-		config.ReverseSecretKey: struct{}{},
-		config.SubmissionURL:    struct{}{},
-		config.URL:              struct{}{},
+		config.Port:             {},
+		config.ReverseSecretKey: {},
+		config.SubmissionURL:    {},
+		config.URL:              {},
 	}
 
 	for k := range swamp {
