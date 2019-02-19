@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,18 +11,19 @@ import (
 
 func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 	checkName := fmt.Sprintf("Terraform test: consul server httptrap check- %s", acctest.RandString(5))
+	brokerId := os.Getenv("CIRCONUS_BROKER_ID")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t); testAccCheckBrokerId(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckHTTPTrapConfigFmt, checkName),
+				Config: testAccCirconusCheckHTTPTrapConfigFmt(checkName, brokerId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "collector.2084916526.id", "/broker/2110"),
+					// resource.TestCheckResourceAttr("circonus_check.consul", "collector.2084916526.id", "/broker/2110"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.async_metrics", "false"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.secret", "12345"),
@@ -68,7 +70,8 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 	})
 }
 
-const testAccCirconusCheckHTTPTrapConfigFmt = `
+func testAccCirconusCheckHTTPTrapConfigFmt(name, brokerId string) string {
+	return fmt.Sprintf(`
 variable "httptrap_check_tags" {
   type = "list"
   default = [ "app:consul", "lifecycle:unittest", "source:consul" ]
@@ -86,7 +89,7 @@ resource "circonus_check" "consul" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "%s"
   }
 
   httptrap {
@@ -95,20 +98,20 @@ resource "circonus_check" "consul" {
   }
 
   metric {
-    name = "consul` + "`" + `${var.consul_hostname}` + "`" + `consul` + "`" + `session_ttl` + "`" + `active"
+    name = "consul`+"`"+`${var.consul_hostname}`+"`"+`consul`+"`"+`session_ttl`+"`"+`active"
     tags = [ "${var.httptrap_check_tags}" ]
     type = "numeric"
   }
 
   metric {
-    name = "consul` + "`" + `${var.consul_hostname}` + "`" + `runtime` + "`" + `alloc_bytes"
+    name = "consul`+"`"+`${var.consul_hostname}`+"`"+`runtime`+"`"+`alloc_bytes"
     tags = [ "${var.httptrap_check_tags}" ]
     type = "numeric"
     unit = "bytes"
   }
 
   metric {
-    name = "consul` + "`" + `consul` + "`" + `http` + "`" + `GET` + "`" + `v1` + "`" + `kv` + "`" + `_"
+    name = "consul`+"`"+`consul`+"`"+`http`+"`"+`GET`+"`"+`v1`+"`"+`kv`+"`"+`_"
     tags = [ "${var.httptrap_check_tags}" ]
     type = "histogram"
     unit = "nanoseconds"
@@ -117,4 +120,5 @@ resource "circonus_check" "consul" {
   tags = [ "${var.httptrap_check_tags}" ]
   target = "${var.consul_hostname}"
 }
-`
+`, name, brokerId)
+}

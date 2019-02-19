@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,18 +11,19 @@ import (
 
 func TestAccCirconusCheckTCP_basic(t *testing.T) {
 	checkName := fmt.Sprintf("Terraform test: TCP+TLS check - %s", acctest.RandString(5))
+	brokerId := os.Getenv("CIRCONUS_BROKER_ID")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t); testAccCheckBrokerId(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckTCPConfigFmt, checkName),
+				Config: testAccCirconusCheckTCPConfigFmt(checkName, brokerId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.1893401625.id", "/broker/1286"),
+					// resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.1893401625.id", "/broker/1286"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.#", "1"),
 					// resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.banner_regexp", ""),
 					// resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.ca_chain", ""),
@@ -138,7 +140,8 @@ func TestAccCirconusCheckTCP_basic(t *testing.T) {
 	})
 }
 
-const testAccCirconusCheckTCPConfigFmt = `
+func testAccCirconusCheckTCPConfigFmt(checkName, brokerId string) string {
+	return fmt.Sprintf(`
 variable "tcp_check_tags" {
   type = "list"
   default = [ "app:circonus", "app:tls_cert", "lifecycle:unittest", "source:fastly" ]
@@ -151,7 +154,7 @@ resource "circonus_check" "tls_cert" {
   period = "60s"
 
   collector {
-    id = "/broker/1286"
+    id = "%s"
   }
 
   tcp {
@@ -221,4 +224,5 @@ resource "circonus_check" "tls_cert" {
 
   tags = [ "${var.tcp_check_tags}" ]
 }
-`
+`, checkName, brokerId)
+}

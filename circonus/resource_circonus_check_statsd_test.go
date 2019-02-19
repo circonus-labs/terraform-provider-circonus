@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,18 +11,19 @@ import (
 
 func TestAccCirconusCheckStatsd_basic(t *testing.T) {
 	checkName := fmt.Sprintf("statsd test check - %s", acctest.RandString(5))
+	brokerId := os.Getenv("CIRCONUS_BROKER_ID")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheck(t); testAccCheckBrokerId(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckStatsdConfigFmt, checkName),
+				Config: testAccCirconusCheckStatsdConfigFmt(checkName, brokerId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "collector.2084916526.id", "/broker/2110"),
+					// resource.TestCheckResourceAttr("circonus_check.statsd_dump", "collector.2084916526.id", "/broker/2110"),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "statsd.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "statsd.3733287963.source_ip", `127.0.0.2`),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "name", checkName),
@@ -41,7 +43,8 @@ func TestAccCirconusCheckStatsd_basic(t *testing.T) {
 	})
 }
 
-const testAccCirconusCheckStatsdConfigFmt = `
+func testAccCirconusCheckStatsdConfigFmt(checkName, brokerId string) string {
+	return fmt.Sprintf(`
 variable "test_tags" {
   type = "list"
   default = [ "app:consul", "author:terraform", "lifecycle:unittest", "source:statsd" ]
@@ -53,7 +56,7 @@ resource "circonus_check" "statsd_dump" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "%s"
   }
 
   statsd {
@@ -68,4 +71,5 @@ resource "circonus_check" "statsd_dump" {
 
   tags = [ "${var.test_tags}" ]
 }
-`
+`, checkName, brokerId)
+}

@@ -29,7 +29,13 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if apiToken := os.Getenv("CIRCONUS_API_TOKEN"); apiToken == "" {
+	if os.Getenv("CIRCONUS_API_TOKEN") == "" {
 		t.Fatal("CIRCONUS_API_TOKEN must be set for acceptance tests")
+	}
+}
+
+func testAccCheckBrokerId(t *testing.T) {
+	if os.Getenv("CIRCONUS_BROKER_ID") == "" {
+		t.Fatal("CIRCONUS_BROKER_ID must be set for this test")
 	}
 }
