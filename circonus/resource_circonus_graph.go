@@ -24,7 +24,6 @@ const (
 	graphMetricAttr        = "metric"
 	graphStyleAttr         = "graph_style"
 	graphTagsAttr          = "tags"
-	graphOverlaySetsAttr   = "overlay_sets"
 
 	// circonus_graph.metric.* resource attribute names
 	graphMetricActiveAttr        = "active"
@@ -54,25 +53,6 @@ const (
 	graphAxisLogarithmicAttr = "logarithmic"
 	graphAxisMaxAttr         = "max"
 	graphAxisMinAttr         = "min"
-
-	// circonus_graph.overlay_sets.* resource attribute names
-	graphOverlaySetIdAttr       = "id"
-	graphOverlaySetTitleAttr    = "title"
-	graphOverlaySetDataOptsAttr = "data_opts"
-	graphOverlaySetUISpecsAttr  = "ui_specs"
-
-	// circonus_graph.overlay_sets.ui_specs.* resource attribute names
-	graphOverlaySetUISpecsDecoupleAttr = "decouple"
-	graphOverlaySetUISpecsIdAttr       = "id"
-	graphOverlaySetUISpecsLabelAttr    = "label"
-	graphOverlaySetUISpecsTypeAttr     = "type"
-	graphOverlaySetUISpecsZAttr        = "z"
-
-	// circonus_graph.overlay_sets.data_opts.* resource attribute names
-	// only implemented graph comparison for now
-	graphOverlaySetDataOptsGraphTitleAttr = "graph_title"
-	graphOverlaySetDataOptsGraphUUIDAttr  = "graph_uuid"
-	graphOverlaySetDataOptsXShiftAttr     = "x_shift"
 )
 
 const (
@@ -120,31 +100,6 @@ var graphMetricClusterDescriptions = attrDescrs{
 	graphMetricClusterColorAttr:     "",
 	graphMetricClusterQueryAttr:     "",
 	graphMetricClusterHumanNameAttr: "",
-}
-
-var graphOverlaySetDescriptions = attrDescrs{
-	// circonus_graph.overlay_sets.* resource attribute names
-	graphOverlaySetIdAttr:       "",
-	graphOverlaySetTitleAttr:    "",
-	graphOverlaySetDataOptsAttr: "",
-	graphOverlaySetUISpecsAttr:  "",
-}
-
-var graphOverlaySetUISpecsDescriptions = attrDescrs{
-	// circonus_graph.overlay_sets.ui_specs.* resource attribute names
-	graphOverlaySetUISpecsDecoupleAttr: "",
-	graphOverlaySetUISpecsIdAttr:       "",
-	graphOverlaySetUISpecsLabelAttr:    "",
-	graphOverlaySetUISpecsTypeAttr:     "",
-	graphOverlaySetUISpecsZAttr:        "",
-}
-
-var graphOverlaySetDataOptsDescriptions = attrDescrs{
-	// circonus_graph.overlay_sets.data_opts.* resource attribute names
-	// only implemented graph comparison for now
-	graphOverlaySetDataOptsGraphTitleAttr: "",
-	graphOverlaySetDataOptsGraphUUIDAttr:  "",
-	graphOverlaySetDataOptsXShiftAttr:     "",
 }
 
 // NOTE(sean@): There is no way to set a description on map inputs, but if that
@@ -342,71 +297,6 @@ func resourceGraph() *schema.Resource {
 				Optional:     true,
 				Default:      defaultGraphStyle,
 				ValidateFunc: validateStringIn(graphStyleAttr, validGraphStyles),
-			},
-			graphOverlaySetsAttr: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: convertToHelperSchema(graphOverlaySetDescriptions, map[schemaAttr]*schema.Schema{
-						graphOverlaySetIdAttr: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						graphOverlaySetTitleAttr: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						graphOverlaySetDataOptsAttr: {
-							Type:     schema.TypeSet,
-							Required: true,
-							Elem: &schema.Resource{
-								Schema: convertToHelperSchema(graphOverlaySetDataOptsDescriptions, map[schemaAttr]*schema.Schema{
-									graphOverlaySetDataOptsGraphTitleAttr: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									graphOverlaySetDataOptsGraphUUIDAttr: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									graphOverlaySetDataOptsXShiftAttr: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								}),
-							},
-						},
-						graphOverlaySetUISpecsAttr: {
-							Type:     schema.TypeSet,
-							Required: true,
-							Elem: &schema.Resource{
-								Schema: convertToHelperSchema(graphOverlaySetUISpecsDescriptions, map[schemaAttr]*schema.Schema{
-									graphOverlaySetUISpecsDecoupleAttr: {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Default:  false,
-									},
-									graphOverlaySetUISpecsIdAttr: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									graphOverlaySetUISpecsLabelAttr: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									graphOverlaySetUISpecsTypeAttr: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									graphOverlaySetUISpecsZAttr: {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								}),
-							},
-						},
-					}),
-				},
 			},
 			graphTagsAttr: tagMakeConfigSchema(graphTagsAttr),
 		}),
@@ -627,40 +517,6 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set(graphStyleAttr, g.Style)
-
-	if g.OverlaySets != nil {
-		overlays := make([]map[string]interface{}, 1)
-		for _, overlaySet := range *g.OverlaySets {
-			overlaySetAttrs := make(map[string]interface{}, 4)
-			overlaySetAttrs[string(graphOverlaySetIdAttr)] = overlaySet.ID
-			overlaySetAttrs[string(graphOverlaySetTitleAttr)] = overlaySet.Title
-
-			uiSpecs := make(map[string]interface{}, 5)
-			uiSpecs[string(graphOverlaySetUISpecsDecoupleAttr)] = overlaySet.UISpecs.Decouple
-			uiSpecs[string(graphOverlaySetUISpecsIdAttr)] = overlaySet.UISpecs.ID
-			uiSpecs[string(graphOverlaySetUISpecsLabelAttr)] = overlaySet.UISpecs.Label
-			uiSpecs[string(graphOverlaySetUISpecsTypeAttr)] = overlaySet.UISpecs.Type
-			if overlaySet.UISpecs.Z != nil {
-				uiSpecs[string(graphOverlaySetUISpecsZAttr)] = fmt.Sprintf("%d", *overlaySet.UISpecs.Z)
-			}
-
-			set := make([]map[string]interface{}, 1)
-			set[0] = uiSpecs
-			overlaySetAttrs[string(graphOverlaySetUISpecsAttr)] = set
-
-			dataOpts := make(map[string]interface{}, 3)
-			dataOpts[string(graphOverlaySetDataOptsGraphTitleAttr)] = overlaySet.DataOpts.GraphTitle
-			dataOpts[string(graphOverlaySetDataOptsGraphUUIDAttr)] = overlaySet.DataOpts.GraphUUID
-			dataOpts[string(graphOverlaySetDataOptsXShiftAttr)] = overlaySet.DataOpts.XShift
-
-			set = make([]map[string]interface{}, 1)
-			set[0] = dataOpts
-			overlaySetAttrs[string(graphOverlaySetDataOptsAttr)] = set
-
-			overlays = append(overlays, overlaySetAttrs)
-		}
-		d.Set(graphOverlaySetsAttr, overlays)
-	}
 
 	if err := d.Set(graphTagsAttr, tagsToState(apiToTags(g.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphTagsAttr), err)
@@ -1046,64 +902,6 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			g.Style = v.(*string)
 		default:
 			return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphStyleAttr, v)
-		}
-	}
-
-	if v, found := d.GetOk(graphOverlaySetsAttr); found {
-		overlaySet := v.(*schema.Set).List()
-		for _, overlay := range overlaySet {
-			overlayMap := newInterfaceMap(overlay.(map[string]interface{}))
-			var s = api.GraphOverlaySet{}
-
-			if v, found := overlayMap[string(graphOverlaySetIdAttr)]; found {
-				s.ID = v.(string)
-			}
-			if v, found := overlayMap[string(graphOverlaySetTitleAttr)]; found {
-				s.Title = v.(string)
-			}
-			if v, found := overlayMap[string(graphOverlaySetUISpecsAttr)]; found {
-				uiSpecsList := v.(*schema.Set).List()
-				for _, uiSpec := range uiSpecsList {
-					uiSpecMap := newInterfaceMap(uiSpec.(map[string]interface{}))
-					if v, found := uiSpecMap[string(graphOverlaySetUISpecsDecoupleAttr)]; found {
-						s.UISpecs.Decouple = v.(bool)
-					}
-					if v, found := uiSpecMap[string(graphOverlaySetUISpecsIdAttr)]; found {
-						s.UISpecs.ID = v.(string)
-					}
-					if v, found := uiSpecMap[string(graphOverlaySetUISpecsLabelAttr)]; found {
-						s.UISpecs.Label = v.(string)
-					}
-					if v, found := uiSpecMap[string(graphOverlaySetUISpecsTypeAttr)]; found {
-						s.UISpecs.Type = v.(string)
-					}
-					if v, found := uiSpecMap[string(graphOverlaySetUISpecsZAttr)]; found {
-						i64, _ := strconv.ParseInt(v.(string), 10, 64)
-						s.UISpecs.Z = new(int)
-						*s.UISpecs.Z = int(i64)
-
-					}
-				}
-			}
-			if v, found := overlayMap[string(graphOverlaySetDataOptsAttr)]; found {
-				dataOptsList := v.(*schema.Set).List()
-				for _, dataOpt := range dataOptsList {
-					dataOptMap := newInterfaceMap(dataOpt.(map[string]interface{}))
-					if v, found := dataOptMap[string(graphOverlaySetDataOptsGraphTitleAttr)]; found {
-						s.DataOpts.GraphTitle = v.(string)
-					}
-					if v, found := dataOptMap[string(graphOverlaySetDataOptsGraphUUIDAttr)]; found {
-						s.DataOpts.GraphUUID = v.(string)
-					}
-					if v, found := dataOptMap[string(graphOverlaySetDataOptsXShiftAttr)]; found {
-						s.DataOpts.XShift = v.(string)
-					}
-				}
-			}
-
-			x := make(map[string]api.GraphOverlaySet)
-			x[s.ID] = s
-			g.OverlaySets = &x
 		}
 	}
 
