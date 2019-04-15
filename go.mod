@@ -4,7 +4,8 @@ require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
-	github.com/circonus-labs/circonus-gometrics v2.2.4+incompatible
+	github.com/circonus-labs/circonus-gometrics v2.2.7+incompatible
+	github.com/circonus-labs/circonusllhist v0.1.3 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001 // indirect
 	github.com/hashicorp/go-hclog v0.0.0-20180910232447-e45cbeb79f04 // indirect
@@ -25,6 +26,7 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.0.0 // indirect
 	github.com/posener/complete v1.1.2 // indirect
+	github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926 // indirect
 	github.com/zclconf/go-cty v0.0.0-20180925180032-d9b87d891d0b // indirect
 	golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16 // indirect
 	golang.org/x/sys v0.0.0-20181218192612-074acd46bca6 // indirect

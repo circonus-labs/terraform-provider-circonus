@@ -54,6 +54,8 @@ const (
 	defaultGraphLineStyle  = "stepped"
 	defaultGraphStyle      = "line"
 
+	defaultDashboardWidgets = 1
+
 	metricUnit       = ""
 	metricUnitRegexp = `^.*$`
 
@@ -75,6 +77,7 @@ var validMetricTypes = validStringValues{
 	`composite`,
 	`histogram`,
 	`numeric`,
+	`search`,
 	`text`,
 }
 

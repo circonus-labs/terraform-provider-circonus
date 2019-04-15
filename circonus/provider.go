@@ -91,6 +91,8 @@ func Provider() terraform.ResourceProvider {
 			"circonus_check":          resourceCheck(),
 			"circonus_contact_group":  resourceContactGroup(),
 			"circonus_graph":          resourceGraph(),
+			"circonus_overlay_set":    resourceOverlaySet(),
+			"circonus_dashboard":      resourceDashboard(),
 			"circonus_metric":         resourceMetric(),
 			"circonus_metric_cluster": resourceMetricCluster(),
 			"circonus_rule_set":       resourceRuleSet(),
@@ -108,6 +110,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		URL:      d.Get(providerAPIURLAttr).(string),
 		TokenKey: d.Get(providerKeyAttr).(string),
 		TokenApp: tfAppName(),
+		Debug:    true,
 	}
 
 	client, err := api.NewAPI(config)
