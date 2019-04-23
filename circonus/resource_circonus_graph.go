@@ -24,6 +24,7 @@ const (
 	graphMetricAttr        = "metric"
 	graphStyleAttr         = "graph_style"
 	graphTagsAttr          = "tags"
+	graphGuidesAttr        = "guide"
 
 	// circonus_graph.metric.* resource attribute names
 	graphMetricActiveAttr        = "active"
@@ -53,6 +54,13 @@ const (
 	graphAxisLogarithmicAttr = "logarithmic"
 	graphAxisMaxAttr         = "max"
 	graphAxisMinAttr         = "min"
+
+	// circonus_graph.guide.* resource attribute names
+	graphGuideHiddenAttr        = "hidden"
+	graphGuideColorAttr         = "color"
+	graphGuideFormulaAttr       = "formula"
+	graphGuideFormulaLegendAttr = "legend_formula"
+	graphGuideHumanNameAttr     = "name"
 )
 
 const (
@@ -70,8 +78,8 @@ var graphDescriptions = attrDescrs{
 	graphMetricAttr:        "",
 	graphMetricClusterAttr: "",
 	graphStyleAttr:         "",
-	graphOverlaySetsAttr:   "",
 	graphTagsAttr:          "",
+	graphGuidesAttr:        "",
 }
 
 var graphMetricDescriptions = attrDescrs{
@@ -90,6 +98,15 @@ var graphMetricDescriptions = attrDescrs{
 	graphMetricHumanNameAttr:     "",
 	graphMetricNameAttr:          "",
 	graphMetricStackAttr:         "",
+}
+
+var graphGuidesDescriptions = attrDescrs{
+	// circonus_graph.metric.* resource attribute names
+	graphGuideHiddenAttr:        "",
+	graphGuideColorAttr:         "",
+	graphGuideFormulaAttr:       "",
+	graphGuideFormulaLegendAttr: "",
+	graphGuideHumanNameAttr:     "",
 }
 
 var graphMetricClusterDescriptions = attrDescrs{
@@ -163,6 +180,39 @@ func resourceGraph() *schema.Resource {
 				Elem:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateGraphAxisOptions,
+			},
+			graphGuidesAttr: {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: convertToHelperSchema(graphGuidesDescriptions, map[schemaAttr]*schema.Schema{
+						graphGuideHiddenAttr: {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						graphGuideColorAttr: {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphGuideColorAttr, `^#[0-9a-fA-F]{6}$`),
+						},
+						graphGuideFormulaAttr: {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphGuideFormulaAttr, `^.+$`),
+						},
+						graphGuideFormulaLegendAttr: {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphGuideFormulaLegendAttr, `^.+$`),
+						},
+						graphGuideHumanNameAttr: {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphGuideHumanNameAttr, `.+`),
+						},
+					}),
+				},
 			},
 			graphMetricAttr: {
 				Type:     schema.TypeList,
@@ -241,7 +291,7 @@ func resourceGraph() *schema.Resource {
 						graphMetricNameAttr: {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateRegexp(graphMetricNameAttr, `^[\S]+$`),
+							ValidateFunc: validateRegexp(graphMetricNameAttr, `.+`),
 						},
 						graphMetricStackAttr: {
 							Type:         schema.TypeString,
@@ -371,11 +421,11 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("PROVIDER BUG: Unsupported axis type %q", datapoint.Axis)
 		}
 
-		if datapoint.CAQL != nil {
+		if datapoint.CAQL != nil && *datapoint.CAQL != "" {
 			dataPointAttrs[string(graphMetricCAQLAttr)] = *datapoint.CAQL
 		}
 
-		if datapoint.Search != nil {
+		if datapoint.Search != nil && *datapoint.Search != "" {
 			dataPointAttrs[string(graphMetricSearchAttr)] = *datapoint.Search
 		}
 
@@ -521,6 +571,30 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set(graphTagsAttr, tagsToState(apiToTags(g.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphTagsAttr), err)
 	}
+
+	guides := make([]interface{}, 0, len(g.Guides))
+	for _, guide := range g.Guides {
+		guideAttrs := make(map[string]interface{}, 5)
+
+		guideAttrs[string(graphGuideHiddenAttr)] = guide.Hidden
+
+		guideAttrs[string(graphGuideColorAttr)] = guide.Color
+
+		if guide.DataFormula != nil {
+			guideAttrs[string(graphGuideFormulaAttr)] = *guide.DataFormula
+		}
+
+		if guide.LegendFormula != nil {
+			guideAttrs[string(graphGuideFormulaLegendAttr)] = *guide.LegendFormula
+		}
+
+		if guide.Name != "" {
+			guideAttrs[string(graphGuideHumanNameAttr)] = guide.Name
+		}
+
+		guides = append(guides, guideAttrs)
+	}
+	d.Set(graphGuidesAttr, guides)
 
 	return nil
 }
@@ -697,15 +771,14 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricFormulaAttr]; found {
-				switch v.(type) {
-				case string:
-					s := v.(string)
+				s := v.(string)
+				if s != "" {
 					datapoint.DataFormula = &s
-				case *string:
-					datapoint.DataFormula = v.(*string)
-				default:
-					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricAttr, v)
+				} else {
+					datapoint.DataFormula = nil
 				}
+			} else {
+				datapoint.DataFormula = nil
 			}
 
 			if v, found := metricAttrs[graphMetricFunctionAttr]; found {
@@ -720,14 +793,14 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricFormulaLegendAttr]; found {
-				switch u := v.(type) {
-				case string:
-					datapoint.LegendFormula = &u
-				case *string:
-					datapoint.LegendFormula = u
-				default:
-					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricAttr, v)
+				s := v.(string)
+				if s != "" {
+					datapoint.LegendFormula = &s
+				} else {
+					datapoint.LegendFormula = nil
 				}
+			} else {
+				datapoint.LegendFormula = nil
 			}
 
 			if v, found := metricAttrs[graphMetricNameAttr]; found {
@@ -738,25 +811,25 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricCAQLAttr]; found {
-				switch u := v.(type) {
-				case string:
-					datapoint.CAQL = &u
-				case *string:
-					datapoint.CAQL = u
-				default:
-					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricAttr, v)
+				s := v.(string)
+				if s != "" {
+					datapoint.CAQL = &s
+				} else {
+					datapoint.CAQL = nil
 				}
+			} else {
+				datapoint.CAQL = nil
 			}
 
 			if v, found := metricAttrs[graphMetricSearchAttr]; found {
-				switch u := v.(type) {
-				case string:
-					datapoint.Search = &u
-				case *string:
-					datapoint.Search = u
-				default:
-					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricAttr, v)
+				s := v.(string)
+				if s != "" {
+					datapoint.Search = &s
+				} else {
+					datapoint.Search = nil
 				}
+			} else {
+				datapoint.Search = nil
 			}
 
 			if v, found := metricAttrs[graphMetricMetricTypeAttr]; found {
@@ -774,20 +847,9 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricStackAttr]; found {
-				var stackStr string
-				switch u := v.(type) {
-				case string:
-					stackStr = u
-				case *string:
-					if u != nil {
-						stackStr = *u
-					}
-				default:
-					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricStackAttr, v)
-				}
-
-				if stackStr != "" {
-					u64, _ := strconv.ParseUint(stackStr, 10, 64)
+				s := v.(string)
+				if s != "" {
+					u64, _ := strconv.ParseUint(s, 10, 64)
 					u := uint(u64)
 					datapoint.Stack = &u
 				}
@@ -909,6 +971,53 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 		g.Tags = derefStringList(flattenSet(v.(*schema.Set)))
 	}
 
+	if listRaw, found := d.GetOk(graphGuidesAttr); found {
+		guideList := listRaw.([]interface{})
+		for _, guideListElem := range guideList {
+			guideAttrs := newInterfaceMap(guideListElem.(map[string]interface{}))
+			guide := api.GraphGuide{}
+
+			if v, found := guideAttrs[graphGuideHiddenAttr]; found {
+				guide.Hidden = (v.(bool))
+			}
+
+			if v, found := guideAttrs[graphGuideColorAttr]; found {
+				guide.Color = v.(string)
+			}
+
+			if v, found := guideAttrs[graphGuideFormulaAttr]; found {
+				s := v.(string)
+				if s != "" {
+					guide.DataFormula = &s
+				} else {
+					guide.DataFormula = nil
+				}
+			} else {
+				guide.DataFormula = nil
+			}
+
+			if v, found := guideAttrs[graphGuideFormulaLegendAttr]; found {
+				s := v.(string)
+				if s != "" {
+					guide.LegendFormula = &s
+				} else {
+					guide.LegendFormula = nil
+				}
+			} else {
+				guide.LegendFormula = nil
+			}
+
+			if v, found := guideAttrs[graphGuideHumanNameAttr]; found {
+				s := v.(string)
+				if s != "" {
+					guide.Name = s
+				}
+			}
+
+			g.Guides = append(g.Guides, guide)
+		}
+	}
+
 	if err := g.Validate(); err != nil {
 		return err
 	}
@@ -950,13 +1059,13 @@ func (g *circonusGraph) Validate() error {
 			return fmt.Errorf("Error with %s[%d] name=%q: %s is set, missing attribute %s must also be set", graphMetricAttr, i, datapoint.Name, graphMetricNameAttr, graphMetricCheckAttr)
 		}
 
-		if datapoint.CAQL != nil && (datapoint.CheckID != 0 || datapoint.MetricName != "") {
-			return fmt.Errorf("Error with %s[%d] name=%q: %q attribute is mutually exclusive with attributes %s or %s or %s", graphMetricAttr, i, datapoint.Name, graphMetricCAQLAttr, graphMetricNameAttr, graphMetricCheckAttr, graphMetricSearchAttr)
-		}
+		// if datapoint.CAQL != nil && (datapoint.CheckID != 0 || datapoint.MetricName != "") {
+		// 	return fmt.Errorf("Error with %s[%d] name=%q: %q attribute is mutually exclusive with attributes %s or %s or %s", graphMetricAttr, i, datapoint.Name, graphMetricCAQLAttr, graphMetricNameAttr, graphMetricCheckAttr, graphMetricSearchAttr)
+		// }
 
-		if datapoint.Search != nil && (datapoint.CheckID != 0 || datapoint.MetricName != "") {
-			return fmt.Errorf("Error with %s[%d] name=%q: %q attribute is mutually exclusive with attributes %s or %s or %s", graphMetricAttr, i, datapoint.Name, graphMetricSearchAttr, graphMetricNameAttr, graphMetricCheckAttr, graphMetricCAQLAttr)
-		}
+		// if datapoint.Search != nil && (datapoint.CheckID != 0 || datapoint.MetricName != "") {
+		// 	return fmt.Errorf("Error with %s[%d] name=%q: %q attribute is mutually exclusive with attributes %s or %s or %s", graphMetricAttr, i, datapoint.Name, graphMetricSearchAttr, graphMetricNameAttr, graphMetricCheckAttr, graphMetricCAQLAttr)
+		// }
 
 		if datapoint.MetricType == "text" && datapoint.Derive != nil {
 			v := datapoint.Derive

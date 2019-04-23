@@ -2,6 +2,8 @@ package circonus
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/circonus-labs/circonus-gometrics/api"
 	"github.com/hashicorp/errwrap"
@@ -106,14 +108,22 @@ func Provider() terraform.ResourceProvider {
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	globalAutoTag = d.Get(providerAutoTagAttr).(bool)
 
+	f, err := os.OpenFile("/tmp/cgm.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	//defer f.Close()
+
 	config := &api.Config{
 		URL:      d.Get(providerAPIURLAttr).(string),
 		TokenKey: d.Get(providerKeyAttr).(string),
 		TokenApp: tfAppName(),
 		Debug:    true,
+		Log:      log.New(f, "", log.LstdFlags),
 	}
 
 	client, err := api.NewAPI(config)
+	client.Debug = true
 	if err != nil {
 		return nil, errwrap.Wrapf("Error initializing Circonus: %s", err)
 	}

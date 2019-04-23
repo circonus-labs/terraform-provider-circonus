@@ -77,7 +77,7 @@ var validMetricTypes = validStringValues{
 	`composite`,
 	`histogram`,
 	`numeric`,
-	`search`,
+	`auto`,
 	`text`,
 }
 

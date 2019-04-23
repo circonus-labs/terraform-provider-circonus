@@ -4,7 +4,7 @@ require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
-	github.com/circonus-labs/circonus-gometrics v2.2.7+incompatible
+	github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible
 	github.com/circonus-labs/circonusllhist v0.1.3 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001 // indirect
