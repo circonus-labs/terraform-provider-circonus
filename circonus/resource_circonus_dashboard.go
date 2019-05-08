@@ -26,6 +26,11 @@ func resourceDashboard() *schema.Resource {
 				StateFunc:   suppressWhitespace,
 				Description: "The title of the dashboard.",
 			},
+			"uuid": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The uuid of the dashboard.",
+			},
 			"shared": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -535,6 +540,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("account_default", dash.AccountDefault)
 	d.Set("shared", dash.Shared)
 	d.Set("title", dash.Title)
+	d.Set("uuid", dash.UUID)
 
 	return nil
 }
@@ -563,6 +569,7 @@ func dashboardDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
+	d.Set("uuid", "")
 
 	return nil
 }
@@ -900,6 +907,7 @@ func (dash *circonusDashboard) Create(ctxt *providerContext) error {
 	}
 
 	dash.CID = ng.CID
+	dash.UUID = ng.UUID
 
 	return nil
 }
