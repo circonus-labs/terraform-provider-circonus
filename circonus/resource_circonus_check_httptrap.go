@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/circonus-labs/circonus-gometrics/api/config"
+	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
