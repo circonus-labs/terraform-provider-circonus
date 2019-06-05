@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
+	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
