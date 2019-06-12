@@ -28,6 +28,7 @@ const (
 	apiCheckTypeConsul     circonusCheckType = "consul"
 	apiCheckTypeICMPPing   circonusCheckType = "ping_icmp"
 	apiCheckTypeHTTP       circonusCheckType = "http"
+	apiCheckTypeJMX        circonusCheckType = "jmx"
 	apiCheckTypeJSON       circonusCheckType = "json"
 	apiCheckTypeMySQL      circonusCheckType = "mysql"
 	apiCheckTypeStatsd     circonusCheckType = "statsd"
