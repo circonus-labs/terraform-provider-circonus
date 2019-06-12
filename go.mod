@@ -4,11 +4,12 @@ require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
-	github.com/circonus-labs/go-apiclient v0.7.2
+	github.com/circonus-labs/go-apiclient v0.6.4
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001 // indirect
 	github.com/hashicorp/go-hclog v0.0.0-20180910232447-e45cbeb79f04 // indirect
 	github.com/hashicorp/go-plugin v0.0.0-20180814222501-a4620f9913d1 // indirect
+	github.com/hashicorp/go-retryablehttp v0.5.4 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
