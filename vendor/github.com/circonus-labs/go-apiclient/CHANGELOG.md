@@ -1,3 +1,7 @@
+# v0.6.4
+
+* fix: graph.datapoint.alpha - doc:floating point number, api:string
+
 # v0.6.3
 
 * upd: remove tests for invalid cids

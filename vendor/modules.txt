@@ -47,7 +47,7 @@ github.com/bgentry/go-netrc/netrc
 github.com/bgentry/speakeasy
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
-# github.com/circonus-labs/go-apiclient v0.6.3
+# github.com/circonus-labs/go-apiclient v0.6.4
 github.com/circonus-labs/go-apiclient
 github.com/circonus-labs/go-apiclient/config
 # github.com/davecgh/go-spew v1.1.1
@@ -73,7 +73,7 @@ github.com/hashicorp/go-hclog
 github.com/hashicorp/go-multierror
 # github.com/hashicorp/go-plugin v0.0.0-20180814222501-a4620f9913d1
 github.com/hashicorp/go-plugin
-# github.com/hashicorp/go-retryablehttp v0.5.3
+# github.com/hashicorp/go-retryablehttp v0.5.4
 github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-safetemp v1.0.0
 github.com/hashicorp/go-safetemp

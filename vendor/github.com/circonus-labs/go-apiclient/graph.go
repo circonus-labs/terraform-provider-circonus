@@ -50,7 +50,7 @@ type GraphComposite struct {
 
 // GraphDatapoint defines a datapoint
 type GraphDatapoint struct {
-	Alpha         *float64    `json:"alpha,omitempty"`       // float64
+	Alpha         *string     `json:"alpha,omitempty"`       // BUG: doc: floating point number, api: string
 	Axis          string      `json:"axis,omitempty"`        // string
 	CAQL          *string     `json:"caql,omitempty"`        // string or null
 	CheckID       uint        `json:"check_id,omitempty"`    // uint
