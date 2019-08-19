@@ -27,6 +27,7 @@ const (
 	apiCheckTypeCAQL       circonusCheckType = "caql"
 	apiCheckTypeConsul     circonusCheckType = "consul"
 	apiCheckTypeICMPPing   circonusCheckType = "ping_icmp"
+	apiCheckTypeExternal   circonusCheckType = "external"
 	apiCheckTypeHTTP       circonusCheckType = "http"
 	apiCheckTypeJMX        circonusCheckType = "jmx"
 	apiCheckTypeJSON       circonusCheckType = "json"

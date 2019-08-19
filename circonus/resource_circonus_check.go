@@ -34,6 +34,7 @@ const (
 	checkCloudWatchAttr  = "cloudwatch"
 	checkCollectorAttr   = "collector"
 	checkConsulAttr      = "consul"
+	checkExternalAttr    = "external"
 	checkHTTPAttr        = "http"
 	checkHTTPTrapAttr    = "httptrap"
 	checkICMPPingAttr    = "icmp_ping"
@@ -78,6 +79,7 @@ const (
 	apiCheckTypeCAQLAttr       apiCheckType = "caql"
 	apiCheckTypeCloudWatchAttr apiCheckType = "cloudwatch"
 	apiCheckTypeConsulAttr     apiCheckType = "consul"
+	apiCheckTypeExternalAttr   apiCheckType = "external"
 	apiCheckTypeHTTPAttr       apiCheckType = "http"
 	apiCheckTypeHTTPTrapAttr   apiCheckType = "httptrap"
 	apiCheckTypeJMXAttr        apiCheckType = "jmx"
@@ -95,6 +97,7 @@ var checkDescriptions = attrDescrs{
 	checkCloudWatchAttr:  "CloudWatch check configuration",
 	checkCollectorAttr:   "The collector(s) that are responsible for gathering the metrics",
 	checkConsulAttr:      "Consul check configuration",
+	checkExternalAttr:    "External check configuration",
 	checkHTTPAttr:        "HTTP check configuration",
 	checkHTTPTrapAttr:    "HTTP Trap check configuration",
 	checkICMPPingAttr:    "ICMP ping check configuration",
@@ -164,6 +167,7 @@ func resourceCheck() *schema.Resource {
 				},
 			},
 			checkConsulAttr:   schemaCheckConsul,
+			checkExternalAttr: schemaCheckExternal,
 			checkHTTPAttr:     schemaCheckHTTP,
 			checkHTTPTrapAttr: schemaCheckHTTPTrap,
 			checkICMPPingAttr: schemaCheckICMPPing,
@@ -624,6 +628,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 		apiCheckTypeCAQLAttr:       checkAPIToStateCAQL,
 		apiCheckTypeCloudWatchAttr: checkAPIToStateCloudWatch,
 		apiCheckTypeConsulAttr:     checkAPIToStateConsul,
+		apiCheckTypeExternalAttr:   checkAPIToStateExternal,
 		apiCheckTypeHTTPAttr:       checkAPIToStateHTTP,
 		apiCheckTypeHTTPTrapAttr:   checkAPIToStateHTTPTrap,
 		apiCheckTypeICMPPingAttr:   checkAPIToStateICMPPing,
