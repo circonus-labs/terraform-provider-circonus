@@ -590,6 +590,7 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 		checkCAQLAttr:       checkConfigToAPICAQL,
 		checkCloudWatchAttr: checkConfigToAPICloudWatch,
 		checkConsulAttr:     checkConfigToAPIConsul,
+		checkExternalAttr:   checkConfigToAPIExternal,
 		checkHTTPAttr:       checkConfigToAPIHTTP,
 		checkHTTPTrapAttr:   checkConfigToAPIHTTPTrap,
 		checkICMPPingAttr:   checkConfigToAPIICMPPing,
