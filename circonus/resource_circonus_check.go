@@ -177,7 +177,7 @@ func resourceCheck() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Set:      checkMetricChecksum,
-				MinItems: 1,
+				MinItems: 0,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(checkMetricDescriptions, map[schemaAttr]*schema.Schema{
 						metricActiveAttr: {

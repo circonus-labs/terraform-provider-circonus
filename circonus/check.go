@@ -111,10 +111,6 @@ func (c *circonusCheck) Fixup() error {
 }
 
 func (c *circonusCheck) Validate() error {
-	if len(c.Metrics) == 0 {
-		return fmt.Errorf("At least one %s must be specified", checkMetricAttr)
-	}
-
 	if c.Timeout > float32(c.Period) {
 		return fmt.Errorf("Timeout (%f) can not exceed period (%d)", c.Timeout, c.Period)
 	}
