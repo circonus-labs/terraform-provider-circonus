@@ -725,6 +725,17 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 				}
 			}
 
+			if v, found := metricAttrs[graphMetricCAQLAttr]; found {
+				switch u := v.(type) {
+				case string:
+					datapoint.CAQL = &u
+				case *string:
+					datapoint.CAQL = u
+				default:
+					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricAttr, v)
+				}
+			}
+
 			if v, found := metricAttrs[graphMetricMetricTypeAttr]; found {
 				s := v.(string)
 				if s != "" {
