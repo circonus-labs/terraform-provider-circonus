@@ -1,3 +1,15 @@
+## 0.4.0
+
+IMPROVEMENTS:
+
+* Switch from deprecated circonus-gometrics api sub-package to the current [go-apiclient](https://github.com/circonus-labs/go-apiclient) package
+
+BUG FIXES:
+
+* Fix CAQL datapoint support in graphs
+* Incorporate fix in [go-apiclient v0.6.3](https://github.com/circonus-labs/go-apiclient/releases/tag/v0.6.3) to address breaking change to `rule_set` CID format in public API
+* Incorporate fix in [go-apiclient v0.6.4](https://github.com/circonus-labs/go-apiclient/releases/tag/v0.6.4) graph.datapoint.alpha - doc:floating point number, api:string
+
 ## 0.3.0 (Unreleased)
 ## 0.2.0 (October 01, 2018)
 
