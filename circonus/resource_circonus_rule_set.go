@@ -16,14 +16,15 @@ import (
 
 const (
 	// circonus_rule_set.* resource attribute names
-	ruleSetCheckAttr      = "check"
-	ruleSetIfAttr         = "if"
-	ruleSetLinkAttr       = "link"
-	ruleSetMetricTypeAttr = "metric_type"
-	ruleSetNotesAttr      = "notes"
-	ruleSetParentAttr     = "parent"
-	ruleSetMetricNameAttr = "metric_name"
-	ruleSetTagsAttr       = "tags"
+	ruleSetCheckAttr         = "check"
+	ruleSetIfAttr            = "if"
+	ruleSetLinkAttr          = "link"
+	ruleSetMetricTypeAttr    = "metric_type"
+	ruleSetNotesAttr         = "notes"
+	ruleSetParentAttr        = "parent"
+	ruleSetMetricNameAttr    = "metric_name"
+	ruleSetMetricPatternAttr = "metric_pattern"
+	ruleSetTagsAttr          = "tags"
 
 	// circonus_rule_set.if.* resource attribute names
 	ruleSetThenAttr  = "then"
@@ -64,14 +65,15 @@ const (
 
 var ruleSetDescriptions = attrDescrs{
 	// circonus_rule_set.* resource attribute names
-	ruleSetCheckAttr:      "The CID of the check that contains the metric for this rule set",
-	ruleSetIfAttr:         "A rule to execute for this rule set",
-	ruleSetLinkAttr:       "URL to show users when this rule set is active (e.g. wiki)",
-	ruleSetMetricTypeAttr: "The type of data flowing through the specified metric stream",
-	ruleSetNotesAttr:      "Notes describing this rule set",
-	ruleSetParentAttr:     "Parent CID that must be healthy for this rule set to be active",
-	ruleSetMetricNameAttr: "The name of the metric stream within a check to register the rule set with",
-	ruleSetTagsAttr:       "Tags associated with this rule set",
+	ruleSetCheckAttr:         "The CID of the check that contains the metric for this rule set",
+	ruleSetIfAttr:            "A rule to execute for this rule set",
+	ruleSetLinkAttr:          "URL to show users when this rule set is active (e.g. wiki)",
+	ruleSetMetricTypeAttr:    "The type of data flowing through the specified metric stream",
+	ruleSetNotesAttr:         "Notes describing this rule set",
+	ruleSetParentAttr:        "Parent CID that must be healthy for this rule set to be active",
+	ruleSetMetricNameAttr:    "The name of the metric stream within a check to register the rule set with",
+	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
+	ruleSetTagsAttr:          "Tags associated with this rule set",
 }
 
 var ruleSetIfDescriptions = attrDescrs{
@@ -294,9 +296,15 @@ func resourceRuleSet() *schema.Resource {
 			},
 			ruleSetMetricNameAttr: {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricNameAttr, `^[\S]+$`),
+			},
+			ruleSetMetricPatternAttr: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
 			},
 			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
 		}),
@@ -638,6 +646,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.MetricName = v.(string)
 	}
 
+	if v, found := d.GetOk(ruleSetMetricPatternAttr); found {
+		rs.MetricPattern = v.(string)
+	}
+
 	rs.Rules = make([]api.RuleSetRule, 0, defaultRuleSetRuleLen)
 	if ifListRaw, found := d.GetOk(ruleSetIfAttr); found {
 		ifList := ifListRaw.([]interface{})
@@ -857,6 +869,14 @@ func (rs *circonusRuleSet) Validate() error {
 	// For an 'on absence' rule this is the number of seconds the metric must not
 	// have been collected for, and should not be lower than either the period or
 	// timeout of the metric being collected.
+
+	if len(rs.MetricName) > 0 && len(rs.MetricPattern) > 0 {
+		return fmt.Errorf("RuleSet for check ID %s has both metric_name and metric_pattern, must be one or the other", rs.CheckCID)
+	}
+
+	if len(rs.MetricName) == 0 && len(rs.MetricPattern) == 0 {
+		return fmt.Errorf("RuleSet for check ID %s must supply either metric_name or metric_pattern", rs.CheckCID)
+	}
 
 	for i, rule := range rs.Rules {
 		if rule.Criteria == "" {
