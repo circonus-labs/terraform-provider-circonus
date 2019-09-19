@@ -619,6 +619,8 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 
 			c.Metrics = append(c.Metrics, m.CheckBundleMetric)
 		}
+	} else {
+		c.Metrics = make([]api.CheckBundleMetric, 0, 0)
 	}
 
 	if v, found := d.GetOk(checkMetricFilterAttr); found {
