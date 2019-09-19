@@ -18,41 +18,44 @@ package circonus
  */
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
 const (
 	// circonus_check.* global resource attribute names
-	checkActiveAttr      = "active"
-	checkCAQLAttr        = "caql"
-	checkCloudWatchAttr  = "cloudwatch"
-	checkCollectorAttr   = "collector"
-	checkConsulAttr      = "consul"
-	checkExternalAttr    = "external"
-	checkHTTPAttr        = "http"
-	checkHTTPTrapAttr    = "httptrap"
-	checkICMPPingAttr    = "icmp_ping"
-	checkJMXAttr         = "jmx"
-	checkJSONAttr        = "json"
-	checkMetricAttr      = "metric"
-	checkMetricLimitAttr = "metric_limit"
-	checkMySQLAttr       = "mysql"
-	checkNameAttr        = "name"
-	checkNotesAttr       = "notes"
-	checkPeriodAttr      = "period"
-	checkPostgreSQLAttr  = "postgresql"
-	checkStatsdAttr      = "statsd"
-	checkTCPAttr         = "tcp"
-	checkTagsAttr        = "tags"
-	checkTargetAttr      = "target"
-	checkTimeoutAttr     = "timeout"
-	checkTypeAttr        = "type"
+	checkActiveAttr       = "active"
+	checkCAQLAttr         = "caql"
+	checkCloudWatchAttr   = "cloudwatch"
+	checkCollectorAttr    = "collector"
+	checkConsulAttr       = "consul"
+	checkExternalAttr     = "external"
+	checkHTTPAttr         = "http"
+	checkHTTPTrapAttr     = "httptrap"
+	checkICMPPingAttr     = "icmp_ping"
+	checkJMXAttr          = "jmx"
+	checkJSONAttr         = "json"
+	checkMetricAttr       = "metric"
+	checkMetricFilterAttr = "metric_filter"
+	checkMetricLimitAttr  = "metric_limit"
+	checkMySQLAttr        = "mysql"
+	checkNameAttr         = "name"
+	checkNotesAttr        = "notes"
+	checkPeriodAttr       = "period"
+	checkPostgreSQLAttr   = "postgresql"
+	checkStatsdAttr       = "statsd"
+	checkTCPAttr          = "tcp"
+	checkTagsAttr         = "tags"
+	checkTargetAttr       = "target"
+	checkTimeoutAttr      = "timeout"
+	checkTypeAttr         = "type"
 
 	// circonus_check.collector.* resource attribute names
 	checkCollectorIDAttr = "id"
@@ -92,30 +95,31 @@ const (
 )
 
 var checkDescriptions = attrDescrs{
-	checkActiveAttr:      "If the check is activate or disabled",
-	checkCAQLAttr:        "CAQL check configuration",
-	checkCloudWatchAttr:  "CloudWatch check configuration",
-	checkCollectorAttr:   "The collector(s) that are responsible for gathering the metrics",
-	checkConsulAttr:      "Consul check configuration",
-	checkExternalAttr:    "External check configuration",
-	checkHTTPAttr:        "HTTP check configuration",
-	checkHTTPTrapAttr:    "HTTP Trap check configuration",
-	checkICMPPingAttr:    "ICMP ping check configuration",
-	checkJMXAttr:         "JMX check configuration",
-	checkJSONAttr:        "JSON check configuration",
-	checkMetricAttr:      "Configuration for a stream of metrics",
-	checkMetricLimitAttr: `Setting a metric_limit will enable all (-1), disable (0), or allow up to the specified limit of metrics for this check ("N+", where N is a positive integer)`,
-	checkMySQLAttr:       "MySQL check configuration",
-	checkNameAttr:        "The name of the check bundle that will be displayed in the web interface",
-	checkNotesAttr:       "Notes about this check bundle",
-	checkPeriodAttr:      "The period between each time the check is made",
-	checkPostgreSQLAttr:  "PostgreSQL check configuration",
-	checkStatsdAttr:      "statsd check configuration",
-	checkTCPAttr:         "TCP check configuration",
-	checkTagsAttr:        "A list of tags assigned to the check",
-	checkTargetAttr:      "The target of the check (e.g. hostname, URL, IP, etc)",
-	checkTimeoutAttr:     "The length of time in seconds (and fractions of a second) before the check will timeout if no response is returned to the collector",
-	checkTypeAttr:        "The check type",
+	checkActiveAttr:       "If the check is activate or disabled",
+	checkCAQLAttr:         "CAQL check configuration",
+	checkCloudWatchAttr:   "CloudWatch check configuration",
+	checkCollectorAttr:    "The collector(s) that are responsible for gathering the metrics",
+	checkConsulAttr:       "Consul check configuration",
+	checkExternalAttr:     "External check configuration",
+	checkHTTPAttr:         "HTTP check configuration",
+	checkHTTPTrapAttr:     "HTTP Trap check configuration",
+	checkICMPPingAttr:     "ICMP ping check configuration",
+	checkJMXAttr:          "JMX check configuration",
+	checkJSONAttr:         "JSON check configuration",
+	checkMetricAttr:       "Configuration for a stream of metrics",
+	checkMetricFilterAttr: "Allow/deny configuration for regex based metric ingestion",
+	checkMetricLimitAttr:  `Setting a metric_limit will enable all (-1), disable (0), or allow up to the specified limit of metrics for this check ("N+", where N is a positive integer)`,
+	checkMySQLAttr:        "MySQL check configuration",
+	checkNameAttr:         "The name of the check bundle that will be displayed in the web interface",
+	checkNotesAttr:        "Notes about this check bundle",
+	checkPeriodAttr:       "The period between each time the check is made",
+	checkPostgreSQLAttr:   "PostgreSQL check configuration",
+	checkStatsdAttr:       "statsd check configuration",
+	checkTCPAttr:          "TCP check configuration",
+	checkTagsAttr:         "A list of tags assigned to the check",
+	checkTargetAttr:       "The target of the check (e.g. hostname, URL, IP, etc)",
+	checkTimeoutAttr:      "The length of time in seconds (and fractions of a second) before the check will timeout if no response is returned to the collector",
+	checkTypeAttr:         "The check type",
 
 	checkOutByCollectorAttr:        "",
 	checkOutCheckUUIDsAttr:         "",
@@ -132,6 +136,11 @@ var checkCollectorDescriptions = attrDescrs{
 }
 
 var checkMetricDescriptions = metricDescriptions
+var checkMetricFilterDescriptions = attrDescrs{
+	"type":    "'allow' or 'deny'",
+	"regex":   "Regex of the filter",
+	"comment": "Comment on this filter",
+}
 
 func resourceCheck() *schema.Resource {
 	return &schema.Resource{
@@ -201,6 +210,31 @@ func resourceCheck() *schema.Resource {
 							Optional:     true,
 							Default:      metricUnit,
 							ValidateFunc: validateRegexp(metricUnitAttr, metricUnitRegexp),
+						},
+					}),
+				},
+			},
+			checkMetricFilterAttr: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      checkMetricFilterChecksum,
+				MinItems: 0,
+				Elem: &schema.Resource{
+					Schema: convertToHelperSchema(checkMetricFilterDescriptions, map[schemaAttr]*schema.Schema{
+						"type": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validateRegexp("type", `allow|deny`),
+						},
+						"regex": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validateRegexp(metricNameAttr, `.+`),
+						},
+						"comment": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(metricNameAttr, `.+`),
 						},
 					}),
 				},
@@ -383,6 +417,17 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 		metrics.Add(metricAttrs)
 	}
 
+	metricFilters := schema.NewSet(checkMetricFilterChecksum, nil)
+	for _, m := range c.MetricFilters {
+		metricFilterAttrs := map[string]interface{}{
+			"type":    m[0],
+			"regex":   m[1],
+			"comment": m[2],
+		}
+
+		metricFilters.Add(metricFilterAttrs)
+	}
+
 	// Write the global circonus_check parameters followed by the check
 	// type-specific parameters.
 
@@ -399,6 +444,10 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err := d.Set(checkMetricAttr, metrics); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkMetricAttr), err)
+	}
+
+	if err := d.Set(checkMetricFilterAttr, metricFilters); err != nil {
+		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkMetricFilterAttr), err)
 	}
 
 	if err := d.Set(checkTagsAttr, c.Tags); err != nil {
@@ -480,6 +529,29 @@ func checkMetricChecksum(v interface{}) int {
 	return csum
 }
 
+func checkMetricFilterChecksum(v interface{}) int {
+	m := v.(map[string]interface{})
+
+	b := &bytes.Buffer{}
+	b.Grow(defaultHashBufSize)
+
+	// Order writes to the buffer using lexically sorted list for easy visual
+	// reconciliation with other lists.
+	if v, found := m["comment"]; found {
+		fmt.Fprint(b, v.(string))
+	}
+	if v, found := m["regex"]; found {
+		fmt.Fprint(b, v.(string))
+	}
+	if v, found := m["type"]; found {
+		fmt.Fprint(b, v.(string))
+	}
+
+	s := b.String()
+	csum := hashcode.String(s)
+	return csum
+}
+
 // ParseConfig reads Terraform config data and stores the information into a
 // Circonus CheckBundle object.
 func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
@@ -546,6 +618,27 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			c.Metrics = append(c.Metrics, m.CheckBundleMetric)
+		}
+	}
+
+	if v, found := d.GetOk(checkMetricFilterAttr); found {
+		metricFilterList := v.(*schema.Set).List()
+		c.MetricFilters = make([][]string, 0, len(metricFilterList))
+
+		for _, metricFilterListRaw := range metricFilterList {
+			metricFilterAttrs := metricFilterListRaw.(map[string]interface{})
+
+			m := make([]string, 0, 3)
+			if av, found := metricFilterAttrs["type"]; found {
+				m = append(m, av.(string))
+			}
+			if av, found := metricFilterAttrs["regex"]; found {
+				m = append(m, av.(string))
+			}
+			if av, found := metricFilterAttrs["comment"]; found {
+				m = append(m, av.(string))
+			}
+			c.MetricFilters = append(c.MetricFilters, m)
 		}
 	}
 
