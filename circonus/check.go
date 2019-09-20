@@ -34,6 +34,7 @@ const (
 	apiCheckTypeMySQL      circonusCheckType = "mysql"
 	apiCheckTypeStatsd     circonusCheckType = "statsd"
 	apiCheckTypePostgreSQL circonusCheckType = "postgres"
+	apiCheckTypePromText   circonusCheckType = "promtext"
 	apiCheckTypeTCP        circonusCheckType = "tcp"
 )
 

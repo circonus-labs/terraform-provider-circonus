@@ -50,6 +50,7 @@ const (
 	checkNotesAttr        = "notes"
 	checkPeriodAttr       = "period"
 	checkPostgreSQLAttr   = "postgresql"
+	checkPromTextAttr     = "promtext"
 	checkStatsdAttr       = "statsd"
 	checkTCPAttr          = "tcp"
 	checkTagsAttr         = "tags"
@@ -90,6 +91,7 @@ const (
 	apiCheckTypeJSONAttr       apiCheckType = "json"
 	apiCheckTypeMySQLAttr      apiCheckType = "mysql"
 	apiCheckTypePostgreSQLAttr apiCheckType = "postgres"
+	apiCheckTypePromTextAttr   apiCheckType = "promtext"
 	apiCheckTypeStatsdAttr     apiCheckType = "statsd"
 	apiCheckTypeTCPAttr        apiCheckType = "tcp"
 )
@@ -114,6 +116,7 @@ var checkDescriptions = attrDescrs{
 	checkNotesAttr:        "Notes about this check bundle",
 	checkPeriodAttr:       "The period between each time the check is made",
 	checkPostgreSQLAttr:   "PostgreSQL check configuration",
+	checkPromTextAttr:     "Prometheus URL scraper check configuration",
 	checkStatsdAttr:       "statsd check configuration",
 	checkTCPAttr:          "TCP check configuration",
 	checkTagsAttr:         "A list of tags assigned to the check",
@@ -270,6 +273,7 @@ func resourceCheck() *schema.Resource {
 				),
 			},
 			checkPostgreSQLAttr: schemaCheckPostgreSQL,
+			checkPromTextAttr:   schemaCheckPromText,
 			checkStatsdAttr:     schemaCheckStatsd,
 			checkTagsAttr:       tagMakeConfigSchema(checkTagsAttr),
 			checkTargetAttr: {
@@ -693,6 +697,7 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 		checkJSONAttr:       checkConfigToAPIJSON,
 		checkMySQLAttr:      checkConfigToAPIMySQL,
 		checkPostgreSQLAttr: checkConfigToAPIPostgreSQL,
+		checkPromTextAttr:   checkConfigToAPIPromText,
 		checkStatsdAttr:     checkConfigToAPIStatsd,
 		checkTCPAttr:        checkConfigToAPITCP,
 	}
@@ -732,6 +737,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 		apiCheckTypeJSONAttr:       checkAPIToStateJSON,
 		apiCheckTypeMySQLAttr:      checkAPIToStateMySQL,
 		apiCheckTypePostgreSQLAttr: checkAPIToStatePostgreSQL,
+		apiCheckTypePromTextAttr:   checkAPIToStatePromText,
 		apiCheckTypeStatsdAttr:     checkAPIToStateStatsd,
 		apiCheckTypeTCPAttr:        checkAPIToStateTCP,
 	}
