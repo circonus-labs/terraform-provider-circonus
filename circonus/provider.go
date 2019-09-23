@@ -2,8 +2,6 @@ package circonus
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 
 	api "github.com/circonus-labs/go-apiclient"
