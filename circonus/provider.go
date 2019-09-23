@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -108,18 +109,17 @@ func Provider() terraform.ResourceProvider {
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	globalAutoTag = d.Get(providerAutoTagAttr).(bool)
 
-	f, err := os.OpenFile("/tmp/cgm.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+	envLevel := os.Getenv("TF_LOG")
+	var debug = false
+	if envLevel != "" {
+		debug = true
 	}
-	//defer f.Close()
 
 	config := &api.Config{
 		URL:      d.Get(providerAPIURLAttr).(string),
 		TokenKey: d.Get(providerKeyAttr).(string),
 		TokenApp: tfAppName(),
-		Debug:    true,
-		Log:      log.New(f, "", log.LstdFlags),
+		Debug:    debug,
 	}
 
 	client, err := api.NewAPI(config)

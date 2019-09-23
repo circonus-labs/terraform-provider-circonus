@@ -99,7 +99,7 @@ var ruleSetIfValueDescriptions = attrDescrs{
 var ruleSetIfValueOverDescriptions = attrDescrs{
 	// circonus_rule_set.if.value.over.* resource attribute names
 	ruleSetLastAttr:  "Duration over which data from the last interval is examined",
-	ruleSetUsingAttr: "Define the window funciton to use over the last duration",
+	ruleSetUsingAttr: "Define the window function to use over the last duration",
 }
 
 var ruleSetIfThenDescriptions = attrDescrs{
@@ -657,6 +657,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 			ifAttrs := newInterfaceMap(ifListElem.(map[string]interface{}))
 
 			rule := api.RuleSetRule{}
+			rule.WindowingFunction = nil
 
 			if thenListRaw, found := ifAttrs[ruleSetThenAttr]; found {
 				thenList := thenListRaw.(*schema.Set).List()
