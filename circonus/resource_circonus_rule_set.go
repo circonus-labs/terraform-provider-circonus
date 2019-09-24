@@ -822,6 +822,9 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 							if v, found := overAttrs[ruleSetUsingAttr]; found {
 								s := v.(string)
+								if len(s) == 0 {
+									continue
+								}
 								rule.WindowingFunction = new(string)
 								*rule.WindowingFunction = s
 							}
