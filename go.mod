@@ -11,3 +11,5 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20180917205041-7221087c3d28 // indirect
 	github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926 // indirect
 )
+
+go 1.13

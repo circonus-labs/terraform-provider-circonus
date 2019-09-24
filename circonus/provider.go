@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	api "github.com/circonus-labs/go-apiclient"
@@ -117,11 +118,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		URL:      d.Get(providerAPIURLAttr).(string),
 		TokenKey: d.Get(providerKeyAttr).(string),
 		TokenApp: tfAppName(),
-		Debug:    debug,
+	}
+
+	if debug {
+		config.Debug = true
+		config.Log = log.New(log.Writer(), "", log.LstdFlags)
 	}
 
 	client, err := api.NewAPI(config)
-	client.Debug = true
 	if err != nil {
 		return nil, errwrap.Wrapf("Error initializing Circonus: %s", err)
 	}
