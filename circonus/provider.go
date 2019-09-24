@@ -2,6 +2,8 @@ package circonus
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
@@ -108,6 +110,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		URL:      d.Get(providerAPIURLAttr).(string),
 		TokenKey: d.Get(providerKeyAttr).(string),
 		TokenApp: tfAppName(),
+	}
+
+	// turn on logging if terraform log level set to debug
+	if os.Getenv("TF_LOG") == "DEBUG" {
+		config.Debug = true
+		config.Log = log.New(log.Writer(), "", log.LstdFlags)
 	}
 
 	client, err := api.NewAPI(config)
