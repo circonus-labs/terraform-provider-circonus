@@ -808,25 +808,27 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 					if ruleSetOverListRaw, found := valueAttrs[ruleSetOverAttr]; found {
 						overList := ruleSetOverListRaw.(*schema.Set).List()
-
 						for _, overListRaw := range overList {
 							overAttrs := newInterfaceMap(overListRaw)
+
+							windowDuration := uint(0)
+							windowFunction := ""
 
 							if v, found := overAttrs[ruleSetLastAttr]; found {
 								last, err := time.ParseDuration(v.(string))
 								if err != nil {
 									return errwrap.Wrapf(fmt.Sprintf("unable to parse duration %s attribute", ruleSetLastAttr), err)
 								}
-								rule.WindowingDuration = uint(last.Seconds())
+								windowDuration = uint(last.Seconds())
 							}
 
 							if v, found := overAttrs[ruleSetUsingAttr]; found {
-								s := v.(string)
-								if len(s) == 0 {
-									continue
-								}
-								rule.WindowingFunction = new(string)
-								*rule.WindowingFunction = s
+								windowFunction = v.(string)
+							}
+
+							if windowFunction != "" && windowDuration > 0 {
+								rule.WindowingFunction = &windowFunction
+								rule.WindowingDuration = windowDuration
 							}
 						}
 					}
