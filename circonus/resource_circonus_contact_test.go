@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccCirconusContactGroup_basic(t *testing.T) {

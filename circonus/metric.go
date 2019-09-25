@@ -9,8 +9,8 @@ import (
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
 	uuid "github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 type circonusMetric struct {
@@ -91,11 +91,11 @@ func (m *circonusMetric) ParseConfigMap(id string, attrMap map[string]interface{
 func (m *circonusMetric) SaveState(d *schema.ResourceData) error {
 	d.SetId(string(m.ID))
 
-	d.Set(metricActiveAttr, metricAPIStatusToBool(m.Status))
-	d.Set(metricNameAttr, m.Name)
-	d.Set(metricTagsAttr, tagsToState(apiToTags(m.Tags)))
-	d.Set(metricTypeAttr, m.Type)
-	d.Set(metricUnitAttr, indirect(m.Units))
+	_ = d.Set(metricActiveAttr, metricAPIStatusToBool(m.Status))
+	_ = d.Set(metricNameAttr, m.Name)
+	_ = d.Set(metricTagsAttr, tagsToState(apiToTags(m.Tags)))
+	_ = d.Set(metricTypeAttr, m.Type)
+	_ = d.Set(metricUnitAttr, indirect(m.Units))
 
 	return nil
 }
