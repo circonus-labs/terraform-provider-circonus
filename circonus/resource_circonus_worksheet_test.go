@@ -5,9 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/terraform/helper/acctest"
-
-	"github.com/circonus-labs/circonus-gometrics/api"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )

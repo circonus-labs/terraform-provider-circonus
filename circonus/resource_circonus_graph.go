@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/circonus-labs/circonus-gometrics/api/config"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -349,7 +349,7 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 
 		dataPointAttrs[string(graphMetricActiveAttr)] = !datapoint.Hidden
 
-		if datapoint.Alpha != nil && *datapoint.Alpha != 0 {
+		if datapoint.Alpha != nil && *datapoint.Alpha != "0" {
 			dataPointAttrs[string(graphMetricAlphaAttr)] = *datapoint.Alpha
 		}
 
@@ -652,8 +652,8 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricAlphaAttr]; found {
-				f := v.(float64)
-				if f != 0 {
+				f := v.(string)
+				if f != "0" {
 					datapoint.Alpha = &f
 				}
 			}
@@ -914,7 +914,7 @@ func (g *circonusGraph) Update(ctxt *providerContext) error {
 
 func (g *circonusGraph) Validate() error {
 	for i, datapoint := range g.Datapoints {
-		if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != 0 {
+		if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != "0" {
 			return fmt.Errorf("%s can not be set on graphs with style %s", graphMetricAlphaAttr, apiGraphStyleLine)
 		}
 
