@@ -1,4 +1,9 @@
 ## 0.3.0 (Unreleased)
+
+IMPROVEMENTS:
+
+* Provider: Migrate from deprecated [circonus-gometrics/api](https://github.com/circonus-labs/circonus-gometrics) to [go-apiclient](https://github.com/circonus-labs/go-apiclient)
+
 ## 0.2.0 (October 01, 2018)
 
 FEATURES:
