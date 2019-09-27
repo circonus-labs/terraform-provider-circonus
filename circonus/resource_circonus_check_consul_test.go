@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccCirconusCheckConsul_node(t *testing.T) {
+	t.Skip("An Enterprise broker with the Resmon consul check installed must be available")
+
 	checkName := fmt.Sprintf("Terraform test: consul.service.consul mode=state check - %s", acctest.RandString(5))
 
 	checkNode := fmt.Sprintf("my-node-name-or-node-id-%s", acctest.RandString(5))
@@ -68,6 +70,8 @@ func TestAccCirconusCheckConsul_node(t *testing.T) {
 }
 
 func TestAccCirconusCheckConsul_service(t *testing.T) {
+	t.Skip("An Enterprise broker with the Resmon consul check installed must be available")
+
 	checkName := fmt.Sprintf("Terraform test: consul.service.consul mode=service check - %s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
@@ -123,6 +127,8 @@ func TestAccCirconusCheckConsul_service(t *testing.T) {
 }
 
 func TestAccCirconusCheckConsul_state(t *testing.T) {
+	t.Skip("An Enterprise broker with the Resmon consul check installed must be available")
+
 	checkName := fmt.Sprintf("Terraform test: consul.service.consul mode=state check - %s", acctest.RandString(5))
 
 	checkState := "critical"
