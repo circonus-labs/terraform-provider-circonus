@@ -652,9 +652,10 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricAlphaAttr]; found {
-				f := v.(string)
-				if f != "0" {
-					datapoint.Alpha = &f
+				f := v.(float64)
+				if f != 0 {
+					dps := fmt.Sprintf("%v", f)
+					datapoint.Alpha = &dps
 				}
 			}
 
@@ -915,7 +916,7 @@ func (g *circonusGraph) Update(ctxt *providerContext) error {
 func (g *circonusGraph) Validate() error {
 	for i, datapoint := range g.Datapoints {
 		if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != "0" {
-			return fmt.Errorf("%s can not be set on graphs with style %s", graphMetricAlphaAttr, apiGraphStyleLine)
+			return fmt.Errorf("%s (%s) can not be set on graphs with style %s", graphMetricAlphaAttr, *datapoint.Alpha, apiGraphStyleLine)
 		}
 
 		if datapoint.CheckID != 0 && datapoint.MetricName == "" {
@@ -926,8 +927,8 @@ func (g *circonusGraph) Validate() error {
 			return fmt.Errorf("Error with %s[%d] name=%q: %s is set, missing attribute %s must also be set", graphMetricAttr, i, datapoint.Name, graphMetricNameAttr, graphMetricCheckAttr)
 		}
 
-		if datapoint.CAQL != nil && (datapoint.CheckID != 0 || datapoint.MetricName != "") {
-			return fmt.Errorf("Error with %s[%d] name=%q: %q attribute is mutually exclusive with attributes %s or %s", graphMetricAttr, i, datapoint.Name, graphMetricCAQLAttr, graphMetricNameAttr, graphMetricCheckAttr)
+		if (datapoint.CAQL != nil && *datapoint.CAQL != "") && (datapoint.CheckID != 0 || datapoint.MetricName != "") {
+			return fmt.Errorf("Error with %s[%d] name=%q: %q (%s) attribute is mutually exclusive with attributes %s or %s", graphMetricAttr, i, datapoint.Name, graphMetricCAQLAttr, *datapoint.CAQL, graphMetricNameAttr, graphMetricCheckAttr)
 		}
 
 		if datapoint.MetricType == "text" && datapoint.Derive != nil {
