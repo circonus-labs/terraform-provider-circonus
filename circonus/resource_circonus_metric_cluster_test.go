@@ -77,9 +77,8 @@ func checkMetricClusterExists(c *providerContext, metricClusterCID api.CIDType) 
 
 const testAccCirconusMetricClusterConfigFmt = `
 resource "circonus_metric_cluster" "nomad-job1" {
-  description = <<EOF
-Metric Cluster Description
-EOF
+  description = "Metric Cluster Description"
+
   name = "%s"
 
   query {
