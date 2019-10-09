@@ -8,7 +8,6 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001 // indirect
 	github.com/hashicorp/go-plugin v0.0.0-20180814222501-a4620f9913d1 // indirect
-	github.com/hashicorp/go-retryablehttp v0.6.2 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
