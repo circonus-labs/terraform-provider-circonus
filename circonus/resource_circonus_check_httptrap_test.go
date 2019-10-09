@@ -21,7 +21,7 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "collector.2084916526.id", "/broker/2110"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "collector.1263561585.id", "/broker/35"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.async_metrics", "false"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.secret", "12345"),
@@ -86,7 +86,7 @@ resource "circonus_check" "consul" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "/broker/35"
   }
 
   httptrap {

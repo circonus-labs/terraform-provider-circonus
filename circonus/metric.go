@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
+	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
 	uuid "github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform/helper/hashcode"

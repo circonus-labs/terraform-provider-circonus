@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccCirconusCheckCloudWatch_basic(t *testing.T) {
+	t.Skip("CloudWatch credentials have to be setup")
 	checkName := fmt.Sprintf("Terraform test: RDS Metrics via CloudWatch - %s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{

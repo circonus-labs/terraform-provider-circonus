@@ -21,7 +21,7 @@ func TestAccCirconusCheckTCP_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.1893401625.id", "/broker/1286"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.2388330941.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.#", "1"),
 					// resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.banner_regexp", ""),
 					// resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.ca_chain", ""),
@@ -151,7 +151,7 @@ resource "circonus_check" "tls_cert" {
   period = "60s"
 
   collector {
-    id = "/broker/1286"
+    id = "/broker/1"
   }
 
   tcp {

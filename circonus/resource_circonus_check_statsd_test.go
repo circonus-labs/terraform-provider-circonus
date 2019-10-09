@@ -9,6 +9,8 @@ import (
 )
 
 func TestAccCirconusCheckStatsd_basic(t *testing.T) {
+	t.Skip("An Enterprise broker with the StatsD check installed must be available")
+
 	checkName := fmt.Sprintf("statsd test check - %s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{

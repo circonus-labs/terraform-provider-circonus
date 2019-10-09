@@ -49,8 +49,8 @@ github.com/chzyer/logex v1.1.11-0.20160617073814-96a4d311aa9b/go.mod h1:+Ywpsq7O
 github.com/chzyer/readline v0.0.0-20161106042343-c914be64f07d h1:aG5FcWiZTOhPQzYIxwxSR1zEOxzL32fwr1CsaCfhO6w=
 github.com/chzyer/readline v0.0.0-20161106042343-c914be64f07d/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20160617131543-bea8f082b6fd/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
-github.com/circonus-labs/circonus-gometrics v2.2.4+incompatible h1:+ZwGzyJGsOwSxIEDDOXzPagR167tQak/1P5wBwH+/dM=
-github.com/circonus-labs/circonus-gometrics v2.2.4+incompatible/go.mod h1:nmEj6Dob7S7YxXgwXpfOuvO54S+tGdZdw9fuRZt25Ag=
+github.com/circonus-labs/go-apiclient v0.6.8 h1:fDotP+IpmIE46XlkyHfHzscbQOrlhfZzivPQnMu84f4=
+github.com/circonus-labs/go-apiclient v0.6.8/go.mod h1:RP/BcaTRf8MlHaMGCSuSDPGPQqyMeBxaAdwNv5CM/eQ=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coreos/bbolt v1.3.1-coreos.1/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.2.0-rc.1.0.20170908195435-80aa810309d4+incompatible h1:VLCxgrfBsnJtqTy0WFP0GsjjwWZQiuQiNgiWnY6g6Gc=
@@ -108,6 +108,8 @@ github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de h1:XDCSyth
 github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de/go.mod h1:xIwEieBHERyEvaeKF/TcHh1Hu+lxPM+n2vT1+g9I4m4=
 github.com/hashicorp/go-cleanhttp v0.5.0 h1:wvCrVc9TjDls6+YGAF2hAifE1E5U1+b4tH6KdvN3Gig=
 github.com/hashicorp/go-cleanhttp v0.5.0/go.mod h1:JpRdi6/HCYpAwUzNwuwqhbovhLtngrth3wmdIIUrZ80=
+github.com/hashicorp/go-cleanhttp v0.5.1 h1:dH3aiDG9Jvb5r5+bYHsikaOUIpcM0xvgMXVoDkXMzJM=
+github.com/hashicorp/go-cleanhttp v0.5.1/go.mod h1:JpRdi6/HCYpAwUzNwuwqhbovhLtngrth3wmdIIUrZ80=
 github.com/hashicorp/go-getter v0.0.0-20180327010114-90bb99a48d86/go.mod h1:6rdJFnhkXnzGOJbvkrdv4t9nLwKcVA+tmbQeUlkIzrU=
 github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001 h1:qC+3MHkvfCXb1cA9YDpWZ7np8tPOXZceLrW+xyqOgmk=
 github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001/go.mod h1:6rdJFnhkXnzGOJbvkrdv4t9nLwKcVA+tmbQeUlkIzrU=
@@ -124,6 +126,8 @@ github.com/hashicorp/go-plugin v0.0.0-20180814222501-a4620f9913d1 h1:VOzBI0phmFk
 github.com/hashicorp/go-plugin v0.0.0-20180814222501-a4620f9913d1/go.mod h1:JSqWYsict+jzcj0+xElxyrBQRPNoiWQuddnxArJ7XHQ=
 github.com/hashicorp/go-retryablehttp v0.5.1 h1:Vsx5XKPqPs3M6sM4U4GWyUqFS8aBiL9U5gkgvpkg4SE=
 github.com/hashicorp/go-retryablehttp v0.5.1/go.mod h1:9B5zBasrRhHXnJnui7y6sL7es7NDiJgTc6Er0maI1Xs=
+github.com/hashicorp/go-retryablehttp v0.5.4 h1:1BZvpawXoJCWX6pNtow9+rpEj+3itIlutiqnntI6jOE=
+github.com/hashicorp/go-retryablehttp v0.5.4/go.mod h1:9B5zBasrRhHXnJnui7y6sL7es7NDiJgTc6Er0maI1Xs=
 github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90 h1:VBj0QYQ0u2MCJzBfeYXGexnAl17GsH1yidnoxCqqD9E=
 github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90/go.mod h1:o4zcYY1e0GEZI6eSEr+43QDYmuGglw1qSO6qdHUHCgg=
 github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc/go.mod h1:oaerMy3BhqiTbVye6QuFhFtIceqFoDHxNAB65b+Rj1I=
@@ -236,6 +240,8 @@ github.com/packer-community/winrmcp v0.0.0-20180102160824-81144009af58/go.mod h1
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pkg/errors v0.0.0-20170505043639-c605e284fe17 h1:chPfVn+gpAM5CTpTyVU9j8J+xgRGwmoDlNDLjKnJiYo=
 github.com/pkg/errors v0.0.0-20170505043639-c605e284fe17/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v0.0.0-20171219111128-6bee943216c8/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
