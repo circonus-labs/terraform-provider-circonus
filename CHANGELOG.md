@@ -3,6 +3,7 @@
 IMPROVEMENTS:
 
 * Provider: Migrate from deprecated [circonus-gometrics/api](https://github.com/circonus-labs/circonus-gometrics) to [go-apiclient](https://github.com/circonus-labs/go-apiclient)
+* Provider: Support new attributes for contact group (`group_type` and `always_send_clear`)
 
 ## 0.2.0 (October 01, 2018)
 

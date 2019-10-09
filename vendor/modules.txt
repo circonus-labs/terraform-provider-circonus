@@ -47,7 +47,7 @@ github.com/bgentry/go-netrc/netrc
 github.com/bgentry/speakeasy
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
-# github.com/circonus-labs/go-apiclient v0.6.8
+# github.com/circonus-labs/go-apiclient v0.6.9
 github.com/circonus-labs/go-apiclient
 github.com/circonus-labs/go-apiclient/config
 # github.com/davecgh/go-spew v1.1.1
@@ -67,7 +67,7 @@ github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001
 github.com/hashicorp/go-getter
 github.com/hashicorp/go-getter/helper/url
-# github.com/hashicorp/go-hclog v0.0.0-20180910232447-e45cbeb79f04
+# github.com/hashicorp/go-hclog v0.0.0-20170716174523-b4e5765d1e5f
 github.com/hashicorp/go-hclog
 # github.com/hashicorp/go-multierror v1.0.0
 github.com/hashicorp/go-multierror

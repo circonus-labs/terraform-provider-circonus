@@ -126,10 +126,10 @@ variable "test_tags" {
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 
-resource "circonus_contact_group" "test-trigger" {
-  name = "%s"
-  tags = [ "${var.test_tags}" ]
-}
+#resource "circonus_contact_group" "test-trigger" {
+#  name = "%s"
+#  tags = [ "${var.test_tags}" ]
+#}
 
 resource "circonus_check" "api_latency" {
   active = true
@@ -172,7 +172,8 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+      notify = [ "/contact_group/4679" ]
       severity = 1
     }
   }
@@ -188,7 +189,8 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
+	  notify = [ "/contact_group/4679" ]
       severity = 2
     }
   }
@@ -204,7 +206,8 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
+	  notify = [ "/contact_group/4679" ]
       severity = 3
     }
   }
@@ -215,7 +218,8 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
+	  notify = [ "/contact_group/4679" ]
       after = "2400s"
       severity = 4
     }

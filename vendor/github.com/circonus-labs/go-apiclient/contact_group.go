@@ -20,11 +20,11 @@ import (
 
 // ContactGroupAlertFormats define alert formats
 type ContactGroupAlertFormats struct {
-	LongMessage  *string `json:"long_message"`  // string or null
-	LongSubject  *string `json:"long_subject"`  // string or null
-	LongSummary  *string `json:"long_summary"`  // string or null
-	ShortMessage *string `json:"short_message"` // string or null
-	ShortSummary *string `json:"short_summary"` // string or null
+	LongMessage  *string `json:"long_message,omitempty"`  // string - 2019-10-09 null no longer accepted, must be omitted if not set
+	LongSubject  *string `json:"long_subject,omitempty"`  // string - 2019-10-09 null no longer accepted, must be omitted if not set
+	LongSummary  *string `json:"long_summary,omitempty"`  // string - 2019-10-09 null no longer accepted, must be omitted if not set
+	ShortMessage *string `json:"short_message,omitempty"` // string - 2019-10-09 null no longer accepted, must be omitted if not set
+	ShortSummary *string `json:"short_summary,omitempty"` // string - 2019-10-09 null no longer accepted, must be omitted if not set
 }
 
 // ContactGroupContactsExternal external contacts
@@ -64,6 +64,8 @@ type ContactGroup struct {
 	Name              string                    `json:"name,omitempty"`               // string
 	Reminders         []uint                    `json:"reminders,omitempty"`          // [] len == 5
 	Tags              []string                  `json:"tags,omitempty"`               // [] len >= 0
+	AlwaysSendClear   bool                      `json:"always_send_clear,omitempty"`  // bool - new 2019-10-09
+	GroupType         string                    `json:"group_type,omitempty"`         // string - new 2019-10-09
 }
 
 // NewContactGroup returns a ContactGroup (with defaults, if applicable)

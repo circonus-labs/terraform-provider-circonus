@@ -58,6 +58,7 @@ func TestAccCirconusContactGroup_basic(t *testing.T) {
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.team", "bender"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.warning", "3"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "aggregation_window", "60s"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "group_type", "normal"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.#", "0"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.#", "5"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.severity", "1"),
@@ -255,5 +256,7 @@ resource "circonus_contact_group" "staging-sev3" {
     "author:terraform",
     "other:foo",
   ]
+
+  group_type = "normal"
 }
 `
