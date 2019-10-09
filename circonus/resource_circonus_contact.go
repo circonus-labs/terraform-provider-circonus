@@ -18,6 +18,8 @@ import (
 const (
 	// circonus_contact attributes
 	contactAggregationWindowAttr = "aggregation_window"
+	contactAlwaysSendClearAttr   = "always_send_clear"
+	contactGroupTypeAttr         = "group_type"
 	contactAlertOptionAttr       = "alert_option"
 	contactEmailAttr             = "email"
 	contactHTTPAttr              = "http"
@@ -133,6 +135,8 @@ type contactVictorOpsInfo struct {
 
 var contactGroupDescriptions = attrDescrs{
 	contactAggregationWindowAttr:    "",
+	contactAlwaysSendClearAttr:      "",
+	contactGroupTypeAttr:            "",
 	contactAlertOptionAttr:          "",
 	contactContactGroupFallbackAttr: "",
 	contactEmailAttr:                "",
@@ -226,6 +230,14 @@ func resourceContactGroup() *schema.Resource {
 				ValidateFunc: validateFuncs(
 					validateDurationMin(contactAggregationWindowAttr, "0s"),
 				),
+			},
+			contactAlwaysSendClearAttr: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			contactGroupTypeAttr: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			contactAlertOptionAttr: {
 				Type:     schema.TypeSet,
@@ -598,6 +610,8 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set(contactAggregationWindowAttr, fmt.Sprintf("%ds", cg.AggregationWindow))
+	d.Set(contactAlwaysSendClearAttr, cg.AlwaysSendClear)
+	d.Set(contactGroupTypeAttr, cg.GroupType)
 
 	if err := d.Set(contactAlertOptionAttr, contactGroupAlertOptionsToState(cg)); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactAlertOptionAttr), err)
@@ -782,6 +796,14 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 	if v, ok := d.GetOk(contactAggregationWindowAttr); ok {
 		aggWindow, _ := time.ParseDuration(v.(string))
 		cg.AggregationWindow = uint(aggWindow.Seconds())
+	}
+	if v, ok := d.GetOk(contactAlwaysSendClearAttr); ok {
+		cg.AlwaysSendClear = v.(bool)
+	}
+	if v, ok := d.GetOk(contactGroupTypeAttr); ok {
+		if v.(string) != "" {
+			cg.GroupType = v.(string)
+		}
 	}
 
 	if v, ok := d.GetOk(contactAlertOptionAttr); ok {
