@@ -1,3 +1,9 @@
+# v0.6.9
+
+* fix: contact_group.`alert_formats`, individual fields should be omitted if not set (was `string|null`, now `string|omit`)
+* add: contact_group.`always_send_clear` attribute, bool
+* add: contact_group.`group_type` attribute, string
+
 # v0.6.8
 
 * upd: force logging of json being sent to api
