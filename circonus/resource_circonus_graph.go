@@ -226,12 +226,9 @@ func resourceGraph() *schema.Resource {
 							Default:  true,
 						},
 						graphMetricAlphaAttr: {
-							Type:     schema.TypeFloat,
+							Type:     schema.TypeString,
 							Optional: true,
-							ValidateFunc: validateFuncs(
-								validateFloatMin(graphMetricAlphaAttr, 0.0),
-								validateFloatMax(graphMetricAlphaAttr, 1.0),
-							),
+							Default:  "0",
 						},
 						graphMetricAxisAttr: {
 							Type:         schema.TypeString,
@@ -410,6 +407,8 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 
 		if datapoint.Alpha != nil && *datapoint.Alpha != "0" {
 			dataPointAttrs[string(graphMetricAlphaAttr)] = *datapoint.Alpha
+		} else {
+			dataPointAttrs[string(graphMetricAlphaAttr)] = nil
 		}
 
 		switch datapoint.Axis {
@@ -739,11 +738,10 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricAlphaAttr]; found {
-				f := v.(float64)
-				if f != 0 {
-					s := fmt.Sprintf("%f", f)
-					datapoint.Alpha = &s
-				}
+				f := v.(string)
+				datapoint.Alpha = &f
+			} else {
+				datapoint.Alpha = nil
 			}
 
 			if v, found := metricAttrs[graphMetricAxisAttr]; found {
@@ -1048,9 +1046,9 @@ func (g *circonusGraph) Update(ctxt *providerContext) error {
 
 func (g *circonusGraph) Validate() error {
 	for i, datapoint := range g.Datapoints {
-		if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != "0" {
-			return fmt.Errorf("%s can not be set on graphs with style %s", graphMetricAlphaAttr, apiGraphStyleLine)
-		}
+		// if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != "0" {
+		// 	return fmt.Errorf("%s can not be set on graphs with style %s", graphMetricAlphaAttr, apiGraphStyleLine)
+		// }
 
 		if datapoint.CheckID != 0 && datapoint.MetricName == "" {
 			return fmt.Errorf("Error with %s[%d] name=%q: %s is set, missing attribute %s must also be set", graphMetricAttr, i, datapoint.Name, graphMetricCheckAttr, graphMetricNameAttr)

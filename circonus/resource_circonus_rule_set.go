@@ -24,6 +24,7 @@ const (
 	ruleSetParentAttr        = "parent"
 	ruleSetMetricNameAttr    = "metric_name"
 	ruleSetMetricPatternAttr = "metric_pattern"
+	ruleSetMetricFilterAttr  = "metric_filter"
 	ruleSetTagsAttr          = "tags"
 
 	// circonus_rule_set.if.* resource attribute names
@@ -73,6 +74,7 @@ var ruleSetDescriptions = attrDescrs{
 	ruleSetParentAttr:        "Parent CID that must be healthy for this rule set to be active",
 	ruleSetMetricNameAttr:    "The name of the metric stream within a check to register the rule set with",
 	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
+	ruleSetMetricFilterAttr:  "The tag filter a pattern match ruleset will user",
 	ruleSetTagsAttr:          "Tags associated with this rule set",
 }
 
@@ -306,6 +308,12 @@ func resourceRuleSet() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
 			},
+			ruleSetMetricFilterAttr: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
+			},
 			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
 		}),
 	}
@@ -424,6 +432,8 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set(ruleSetLinkAttr, indirect(rs.Link))
 	d.Set(ruleSetMetricNameAttr, rs.MetricName)
+	d.Set(ruleSetMetricPatternAttr, rs.MetricPattern)
+	d.Set(ruleSetMetricFilterAttr, rs.Filter)
 	d.Set(ruleSetMetricTypeAttr, rs.MetricType)
 	d.Set(ruleSetNotesAttr, indirect(rs.Notes))
 	d.Set(ruleSetParentAttr, indirect(rs.Parent))
@@ -444,6 +454,7 @@ func ruleSetUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	rs.CID = d.Id()
+
 	if err := rs.Update(ctxt); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("unable to update rule set %q: {{err}}", d.Id()), err)
 	}
@@ -648,6 +659,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 	if v, found := d.GetOk(ruleSetMetricPatternAttr); found {
 		rs.MetricPattern = v.(string)
+	}
+
+	if v, found := d.GetOk(ruleSetMetricFilterAttr); found {
+		rs.Filter = v.(string)
 	}
 
 	rs.Rules = make([]api.RuleSetRule, 0, defaultRuleSetRuleLen)
