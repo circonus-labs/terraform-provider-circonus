@@ -956,25 +956,29 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 
 						// there will be only 1
 						tList := v.(*schema.Set).List()
-						for _, tElem := range tList {
-							tAttrs := tElem.(map[string]interface{})
-							if vv, found := tAttrs["colors"]; found {
-								t.Colors = make([]string, len(vv.([]interface{})))
-								for i, x := range vv.([]interface{}) {
-									t.Colors[i] = (x.(string))
+						if len(tList) > 0 {
+							for _, tElem := range tList {
+								tAttrs := tElem.(map[string]interface{})
+								if vv, found := tAttrs["colors"]; found {
+									t.Colors = make([]string, len(vv.([]interface{})))
+									for i, x := range vv.([]interface{}) {
+										t.Colors[i] = (x.(string))
+									}
+								}
+								if vv, found := tAttrs["values"]; found {
+									t.Values = make([]string, len(vv.([]interface{})))
+									for i, x := range vv.([]interface{}) {
+										t.Values[i] = (x.(string))
+									}
+								}
+								if vv, found := tAttrs["flip"]; found {
+									t.Flip = vv.(bool)
 								}
 							}
-							if vv, found := tAttrs["values"]; found {
-								t.Values = make([]string, len(vv.([]interface{})))
-								for i, x := range vv.([]interface{}) {
-									t.Values[i] = (x.(string))
-								}
-							}
-							if vv, found := tAttrs["flip"]; found {
-								t.Flip = vv.(bool)
-							}
+							w.Settings.Thresholds = &t
+						} else {
+							w.Settings.Thresholds = nil
 						}
-						w.Settings.Thresholds = &t
 					}
 					if v, found := sMap["time_window"]; found {
 						w.Settings.TimeWindow = (v.(string))
