@@ -309,6 +309,28 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeFloat,
 										Optional: true,
 									},
+									"thresholds": &schema.Schema{
+										Type:     schema.TypeSet,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"colors": &schema.Schema{
+													Type:     schema.TypeList,
+													Required: true,
+													Elem:     schema.TypeString,
+												},
+												"values": &schema.Schema{
+													Type:     schema.TypeList,
+													Required: true,
+													Elem:     schema.TypeString,
+												},
+												"flip": &schema.Schema{
+													Type:     schema.TypeBool,
+													Required: true,
+												},
+											},
+										},
+									},
 									"time_window": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
@@ -513,6 +535,13 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["size"] = widget.Settings.Size
 		dashWidgetSettingsAttrs["tag_filter_set"] = widget.Settings.TagFilterSet
 		dashWidgetSettingsAttrs["threshold"] = widget.Settings.Threshold
+		if widget.Settings.Thresholds != nil {
+			t := make(map[string]interface{}, 3)
+			t["colors"] = widget.Settings.Thresholds.Colors
+			t["values"] = widget.Settings.Thresholds.Values
+			t["flip"] = widget.Settings.Thresholds.Flip
+			dashWidgetSettingsAttrs["thresholds"] = t
+		}
 		dashWidgetSettingsAttrs["time_window"] = widget.Settings.TimeWindow
 		dashWidgetSettingsAttrs["title"] = widget.Settings.Title
 		dashWidgetSettingsAttrs["title_format"] = widget.Settings.TitleFormat
@@ -921,6 +950,25 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					}
 					if v, found := sMap["threshold"]; found {
 						w.Settings.Threshold = float32((v.(float64)))
+					}
+					if v, found := sMap["thresholds"]; found {
+						t := api.ForecastGaugeWidgetThresholds{}
+
+						// there will be only 1
+						tList := v.(*schema.Set).List()
+						for _, tElem := range tList {
+							tAttrs := tElem.(map[string]interface{})
+							if vv, found := tAttrs["colors"]; found {
+								t.Colors = (vv.([]string))
+							}
+							if vv, found := tAttrs["values"]; found {
+								t.Values = (vv.([]string))
+							}
+							if vv, found := tAttrs["flip"]; found {
+								t.Flip = vv.(bool)
+							}
+						}
+						w.Settings.Thresholds = &t
 					}
 					if v, found := sMap["time_window"]; found {
 						w.Settings.TimeWindow = (v.(string))
