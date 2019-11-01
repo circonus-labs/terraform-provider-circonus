@@ -317,12 +317,12 @@ func resourceDashboard() *schema.Resource {
 												"colors": &schema.Schema{
 													Type:     schema.TypeList,
 													Required: true,
-													Elem:     schema.TypeString,
+													Elem:     &schema.Schema{Type: schema.TypeString},
 												},
 												"values": &schema.Schema{
 													Type:     schema.TypeList,
 													Required: true,
-													Elem:     schema.TypeString,
+													Elem:     &schema.Schema{Type: schema.TypeString},
 												},
 												"flip": &schema.Schema{
 													Type:     schema.TypeBool,
