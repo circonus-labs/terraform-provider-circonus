@@ -200,6 +200,30 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"datapoints": &schema.Schema{
+										Type:     schema.TypeSet,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"_metric_type": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"_check_id": &schema.Schema{
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"label": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"metric": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+											},
+										},
+									},
 									"dependents": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
@@ -444,7 +468,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetAttrs["widget_id"] = widget.WidgetID
 		dashWidgetAttrs["width"] = int(widget.Width)
 
-		dashWidgetSettingsAttrs := make(map[string]interface{}, 60)
+		dashWidgetSettingsAttrs := make(map[string]interface{}, 61)
 		dashWidgetSettingsAttrs["account_id"] = widget.Settings.AccountID
 		dashWidgetSettingsAttrs["acknowledged"] = widget.Settings.Acknowledged
 		dashWidgetSettingsAttrs["algorithm"] = widget.Settings.Algorithm
@@ -456,6 +480,16 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["cluster_name"] = widget.Settings.ClusterName
 		dashWidgetSettingsAttrs["contact_groups"] = widget.Settings.ContactGroups
 		dashWidgetSettingsAttrs["content_type"] = widget.Settings.ContentType
+		dps := make([]map[string]interface{}, 0, len(widget.Settings.Datapoints))
+		for _, dp := range widget.Settings.Datapoints {
+			dpAttrs := make(map[string]interface{}, 4)
+			dpAttrs["label"] = dp.Label
+			dpAttrs["_metric_type"] = dp.MetricType
+			dpAttrs["metric"] = dp.Metric
+			dpAttrs["_check_id"] = dp.CheckID
+			dps = append(dps, dpAttrs)
+		}
+		dashWidgetSettingsAttrs["datapoints"] = dps
 		dashWidgetSettingsAttrs["dependents"] = widget.Settings.Dependents
 		dashWidgetSettingsAttrs["disable_autoformat"] = widget.Settings.DisableAutoformat
 		dashWidgetSettingsAttrs["display"] = widget.Settings.Display
@@ -769,9 +803,32 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					// if v, found := sMap[string(dashWidgetSettingsDefinitionAttr)]; found {
 					// 	w.Settings.Definition = (v.(string))
 					// }
+					if v, found := sMap["datapoints"]; found {
+						w.Settings.Datapoints = make([]api.ChartTextWidgetDatapoint, 0)
+
+						datapointList := v.(*schema.Set).List()
+						for _, dpElem := range datapointList {
+							dpAttrs := dpElem.(map[string]interface{})
+							dp := api.ChartTextWidgetDatapoint{}
+							if vv, found := dpAttrs["label"]; found {
+								dp.Label = (vv.(string))
+							}
+							if vv, found := dpAttrs["_metric_type"]; found {
+								dp.MetricType = (vv.(string))
+							}
+							if vv, found := dpAttrs["_check_id"]; found {
+								dp.CheckID = vv.(uint)
+							}
+							if vv, found := dpAttrs["metric"]; found {
+								dp.Metric = (vv.(string))
+							}
+							w.Settings.Datapoints = append(w.Settings.Datapoints, dp)
+						}
+					}
 					if v, found := sMap["dependents"]; found {
 						w.Settings.Dependents = (v.(string))
 					}
+
 					if v, found := sMap["disable_autoformat"]; found {
 						w.Settings.DisableAutoformat = v.(bool)
 					}
