@@ -30,6 +30,7 @@ const (
 	apiCheckTypeExternal   circonusCheckType = "external"
 	apiCheckTypeHTTP       circonusCheckType = "http"
 	apiCheckTypeJMX        circonusCheckType = "jmx"
+	apiCheckTypeMemcached  circonusCheckType = "memcached"
 	apiCheckTypeJSON       circonusCheckType = "json"
 	apiCheckTypeMySQL      circonusCheckType = "mysql"
 	apiCheckTypeStatsd     circonusCheckType = "statsd"

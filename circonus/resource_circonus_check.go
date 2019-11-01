@@ -42,6 +42,7 @@ const (
 	checkICMPPingAttr     = "icmp_ping"
 	checkJMXAttr          = "jmx"
 	checkJSONAttr         = "json"
+	checkMemcachedAttr    = "memcached"
 	checkMetricAttr       = "metric"
 	checkMetricFilterAttr = "metric_filter"
 	checkMetricLimitAttr  = "metric_limit"
@@ -87,6 +88,7 @@ const (
 	apiCheckTypeHTTPAttr       apiCheckType = "http"
 	apiCheckTypeHTTPTrapAttr   apiCheckType = "httptrap"
 	apiCheckTypeJMXAttr        apiCheckType = "jmx"
+	apiCheckTypeMemcachedAttr  apiCheckType = "memcached"
 	apiCheckTypeICMPPingAttr   apiCheckType = "ping_icmp"
 	apiCheckTypeJSONAttr       apiCheckType = "json"
 	apiCheckTypeMySQLAttr      apiCheckType = "mysql"
@@ -108,6 +110,7 @@ var checkDescriptions = attrDescrs{
 	checkICMPPingAttr:     "ICMP ping check configuration",
 	checkJMXAttr:          "JMX check configuration",
 	checkJSONAttr:         "JSON check configuration",
+	checkMemcachedAttr:    "Memcached check configuration",
 	checkMetricAttr:       "Configuration for a stream of metrics",
 	checkMetricFilterAttr: "Allow/deny configuration for regex based metric ingestion",
 	checkMetricLimitAttr:  `Setting a metric_limit will enable all (-1), disable (0), or allow up to the specified limit of metrics for this check ("N+", where N is a positive integer)`,
@@ -178,13 +181,14 @@ func resourceCheck() *schema.Resource {
 					}),
 				},
 			},
-			checkConsulAttr:   schemaCheckConsul,
-			checkExternalAttr: schemaCheckExternal,
-			checkHTTPAttr:     schemaCheckHTTP,
-			checkHTTPTrapAttr: schemaCheckHTTPTrap,
-			checkICMPPingAttr: schemaCheckICMPPing,
-			checkJMXAttr:      schemaCheckJMX,
-			checkJSONAttr:     schemaCheckJSON,
+			checkConsulAttr:    schemaCheckConsul,
+			checkExternalAttr:  schemaCheckExternal,
+			checkHTTPAttr:      schemaCheckHTTP,
+			checkHTTPTrapAttr:  schemaCheckHTTPTrap,
+			checkICMPPingAttr:  schemaCheckICMPPing,
+			checkJMXAttr:       schemaCheckJMX,
+			checkMemcachedAttr: schemaCheckMemcached,
+			checkJSONAttr:      schemaCheckJSON,
 			checkMetricAttr: {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -694,6 +698,7 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 		checkHTTPTrapAttr:   checkConfigToAPIHTTPTrap,
 		checkICMPPingAttr:   checkConfigToAPIICMPPing,
 		checkJMXAttr:        checkConfigToAPIJMX,
+		checkMemcachedAttr:  checkConfigToAPIMemcached,
 		checkJSONAttr:       checkConfigToAPIJSON,
 		checkMySQLAttr:      checkConfigToAPIMySQL,
 		checkPostgreSQLAttr: checkConfigToAPIPostgreSQL,
@@ -734,6 +739,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 		apiCheckTypeHTTPTrapAttr:   checkAPIToStateHTTPTrap,
 		apiCheckTypeICMPPingAttr:   checkAPIToStateICMPPing,
 		apiCheckTypeJMXAttr:        checkAPIToStateJMX,
+		apiCheckTypeMemcachedAttr:  checkAPIToStateMemcached,
 		apiCheckTypeJSONAttr:       checkAPIToStateJSON,
 		apiCheckTypeMySQLAttr:      checkAPIToStateMySQL,
 		apiCheckTypePostgreSQLAttr: checkAPIToStatePostgreSQL,
