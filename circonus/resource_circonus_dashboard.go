@@ -490,7 +490,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetAttrs["widget_id"] = widget.WidgetID
 		dashWidgetAttrs["width"] = int(widget.Width)
 
-		dashWidgetSettingsAttrs := make(map[string]interface{}, 61)
+		dashWidgetSettingsAttrs := make(map[string]interface{}, 62)
 		dashWidgetSettingsAttrs["account_id"] = widget.Settings.AccountID
 		dashWidgetSettingsAttrs["acknowledged"] = widget.Settings.Acknowledged
 		dashWidgetSettingsAttrs["algorithm"] = widget.Settings.Algorithm
