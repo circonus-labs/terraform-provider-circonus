@@ -486,7 +486,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 			dpAttrs["label"] = dp.Label
 			dpAttrs["_metric_type"] = dp.MetricType
 			dpAttrs["metric"] = dp.Metric
-			dpAttrs["_check_id"] = dp.CheckID
+			dpAttrs["_check_id"] = int(dp.CheckID)
 			dps = append(dps, dpAttrs)
 		}
 		dashWidgetSettingsAttrs["datapoints"] = dps
@@ -817,7 +817,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 								dp.MetricType = (vv.(string))
 							}
 							if vv, found := dpAttrs["_check_id"]; found {
-								dp.CheckID = vv.(uint)
+								dp.CheckID = uint(vv.(int))
 							}
 							if vv, found := dpAttrs["metric"]; found {
 								dp.Metric = (vv.(string))
