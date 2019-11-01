@@ -959,10 +959,16 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						for _, tElem := range tList {
 							tAttrs := tElem.(map[string]interface{})
 							if vv, found := tAttrs["colors"]; found {
-								t.Colors = (vv.([]string))
+								t.Colors = make([]string, len(vv.([]interface{})))
+								for i, x := range vv.([]interface{}) {
+									t.Colors[i] = (x.(string))
+								}
 							}
 							if vv, found := tAttrs["values"]; found {
-								t.Values = (vv.([]string))
+								t.Values = make([]string, len(vv.([]interface{})))
+								for i, x := range vv.([]interface{}) {
+									t.Values[i] = (x.(string))
+								}
 							}
 							if vv, found := tAttrs["flip"]; found {
 								t.Flip = vv.(bool)
