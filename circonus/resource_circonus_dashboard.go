@@ -763,6 +763,8 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 			wAttrs := widgetListElem.(map[string]interface{})
 
 			w := api.DashboardWidget{}
+			w.Settings.RangeHigh = nil
+			w.Settings.RangeLow = nil
 
 			if v, found := wAttrs["active"]; found {
 				w.Active = v.(bool)
