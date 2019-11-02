@@ -928,14 +928,24 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Period = uint(v.(int))
 					}
 					if v, found := sMap["range_high"]; found {
-						x := v.(int)
-						w.Settings.RangeHigh = &x
+						y, ok := sMap["type"]
+						if ok && y.(string) == "gauge" {
+							x := v.(int)
+							w.Settings.RangeHigh = &x
+						} else {
+							w.Settings.RangeHigh = nil
+						}
 					} else {
 						w.Settings.RangeHigh = nil
 					}
 					if v, found := sMap["range_low"]; found {
-						x := v.(int)
-						w.Settings.RangeLow = &x
+						y, ok := sMap["type"]
+						if ok && y.(string) == "gauge" {
+							x := v.(int)
+							w.Settings.RangeLow = &x
+						} else {
+							w.Settings.RangeLow = nil
+						}
 					} else {
 						w.Settings.RangeLow = nil
 					}
