@@ -526,8 +526,12 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["min_age"] = widget.Settings.MinAge
 		dashWidgetSettingsAttrs["off_hours"] = widget.Settings.OffHours
 		dashWidgetSettingsAttrs["overlay_set_id"] = widget.Settings.OverlaySetID
-		dashWidgetSettingsAttrs["range_high"] = int(widget.Settings.RangeHigh)
-		dashWidgetSettingsAttrs["range_low"] = int(widget.Settings.RangeLow)
+		if widget.Settings.RangeHigh != nil {
+			dashWidgetSettingsAttrs["range_high"] = int(*widget.Settings.RangeHigh)
+		}
+		if widget.Settings.RangeLow != nil {
+			dashWidgetSettingsAttrs["range_low"] = int(*widget.Settings.RangeLow)
+		}
 		dashWidgetSettingsAttrs["resource_limit"] = widget.Settings.ResourceLimit
 		dashWidgetSettingsAttrs["resource_usage"] = widget.Settings.ResourceUsage
 		dashWidgetSettingsAttrs["search"] = widget.Settings.Search
@@ -922,10 +926,16 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Period = uint(v.(int))
 					}
 					if v, found := sMap["range_high"]; found {
-						w.Settings.RangeHigh = v.(int)
+						x := v.(int)
+						w.Settings.RangeHigh = &x
+					} else {
+						w.Settings.RangeHigh = nil
 					}
 					if v, found := sMap["range_low"]; found {
-						w.Settings.RangeLow = v.(int)
+						x := v.(int)
+						w.Settings.RangeLow = &x
+					} else {
+						w.Settings.RangeLow = nil
 					}
 					if v, found := sMap["realtime"]; found {
 						w.Settings.Realtime = v.(bool)
