@@ -928,7 +928,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Period = uint(v.(int))
 					}
 					if v, found := sMap["range_high"]; found {
-						y, ok := sMap["type"]
+						y, ok := wAttrs["type"]
 						if ok && y.(string) == "gauge" {
 							x := v.(int)
 							w.Settings.RangeHigh = &x
@@ -939,7 +939,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.RangeHigh = nil
 					}
 					if v, found := sMap["range_low"]; found {
-						y, ok := sMap["type"]
+						y, ok := wAttrs["type"]
 						if ok && y.(string) == "gauge" {
 							x := v.(int)
 							w.Settings.RangeLow = &x
