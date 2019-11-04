@@ -172,6 +172,10 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"autoformat": &schema.Schema{
+										Type:     schema.TypeBool,
+										Optional: true,
+									},
 									"body_format": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
@@ -490,10 +494,11 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetAttrs["widget_id"] = widget.WidgetID
 		dashWidgetAttrs["width"] = int(widget.Width)
 
-		dashWidgetSettingsAttrs := make(map[string]interface{}, 62)
+		dashWidgetSettingsAttrs := make(map[string]interface{}, 63)
 		dashWidgetSettingsAttrs["account_id"] = widget.Settings.AccountID
 		dashWidgetSettingsAttrs["acknowledged"] = widget.Settings.Acknowledged
 		dashWidgetSettingsAttrs["algorithm"] = widget.Settings.Algorithm
+		dashWidgetSettingsAttrs["autoformat"] = widget.Settings.Autoformat
 		dashWidgetSettingsAttrs["body_format"] = widget.Settings.BodyFormat
 		dashWidgetSettingsAttrs["chart_type"] = widget.Settings.ChartType
 		dashWidgetSettingsAttrs["check_uuid"] = widget.Settings.CheckUUID
@@ -807,6 +812,9 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					}
 					if v, found := sMap["algorithm"]; found {
 						w.Settings.Algorithm = (v.(string))
+					}
+					if v, found := sMap["autoformat"]; found {
+						w.Settings.Autoformat = v.(bool)
 					}
 					if v, found := sMap["body_format"]; found {
 						w.Settings.BodyFormat = (v.(string))
