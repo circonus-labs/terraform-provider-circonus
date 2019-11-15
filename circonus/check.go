@@ -33,6 +33,7 @@ const (
 	apiCheckTypeMemcached  circonusCheckType = "memcached"
 	apiCheckTypeJSON       circonusCheckType = "json"
 	apiCheckTypeMySQL      circonusCheckType = "mysql"
+	apiCheckTypeSNMP       circonusCheckType = "snmp"
 	apiCheckTypeStatsd     circonusCheckType = "statsd"
 	apiCheckTypePostgreSQL circonusCheckType = "postgres"
 	apiCheckTypePromText   circonusCheckType = "promtext"
