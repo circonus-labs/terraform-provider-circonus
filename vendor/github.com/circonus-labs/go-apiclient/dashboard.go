@@ -94,7 +94,7 @@ type ChartWidgtDefinition struct {
 // ForecastGaugeWidgetThresholds defines forecast widget thresholds
 type ForecastGaugeWidgetThresholds struct {
 	Colors []string `json:"colors,omitempty"` // forecasts, gauges
-	Flip   bool     `json:"flip,omitempty"`   // gauges
+	Flip   bool     `json:"flip"`             // gauges 2019-11-01, flip is required
 	Values []string `json:"values,omitempty"` // forecasts, gauges
 }
 
@@ -160,8 +160,8 @@ type DashboardWidgetSettings struct {
 	OffHours            []uint                           `json:"off_hours,omitempty"`             // alerts
 	OverlaySetID        string                           `json:"overlay_set_id,omitempty"`        // graphs
 	Period              uint                             `json:"period,omitempty"`                // gauges, text, graphs
-	RangeHigh           int                              `json:"range_high,omitempty"`            // gauges
-	RangeLow            int                              `json:"range_low,omitempty"`             // gauges
+	RangeHigh           *int                             `json:"range_high,omitempty"`            // gauges 2019-11-01 switch to pointer for 0 ranges
+	RangeLow            *int                             `json:"range_low,omitempty"`             // gauges 2019-11-01 switch to pointer for 0 ranges
 	Realtime            bool                             `json:"realtime,omitempty"`              // graphs
 	ResourceLimit       string                           `json:"resource_limit,omitempty"`        // forecasts
 	ResourceUsage       string                           `json:"resource_usage,omitempty"`        // forecasts
