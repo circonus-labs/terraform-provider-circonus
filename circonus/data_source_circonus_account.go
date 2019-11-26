@@ -6,7 +6,7 @@ import (
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -240,24 +240,24 @@ func dataSourceCirconusAccountRead(d *schema.ResourceData, meta interface{}) err
 
 	d.SetId(a.CID)
 
-	d.Set(accountAddress1Attr, a.Address1)
-	d.Set(accountAddress2Attr, a.Address2)
-	d.Set(accountCCEmailAttr, a.CCEmail)
-	d.Set(accountIDAttr, a.CID)
-	d.Set(accountCityAttr, a.City)
-	d.Set(accountContactGroupsAttr, a.ContactGroups)
-	d.Set(accountCountryAttr, a.Country)
-	d.Set(accountDescriptionAttr, a.Description)
+	_ = d.Set(accountAddress1Attr, a.Address1)
+	_ = d.Set(accountAddress2Attr, a.Address2)
+	_ = d.Set(accountCCEmailAttr, a.CCEmail)
+	_ = d.Set(accountIDAttr, a.CID)
+	_ = d.Set(accountCityAttr, a.City)
+	_ = d.Set(accountContactGroupsAttr, a.ContactGroups)
+	_ = d.Set(accountCountryAttr, a.Country)
+	_ = d.Set(accountDescriptionAttr, a.Description)
 
 	if err := d.Set(accountInvitesAttr, invitesList); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store account %q attribute: {{err}}", accountInvitesAttr), err)
 	}
 
-	d.Set(accountNameAttr, a.Name)
-	d.Set(accountOwnerAttr, a.OwnerCID)
-	d.Set(accountStateProvAttr, a.StateProv)
-	d.Set(accountTimezoneAttr, a.Timezone)
-	d.Set(accountUIBaseURLAttr, a.UIBaseURL)
+	_ = d.Set(accountNameAttr, a.Name)
+	_ = d.Set(accountOwnerAttr, a.OwnerCID)
+	_ = d.Set(accountStateProvAttr, a.StateProv)
+	_ = d.Set(accountTimezoneAttr, a.Timezone)
+	_ = d.Set(accountUIBaseURLAttr, a.UIBaseURL)
 
 	if err := d.Set(accountUsageAttr, usageList); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store account %q attribute: {{err}}", accountUsageAttr), err)

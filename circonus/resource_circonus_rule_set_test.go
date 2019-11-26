@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccCirconusRuleSet_basic(t *testing.T) {
@@ -146,12 +146,12 @@ resource "circonus_check" "api_latency" {
 
   metric {
     name = "maximum"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
   target = "api.circonus.com"
 }
 
@@ -225,6 +225,6 @@ EOF
     }
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
 }
 `

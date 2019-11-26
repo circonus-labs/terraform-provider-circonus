@@ -9,7 +9,7 @@ import (
 
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -332,11 +332,9 @@ func checkConfigToAPIConsul(c *circonusCheck, l interfaceList) error {
 			c.Config[config.Ciphers] = v.(string)
 		}
 
-		if headers := consulConfig.CollectMap(checkConsulHeadersAttr); headers != nil {
-			for k, v := range headers {
-				h := config.HeaderPrefix + config.Key(k)
-				c.Config[h] = v
-			}
+		for k, v := range consulConfig.CollectMap(checkConsulHeadersAttr) {
+			h := config.HeaderPrefix + config.Key(k)
+			c.Config[h] = v
 		}
 
 		if v, found := consulConfig[checkConsulKeyFileAttr]; found {

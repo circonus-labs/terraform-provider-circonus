@@ -1,4 +1,14 @@
-## 0.3.1 (Unreleased)
+## 0.4.0 (Unreleased)
+
+IMPROVEMENTS:
+
+* Update dependencies
+* Switch to Terraform Plugin SDK
+
+NOTES:
+
+* Minimum version of Go required to build the provider is now 1.13
+
 ## 0.3.0 (November 14, 2019)
 
 IMPROVEMENTS:

@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccCirconusGraph_basic(t *testing.T) {
@@ -128,19 +128,19 @@ resource "circonus_check" "api_latency" {
 
   metric {
     name = "maximum"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
   metric {
     name = "minimum"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
   target = "api.circonus.com"
 }
 
@@ -150,6 +150,16 @@ resource "circonus_graph" "mixed-points" {
   notes = "test notes"
   graph_style = "line"
   line_style = "stepped"
+
+  left = {
+    max = 11
+  }
+
+  right = {
+    logarithmic = 10
+    max = 20
+    min = -1
+  }
 
   metric {
     # caql = "" # conflicts with metric_name/check
@@ -184,16 +194,6 @@ resource "circonus_graph" "mixed-points" {
   //   name = "Metrics Used"
   // }
 
-  left {
-    max = 11
-  }
-
-  right {
-    logarithmic = 10
-    max = 20
-    min = -1
-  }
-
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
 }
 `

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckTCP_basic(t *testing.T) {
@@ -161,64 +161,64 @@ resource "circonus_check" "tls_cert" {
 
   metric {
     name = "cert_end"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "epoch"
   }
 
   metric {
     name = "cert_end_in"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
   metric {
     name = "cert_error"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "text"
   }
 
   metric {
     name = "cert_issuer"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "text"
   }
 
   metric {
     name = "cert_start"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "epoch"
   }
 
   metric {
     name = "cert_subject"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "text"
   }
 
   metric {
     name = "duration"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "milliseconds"
   }
 
   metric {
     name = "tt_connect"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "milliseconds"
   }
 
   metric {
     name = "tt_firstbyte"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "milliseconds"
   }
 
-  tags = [ "${var.tcp_check_tags}" ]
+  tags = "${var.tcp_check_tags}"
 }
 `

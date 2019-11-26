@@ -12,7 +12,7 @@ import (
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // convertToHelperSchema converts the schema and injects the necessary
@@ -115,11 +115,11 @@ func stringListToSet(stringList []string, keyName schemaAttr) []interface{} {
 }
 
 func normalizeTimeDurationStringToSeconds(v interface{}) string {
-	switch v.(type) {
+	switch v := v.(type) {
 	case string:
-		d, err := time.ParseDuration(v.(string))
+		d, err := time.ParseDuration(v)
 		if err != nil {
-			return fmt.Sprintf("<unable to normalize time duration %s: %v>", v.(string), err)
+			return fmt.Sprintf("<unable to normalize time duration %s: %v>", v, err)
 		}
 
 		return fmt.Sprintf("%ds", int(d.Seconds()))
@@ -129,15 +129,14 @@ func normalizeTimeDurationStringToSeconds(v interface{}) string {
 }
 
 func indirect(v interface{}) interface{} {
-	switch v.(type) {
+	switch v := v.(type) {
 	case string:
 		return v
 	case *string:
-		p := v.(*string)
-		if p == nil {
+		if v == nil {
 			return nil
 		}
-		return *p
+		return *v
 	default:
 		return v
 	}

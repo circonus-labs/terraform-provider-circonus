@@ -1,3 +1,8 @@
+# v0.7.0
+
+* fix: forecast gauge `flip` required, remove omitempty
+* upd: range hi/low switched from `int` to `*int` so that 0 can be used, but common setting attribute still omitted for widgets which do not support the range settings
+
 # v0.6.9
 
 * fix: contact_group.`alert_formats`, individual fields should be omitted if not set (was `string|null`, now `string|omit`)

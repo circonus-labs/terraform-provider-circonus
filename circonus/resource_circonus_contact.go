@@ -11,8 +11,8 @@ import (
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -48,9 +48,9 @@ const (
 	//contactUserCIDAttr
 
 	// circonus_contact.http attributes
-	contactHTTPAddressAttr schemaAttr = "address"
 	contactHTTPFormatAttr             = "format"
 	contactHTTPMethodAttr             = "method"
+	contactHTTPAddressAttr schemaAttr = "address"
 
 	// circonus_contact.irc attributes
 	//contactUserCIDAttr
@@ -609,9 +609,9 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	d.Set(contactAggregationWindowAttr, fmt.Sprintf("%ds", cg.AggregationWindow))
-	d.Set(contactAlwaysSendClearAttr, cg.AlwaysSendClear)
-	d.Set(contactGroupTypeAttr, cg.GroupType)
+	_ = d.Set(contactAggregationWindowAttr, fmt.Sprintf("%ds", cg.AggregationWindow))
+	_ = d.Set(contactAlwaysSendClearAttr, cg.AlwaysSendClear)
+	_ = d.Set(contactGroupTypeAttr, cg.GroupType)
 
 	if err := d.Set(contactAlertOptionAttr, contactGroupAlertOptionsToState(cg)); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactAlertOptionAttr), err)
@@ -629,17 +629,17 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactIRCAttr), err)
 	}
 
-	d.Set(contactLongMessageAttr, cg.AlertFormats.LongMessage)
-	d.Set(contactLongSubjectAttr, cg.AlertFormats.LongSubject)
-	d.Set(contactLongSummaryAttr, cg.AlertFormats.LongSummary)
-	d.Set(contactNameAttr, cg.Name)
+	_ = d.Set(contactLongMessageAttr, cg.AlertFormats.LongMessage)
+	_ = d.Set(contactLongSubjectAttr, cg.AlertFormats.LongSubject)
+	_ = d.Set(contactLongSummaryAttr, cg.AlertFormats.LongSummary)
+	_ = d.Set(contactNameAttr, cg.Name)
 
 	if err := d.Set(contactPagerDutyAttr, pagerDutyState); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactPagerDutyAttr), err)
 	}
 
-	d.Set(contactShortMessageAttr, cg.AlertFormats.ShortMessage)
-	d.Set(contactShortSummaryAttr, cg.AlertFormats.ShortSummary)
+	_ = d.Set(contactShortMessageAttr, cg.AlertFormats.ShortMessage)
+	_ = d.Set(contactShortSummaryAttr, cg.AlertFormats.ShortSummary)
 
 	if err := d.Set(contactSlackAttr, slackState); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactSlackAttr), err)
@@ -662,8 +662,8 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Out parameters
-	d.Set(contactLastModifiedAttr, cg.LastModified)
-	d.Set(contactLastModifiedByAttr, cg.LastModifiedBy)
+	_ = d.Set(contactLastModifiedAttr, cg.LastModified)
+	_ = d.Set(contactLastModifiedByAttr, cg.LastModifiedBy)
 
 	return nil
 }

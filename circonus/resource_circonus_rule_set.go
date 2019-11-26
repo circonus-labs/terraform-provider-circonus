@@ -10,8 +10,8 @@ import (
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -408,17 +408,17 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		ifRules = append(ifRules, ifAttrs)
 	}
 
-	d.Set(ruleSetCheckAttr, rs.CheckCID)
+	_ = d.Set(ruleSetCheckAttr, rs.CheckCID)
 
 	if err := d.Set(ruleSetIfAttr, ifRules); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetIfAttr), err)
 	}
 
-	d.Set(ruleSetLinkAttr, indirect(rs.Link))
-	d.Set(ruleSetMetricNameAttr, rs.MetricName)
-	d.Set(ruleSetMetricTypeAttr, rs.MetricType)
-	d.Set(ruleSetNotesAttr, indirect(rs.Notes))
-	d.Set(ruleSetParentAttr, indirect(rs.Parent))
+	_ = d.Set(ruleSetLinkAttr, indirect(rs.Link))
+	_ = d.Set(ruleSetMetricNameAttr, rs.MetricName)
+	_ = d.Set(ruleSetMetricTypeAttr, rs.MetricType)
+	_ = d.Set(ruleSetNotesAttr, indirect(rs.Notes))
+	_ = d.Set(ruleSetParentAttr, indirect(rs.Parent))
 
 	if err := d.Set(ruleSetTagsAttr, tagsToState(apiToTags(rs.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetTagsAttr), err)

@@ -2,14 +2,20 @@ package circonus
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckStatsd_basic(t *testing.T) {
-	t.Skip("An Enterprise broker with the StatsD check installed must be available")
+	statsdAccBrokerEnvVar := "TF_ACC_CIRC_ENT_BROKER_CID"
+	statsdAccBrokerSkipMsg := "'%s' missing from env, unable to test w/o enterprise broker w/statsd enabled, skipping..."
+	accEnterpriseBrokerCID := os.Getenv(statsdAccBrokerEnvVar)
+	if accEnterpriseBrokerCID == "" {
+		t.Skipf(statsdAccBrokerSkipMsg, statsdAccBrokerEnvVar)
+	}
 
 	checkName := fmt.Sprintf("statsd test check - %s", acctest.RandString(5))
 
@@ -19,11 +25,11 @@ func TestAccCirconusCheckStatsd_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckStatsdConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckStatsdConfigFmt, accEnterpriseBrokerCID, checkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "collector.2084916526.id", "/broker/2110"),
+					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "collector.2084916526.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "statsd.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "statsd.3733287963.source_ip", `127.0.0.2`),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "name", checkName),
@@ -55,7 +61,7 @@ resource "circonus_check" "statsd_dump" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "%s"
   }
 
   statsd {
@@ -64,10 +70,10 @@ resource "circonus_check" "statsd_dump" {
 
   metric {
     name = "rando_metric"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "histogram"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
 }
 `

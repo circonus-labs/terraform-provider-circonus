@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
@@ -96,25 +96,25 @@ resource "circonus_check" "consul" {
 
   metric {
     name = "consul` + "`" + `${var.consul_hostname}` + "`" + `consul` + "`" + `session_ttl` + "`" + `active"
-    tags = [ "${var.httptrap_check_tags}" ]
+    tags = "${var.httptrap_check_tags}"
     type = "numeric"
   }
 
   metric {
     name = "consul` + "`" + `${var.consul_hostname}` + "`" + `runtime` + "`" + `alloc_bytes"
-    tags = [ "${var.httptrap_check_tags}" ]
+    tags = "${var.httptrap_check_tags}"
     type = "numeric"
     unit = "bytes"
   }
 
   metric {
     name = "consul` + "`" + `consul` + "`" + `http` + "`" + `GET` + "`" + `v1` + "`" + `kv` + "`" + `_"
-    tags = [ "${var.httptrap_check_tags}" ]
+    tags = "${var.httptrap_check_tags}"
     type = "histogram"
     unit = "nanoseconds"
   }
 
-  tags = [ "${var.httptrap_check_tags}" ]
+  tags = "${var.httptrap_check_tags}"
   target = "${var.consul_hostname}"
 }
 `
