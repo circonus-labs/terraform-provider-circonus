@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
@@ -110,40 +110,40 @@ resource "circonus_check" "loopback_latency" {
 
   metric {
     name = "available"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "%%"
   }
 
   metric {
     name = "average"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
   metric {
     name = "count"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "packets"
   }
 
   metric {
     name = "maximum"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
   metric {
     name = "minimum"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
   target = "api.circonus.com"
 }
 `

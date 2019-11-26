@@ -24,7 +24,7 @@ import (
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -378,16 +378,16 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 	// Write the global circonus_check parameters followed by the check
 	// type-specific parameters.
 
-	d.Set(checkActiveAttr, checkAPIStatusToBool(c.Status))
+	_ = d.Set(checkActiveAttr, checkAPIStatusToBool(c.Status))
 
 	if err := d.Set(checkCollectorAttr, stringListToSet(c.Brokers, checkCollectorIDAttr)); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkCollectorAttr), err)
 	}
 
-	d.Set(checkMetricLimitAttr, c.MetricLimit)
-	d.Set(checkNameAttr, c.DisplayName)
-	d.Set(checkNotesAttr, c.Notes)
-	d.Set(checkPeriodAttr, fmt.Sprintf("%ds", c.Period))
+	_ = d.Set(checkMetricLimitAttr, c.MetricLimit)
+	_ = d.Set(checkNameAttr, c.DisplayName)
+	_ = d.Set(checkNotesAttr, c.Notes)
+	_ = d.Set(checkPeriodAttr, fmt.Sprintf("%ds", c.Period))
 
 	if err := d.Set(checkMetricAttr, metrics); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkMetricAttr), err)
@@ -397,14 +397,14 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkTagsAttr), err)
 	}
 
-	d.Set(checkTargetAttr, c.Target)
+	_ = d.Set(checkTargetAttr, c.Target)
 
 	{
 		t, _ := time.ParseDuration(fmt.Sprintf("%fs", c.Timeout))
-		d.Set(checkTimeoutAttr, t.String())
+		_ = d.Set(checkTimeoutAttr, t.String())
 	}
 
-	d.Set(checkTypeAttr, c.Type)
+	_ = d.Set(checkTypeAttr, c.Type)
 
 	// Last step: parse a check_bundle's config into the statefile.
 	if err := parseCheckTypeConfig(&c, d); err != nil {
@@ -425,12 +425,12 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if checkID != "" {
-		d.Set(checkOutIDAttr, checkID)
+		_ = d.Set(checkOutIDAttr, checkID)
 	}
 
-	d.Set(checkOutCreatedAttr, c.Created)
-	d.Set(checkOutLastModifiedAttr, c.LastModified)
-	d.Set(checkOutLastModifiedByAttr, c.LastModifedBy)
+	_ = d.Set(checkOutCreatedAttr, c.Created)
+	_ = d.Set(checkOutLastModifiedAttr, c.LastModified)
+	_ = d.Set(checkOutLastModifiedByAttr, c.LastModifedBy)
 
 	if err := d.Set(checkOutReverseConnectURLsAttr, c.ReverseConnectURLs); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkOutReverseConnectURLsAttr), err)

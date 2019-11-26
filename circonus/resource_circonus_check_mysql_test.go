@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckMySQL_basic(t *testing.T) {
@@ -70,11 +70,11 @@ EOF
 
   metric {
     name = "binlog` + "`" + `total"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
   target = "mydb.example.org"
 }
 `

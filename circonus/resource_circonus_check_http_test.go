@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckHTTP_basic(t *testing.T) {
@@ -105,27 +105,27 @@ variable "http_check_tags" {
 
 resource "circonus_metric" "status_code" {
   name = "code"
-  tags = [ "${var.http_check_tags}" ]
+  tags = "${var.http_check_tags}"
   type = "text"
 }
 
 resource "circonus_metric" "request_duration" {
   name = "duration"
-  tags = [ "${var.http_check_tags}" ]
+  tags = "${var.http_check_tags}"
   type = "numeric"
   unit = "seconds"
 }
 
 resource "circonus_metric" "request_ttconnect" {
   name = "tt_connect"
-  tags = [ "${var.http_check_tags}" ]
+  tags = "${var.http_check_tags}"
   type = "numeric"
   unit = "milliseconds"
 }
 
 resource "circonus_metric" "request_ttfb" {
   name = "tt_firstbyte"
-  tags = [ "${var.http_check_tags}" ]
+  tags = "${var.http_check_tags}"
   type = "numeric"
   unit = "milliseconds"
 }
@@ -154,31 +154,31 @@ resource "circonus_check" "jezebel" {
 
   metric {
     name = "${circonus_metric.status_code.name}"
-    tags = [ "${circonus_metric.status_code.tags}" ]
+    tags = "${circonus_metric.status_code.tags}"
     type = "${circonus_metric.status_code.type}"
   }
 
   metric {
     name = "${circonus_metric.request_duration.name}"
-    tags = [ "${circonus_metric.request_duration.tags}" ]
+    tags = "${circonus_metric.request_duration.tags}"
     type = "${circonus_metric.request_duration.type}"
     unit = "${circonus_metric.request_duration.unit}"
   }
 
   metric {
     name = "${circonus_metric.request_ttconnect.name}"
-    tags = [ "${circonus_metric.request_ttconnect.tags}" ]
+    tags = "${circonus_metric.request_ttconnect.tags}"
     type = "${circonus_metric.request_ttconnect.type}"
     unit = "${circonus_metric.request_ttconnect.unit}"
   }
 
   metric {
     name = "${circonus_metric.request_ttfb.name}"
-    tags = [ "${circonus_metric.request_ttfb.tags}" ]
+    tags = "${circonus_metric.request_ttfb.tags}"
     type = "${circonus_metric.request_ttfb.type}"
     unit = "${circonus_metric.request_ttfb.unit}"
   }
 
-  tags = [ "${var.http_check_tags}" ]
+  tags = "${var.http_check_tags}"
 }
 `

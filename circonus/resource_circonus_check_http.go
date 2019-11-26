@@ -11,8 +11,8 @@ import (
 
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -341,11 +341,9 @@ func checkConfigToAPIHTTP(c *circonusCheck, l interfaceList) error {
 			c.Config[config.Extract] = v.(string)
 		}
 
-		if headers := httpConfig.CollectMap(checkHTTPHeadersAttr); headers != nil {
-			for k, v := range headers {
-				h := config.HeaderPrefix + config.Key(k)
-				c.Config[h] = v
-			}
+		for k, v := range httpConfig.CollectMap(checkHTTPHeadersAttr) {
+			h := config.HeaderPrefix + config.Key(k)
+			c.Config[h] = v
 		}
 
 		if v, found := httpConfig[checkHTTPKeyFileAttr]; found {

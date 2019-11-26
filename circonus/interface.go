@@ -31,11 +31,11 @@ func (l interfaceList) CollectList(attrName schemaAttr) []string {
 func (l interfaceList) List() []string {
 	stringList := make([]string, 0, len(l))
 	for _, e := range l {
-		switch e.(type) {
+		switch e := e.(type) {
 		case string:
-			stringList = append(stringList, e.(string))
+			stringList = append(stringList, e)
 		case []interface{}:
-			for _, v := range e.([]interface{}) {
+			for _, v := range e {
 				stringList = append(stringList, v.(string))
 			}
 		default:
