@@ -3,6 +3,7 @@ package circonus
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"time"
@@ -500,6 +501,7 @@ func loadRuleSet(ctxt *providerContext, cid api.CIDType) (circonusRuleSet, error
 	if err != nil {
 		return circonusRuleSet{}, err
 	}
+	log.Printf("RuleSet: %v\n", *crs)
 	rs.RuleSet = *crs
 
 	return rs, nil
@@ -719,16 +721,24 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 				}
 			}
 
+			log.Printf("ifAttrs: %v\n", ifAttrs)
+			v, _ := ifAttrs["value"]
+			log.Printf("ifAttrs.value: %v\n", v)
+
 			if ruleSetValueListRaw, found := ifAttrs[ruleSetValueAttr]; found {
+				log.Printf("ruleValueListRaw: %v\n", ruleSetValueListRaw)
 				ruleSetValueList := ruleSetValueListRaw.(*schema.Set).List()
 
 				for _, valueListRaw := range ruleSetValueList {
 					valueAttrs := newInterfaceMap(valueListRaw)
+					log.Printf("valueAttrs: %v\n", valueAttrs)
 
 				METRIC_TYPE:
 					switch rs.MetricType {
 					case ruleSetMetricTypeNumeric:
-						if v, found := valueAttrs[ruleSetAbsentAttr]; found {
+						log.Printf("Building numeric rule\n")
+						if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
+							log.Printf("Building absent rule\n")
 							s := v.(string)
 							if s != "" {
 								d, _ := time.ParseDuration(s)
@@ -739,6 +749,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						}
 
 						if v, found := valueAttrs[ruleSetChangedAttr]; found {
+							log.Printf("Building changed rule\n")
 							b := v.(bool)
 							if b {
 								rule.Criteria = apiRuleSetChanged
@@ -747,6 +758,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						}
 
 						if v, found := valueAttrs[ruleSetMinValueAttr]; found {
+							log.Printf("Building min rule\n")
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetMinValue
@@ -756,6 +768,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						}
 
 						if v, found := valueAttrs[ruleSetMaxValueAttr]; found {
+							log.Printf("Building max rule\n")
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetMaxValue
@@ -849,6 +862,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					}
 				}
 			}
+			log.Printf("Appending rule: %v\n", rule)
 			rs.Rules = append(rs.Rules, rule)
 		}
 	}
@@ -857,6 +871,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.Tags = derefStringList(flattenSet(v.(*schema.Set)))
 	}
 
+	log.Printf("RuleSet: %v\n", rs)
 	if err := rs.Validate(); err != nil {
 		return err
 	}
@@ -900,7 +915,11 @@ func (rs *circonusRuleSet) Validate() error {
 		return fmt.Errorf("RuleSet for check ID %s must supply either metric_name or metric_pattern", rs.CheckCID)
 	}
 
+	log.Printf("RuleSet: %v\n", rs)
+
 	for i, rule := range rs.Rules {
+		log.Printf("Rule %d: %v\n", i, rule)
+
 		if rule.Criteria == "" {
 			return fmt.Errorf("rule %d for check ID %s has an empty criteria", i, rs.CheckCID)
 		}

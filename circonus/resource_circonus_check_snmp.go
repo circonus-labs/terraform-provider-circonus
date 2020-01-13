@@ -150,7 +150,6 @@ var schemaCheckSNMP = &schema.Schema{
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validateRegexp(checkSNMPOIDType, `^.+$`),
-							Default:      "guess",
 						},
 					}),
 				},
@@ -321,7 +320,11 @@ func hashCheckSNMP(v interface{}) int {
 	for _, s := range x {
 		if s != nil {
 			t := s.(map[string]interface{})
-			fmt.Fprintf(b, "%s%s%s", strings.TrimSpace(t["path"].(string)), strings.TrimSpace(t["name"].(string)), strings.TrimSpace(t["type"].(string)))
+			tstring := "any"
+			if tt, ok := t["type"]; ok {
+				tstring = tt.(string)
+			}
+			fmt.Fprintf(b, "%s%s%s", strings.TrimSpace(t["path"].(string)), strings.TrimSpace(t["name"].(string)), tstring)
 		}
 	}
 

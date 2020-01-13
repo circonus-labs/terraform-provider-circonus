@@ -16,7 +16,7 @@ const (
 	defaultCirconusAggregationWindow     = "300s"
 	defaultCirconusAlertMinEscalateAfter = "300s"
 	defaultCirconusCheckPeriodMax        = "300s"
-	defaultCirconusCheckPeriodMin        = "30s"
+	defaultCirconusCheckPeriodMin        = "10s"
 	defaultCirconusHTTPFormat            = "json"
 	defaultCirconusHTTPMethod            = "POST"
 	defaultCirconusSlackUsername         = "Circonus"
