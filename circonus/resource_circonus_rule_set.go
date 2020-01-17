@@ -51,6 +51,9 @@ const (
 	// circonus_rule_set.if.value.over.* resource attribute names
 	ruleSetLastAttr  = "last"
 	ruleSetUsingAttr = "using"
+
+	// out attributes
+	ruleSetIdAttr = "rule_set_id"
 )
 
 const (
@@ -77,6 +80,7 @@ var ruleSetDescriptions = attrDescrs{
 	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
 	ruleSetMetricFilterAttr:  "The tag filter a pattern match ruleset will user",
 	ruleSetTagsAttr:          "Tags associated with this rule set",
+	ruleSetIdAttr:            "out",
 }
 
 var ruleSetIfDescriptions = attrDescrs{
@@ -316,6 +320,10 @@ func resourceRuleSet() *schema.Resource {
 				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
 			},
 			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
+			ruleSetIdAttr: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		}),
 	}
 }
@@ -365,6 +373,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(rs.CID)
+	d.Set(ruleSetIdAttr, rs.CID)
 
 	ifRules := make([]interface{}, 0, defaultRuleSetRuleLen)
 	for _, rule := range rs.Rules {
@@ -472,6 +481,7 @@ func ruleSetDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
+	d.Set(ruleSetIdAttr, "")
 
 	return nil
 }
