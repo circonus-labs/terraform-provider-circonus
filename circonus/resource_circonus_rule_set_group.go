@@ -189,7 +189,9 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 		f := make(map[string]interface{}, 3)
 		f["expression"] = formula.Expression.(string)
 		t := reflect.TypeOf(formula.RaiseSeverity)
-		if t.String() == "string" {
+		if t.String() == "uint" {
+			f["raise_severity"] = int(formula.RaiseSeverity.(uint))
+		} else if t.String() == "string" {
 			s, _ := strconv.ParseInt(formula.RaiseSeverity.(string), 10, 32)
 			f["raise_severity"] = s
 		} else {
