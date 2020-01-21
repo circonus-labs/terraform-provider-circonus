@@ -3,10 +3,10 @@ package circonus
 import (
 	"fmt"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/circonus-labs/circonus-gometrics/api/config"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -153,12 +153,12 @@ func dataSourceCirconusCollectorRead(d *schema.ResourceData, meta interface{}) e
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store collector %q attribute: {{err}}", collectorDetailsAttr), err)
 	}
 
-	d.Set(collectorIDAttr, collector.CID)
-	d.Set(collectorLatitudeAttr, collector.Latitude)
-	d.Set(collectorLongitudeAttr, collector.Longitude)
-	d.Set(collectorNameAttr, collector.Name)
-	d.Set(collectorTagsAttr, collector.Tags)
-	d.Set(collectorTypeAttr, collector.Type)
+	_ = d.Set(collectorIDAttr, collector.CID)
+	_ = d.Set(collectorLatitudeAttr, collector.Latitude)
+	_ = d.Set(collectorLongitudeAttr, collector.Longitude)
+	_ = d.Set(collectorNameAttr, collector.Name)
+	_ = d.Set(collectorTagsAttr, collector.Tags)
+	_ = d.Set(collectorTypeAttr, collector.Type)
 
 	return nil
 }

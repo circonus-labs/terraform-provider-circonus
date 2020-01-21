@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckTCP_basic(t *testing.T) {
@@ -21,7 +21,7 @@ func TestAccCirconusCheckTCP_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.1893401625.id", "/broker/1286"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.2388330941.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.#", "1"),
 					// resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.banner_regexp", ""),
 					// resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.ca_chain", ""),
@@ -151,7 +151,7 @@ resource "circonus_check" "tls_cert" {
   period = "60s"
 
   collector {
-    id = "/broker/1286"
+    id = "/broker/1"
   }
 
   tcp {
@@ -161,64 +161,64 @@ resource "circonus_check" "tls_cert" {
 
   metric {
     name = "cert_end"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "epoch"
   }
 
   metric {
     name = "cert_end_in"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
   metric {
     name = "cert_error"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "text"
   }
 
   metric {
     name = "cert_issuer"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "text"
   }
 
   metric {
     name = "cert_start"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "epoch"
   }
 
   metric {
     name = "cert_subject"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "text"
   }
 
   metric {
     name = "duration"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "milliseconds"
   }
 
   metric {
     name = "tt_connect"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "milliseconds"
   }
 
   metric {
     name = "tt_firstbyte"
-    tags = [ "${var.tcp_check_tags}" ]
+    tags = "${var.tcp_check_tags}"
     type = "numeric"
     unit = "milliseconds"
   }
 
-  tags = [ "${var.tcp_check_tags}" ]
+  tags = "${var.tcp_check_tags}"
 }
 `

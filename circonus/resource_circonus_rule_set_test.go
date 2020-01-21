@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccCirconusRuleSet_basic(t *testing.T) {
@@ -126,10 +126,10 @@ variable "test_tags" {
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 
-resource "circonus_contact_group" "test-trigger" {
-  name = "%s"
-  tags = [ "${var.test_tags}" ]
-}
+#resource "circonus_contact_group" "test-trigger" {
+#  name = "%s"
+#  tags = [ "${var.test_tags}" ]
+#}
 
 resource "circonus_check" "api_latency" {
   active = true
@@ -146,12 +146,12 @@ resource "circonus_check" "api_latency" {
 
   metric {
     name = "maximum"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
     unit = "seconds"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
   target = "api.circonus.com"
 }
 
@@ -172,7 +172,8 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+      notify = [ "/contact_group/4679" ]
       severity = 1
     }
   }
@@ -188,7 +189,8 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
+	  notify = [ "/contact_group/4679" ]
       severity = 2
     }
   }
@@ -204,7 +206,8 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
+	  notify = [ "/contact_group/4679" ]
       severity = 3
     }
   }
@@ -215,12 +218,13 @@ EOF
     }
 
     then {
-      notify = [ "${circonus_contact_group.test-trigger.id}" ]
+#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
+	  notify = [ "/contact_group/4679" ]
       after = "2400s"
       severity = 4
     }
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
 }
 `

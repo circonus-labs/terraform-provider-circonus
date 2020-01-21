@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccDataSourceCirconusAccount(t *testing.T) {
@@ -16,7 +16,7 @@ func TestAccDataSourceCirconusAccount(t *testing.T) {
 			{
 				Config: testAccDataSourceCirconusAccountCurrentConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceCirconusAccountCheck("data.circonus_account.by_current", "/account/3081"),
+					testAccDataSourceCirconusAccountCheck("data.circonus_account.by_current", "/account/4536"),
 				),
 			},
 		},
@@ -29,7 +29,7 @@ func TestAccDataSourceCirconusAccount(t *testing.T) {
 			{
 				Config: testAccDataSourceCirconusAccountIDConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceCirconusAccountCheck("data.circonus_account.by_id", "/account/3081"),
+					testAccDataSourceCirconusAccountCheck("data.circonus_account.by_id", "/account/4536"),
 				),
 			},
 		},
@@ -61,6 +61,6 @@ data "circonus_account" "by_current" {
 
 const testAccDataSourceCirconusAccountIDConfig = `
 data "circonus_account" "by_id" {
-  id = "/account/3081"
+  id = "/account/4536"
 }
 `

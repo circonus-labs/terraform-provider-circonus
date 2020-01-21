@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
@@ -21,7 +21,7 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "collector.2084916526.id", "/broker/2110"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "collector.1263561585.id", "/broker/35"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.async_metrics", "false"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.secret", "12345"),
@@ -86,7 +86,7 @@ resource "circonus_check" "consul" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "/broker/35"
   }
 
   httptrap {
@@ -96,25 +96,25 @@ resource "circonus_check" "consul" {
 
   metric {
     name = "consul` + "`" + `${var.consul_hostname}` + "`" + `consul` + "`" + `session_ttl` + "`" + `active"
-    tags = [ "${var.httptrap_check_tags}" ]
+    tags = "${var.httptrap_check_tags}"
     type = "numeric"
   }
 
   metric {
     name = "consul` + "`" + `${var.consul_hostname}` + "`" + `runtime` + "`" + `alloc_bytes"
-    tags = [ "${var.httptrap_check_tags}" ]
+    tags = "${var.httptrap_check_tags}"
     type = "numeric"
     unit = "bytes"
   }
 
   metric {
     name = "consul` + "`" + `consul` + "`" + `http` + "`" + `GET` + "`" + `v1` + "`" + `kv` + "`" + `_"
-    tags = [ "${var.httptrap_check_tags}" ]
+    tags = "${var.httptrap_check_tags}"
     type = "histogram"
     unit = "nanoseconds"
   }
 
-  tags = [ "${var.httptrap_check_tags}" ]
+  tags = "${var.httptrap_check_tags}"
   target = "${var.consul_hostname}"
 }
 `

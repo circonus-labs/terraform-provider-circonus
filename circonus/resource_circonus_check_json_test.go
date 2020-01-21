@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/circonus-labs/circonus-gometrics/api/config"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckJSON_basic(t *testing.T) {
@@ -156,14 +156,14 @@ resource "circonus_check" "usage" {
 
   metric {
     name = "${circonus_metric.used.name}"
-    tags = [ "${circonus_metric.used.tags}" ]
+    tags = "${circonus_metric.used.tags}"
     type = "${circonus_metric.used.type}"
     unit = "${coalesce(circonus_metric.used.unit, var.usage_default_unit)}"
   }
 
   metric {
     name = "${circonus_metric.limit.name}"
-    tags = [ "${circonus_metric.limit.tags}" ]
+    tags = "${circonus_metric.limit.tags}"
     type = "${circonus_metric.limit.type}"
     unit = "${coalesce(circonus_metric.limit.unit, var.usage_default_unit)}"
   }
@@ -216,14 +216,14 @@ resource "circonus_check" "usage" {
 
   metric {
     name = "${circonus_metric.used.name}"
-    tags = [ "${circonus_metric.used.tags}" ]
+    tags = "${circonus_metric.used.tags}"
     type = "${circonus_metric.used.type}"
     unit = "${coalesce(circonus_metric.used.unit, var.usage_default_unit)}"
   }
 
   metric {
     name = "${circonus_metric.limit.name}"
-    tags = [ "${circonus_metric.limit.tags}" ]
+    tags = "${circonus_metric.limit.tags}"
     type = "${circonus_metric.limit.type}"
     unit = "${coalesce(circonus_metric.limit.unit, var.usage_default_unit)}"
   }

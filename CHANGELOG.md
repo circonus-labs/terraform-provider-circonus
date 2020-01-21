@@ -1,4 +1,22 @@
-## 0.3.0 (Unreleased)
+## 0.4.1 (Unreleased)
+## 0.4.0 (December 02, 2019)
+
+IMPROVEMENTS:
+
+* Update dependencies
+* Switch to Terraform Plugin SDK
+
+NOTES:
+
+* Minimum version of Go required to build the provider is now 1.13
+
+## 0.3.0 (November 14, 2019)
+
+IMPROVEMENTS:
+
+* Provider: Migrate from deprecated [circonus-gometrics/api](https://github.com/circonus-labs/circonus-gometrics) to [go-apiclient](https://github.com/circonus-labs/go-apiclient)
+* Provider: Support new attributes for contact group (`group_type` and `always_send_clear`)
+
 ## 0.2.0 (October 01, 2018)
 
 FEATURES:

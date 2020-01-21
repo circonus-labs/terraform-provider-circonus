@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
+	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -141,8 +141,8 @@ func metricClusterRead(d *schema.ResourceData, meta interface{}) error {
 		queries.Add(queryAttrs)
 	}
 
-	d.Set(metricClusterDescriptionAttr, mc.Description)
-	d.Set(metricClusterNameAttr, mc.Name)
+	_ = d.Set(metricClusterDescriptionAttr, mc.Description)
+	_ = d.Set(metricClusterNameAttr, mc.Name)
 
 	if err := d.Set(metricClusterTagsAttr, tagsToState(apiToTags(mc.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store metric cluster %q attribute: {{err}}", metricClusterTagsAttr), err)

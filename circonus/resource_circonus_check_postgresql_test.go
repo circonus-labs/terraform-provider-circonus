@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckPostgreSQL_basic(t *testing.T) {
@@ -105,47 +105,47 @@ EOF
 
   metric {
     name = "tables` + "`" + `inserts"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
   metric {
     name = "tables` + "`" + `updates"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
   metric {
     name = "tables` + "`" + `deletes"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
   metric {
     name = "tables` + "`" + `index_scans"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
   metric {
     name = "tables` + "`" + `seq_scans"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
   metric {
     name = "tables` + "`" + `index_tup_fetch"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
   metric {
     name = "tables` + "`" + `seq_tup_read"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "numeric"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
   target = "pgdb.example.org"
 }
 `

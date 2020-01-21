@@ -1,12 +1,15 @@
+// Package circonus defines the Terraform Circonus provider
 package circonus
 
 import (
 	"fmt"
+	"log"
+	"os"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
+	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 const (
@@ -34,6 +37,7 @@ var providerDescription = map[string]string{
 var (
 	validContactHTTPFormats = validStringValues{"json", "params"}
 	validContactHTTPMethods = validStringValues{"GET", "POST"}
+	tfVer                   = "unk"
 )
 
 type contactMethods string
@@ -59,7 +63,7 @@ type providerContext struct {
 
 // Provider returns a terraform.ResourceProvider.
 func Provider() terraform.ResourceProvider {
-	return &schema.Provider{
+	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			providerAPIURLAttr: {
 				Type:        schema.TypeString,
@@ -98,12 +102,21 @@ func Provider() terraform.ResourceProvider {
 			"circonus_rule_set":       resourceRuleSet(),
 			"circonus_worksheet":      resourceWorksheet(),
 		},
-
-		ConfigureFunc: providerConfigure,
 	}
+
+	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+		terraformVersion := p.TerraformVersion
+		if terraformVersion == "" {
+			// Terraform 0.12 introduced this field to the protocol
+			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			terraformVersion = "0.11+compatible"
+		}
+		return providerConfigure(d, terraformVersion)
+	}
+	return p
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, error) {
 	globalAutoTag = d.Get(providerAutoTagAttr).(bool)
 
 	config := &api.Config{
@@ -113,10 +126,18 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Debug:    true,
 	}
 
+	// turn on logging if terraform log level set to debug
+	if os.Getenv("TF_LOG") == "DEBUG" {
+		config.Debug = true
+		config.Log = log.New(log.Writer(), "", log.LstdFlags)
+	}
+
 	client, err := api.NewAPI(config)
 	if err != nil {
 		return nil, errwrap.Wrapf("Error initializing Circonus: %s", err)
 	}
+
+	tfVer = tfVersion
 
 	return &providerContext{
 		client:     client,
@@ -126,5 +147,5 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 }
 
 func tfAppName() string {
-	return fmt.Sprintf("Terraform v%s", terraform.VersionString())
+	return fmt.Sprintf("Terraform v%s", tfVer)
 }

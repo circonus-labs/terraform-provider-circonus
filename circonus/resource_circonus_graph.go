@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/circonus-labs/circonus-gometrics/api/config"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -358,7 +358,7 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 
 		dataPointAttrs[string(graphMetricActiveAttr)] = !datapoint.Hidden
 
-		if datapoint.Alpha != nil && *datapoint.Alpha != 0 {
+		if datapoint.Alpha != nil && *datapoint.Alpha != "0" {
 			dataPointAttrs[string(graphMetricAlphaAttr)] = *datapoint.Alpha
 		}
 
@@ -494,15 +494,15 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 		rightAxisMap[string(graphAxisMinAttr)] = strconv.FormatFloat(*g.MinRightY, 'f', -1, 64)
 	}
 
-	d.Set(graphDescriptionAttr, g.Description)
+	_ = d.Set(graphDescriptionAttr, g.Description)
 
 	if err := d.Set(graphLeftAttr, leftAxisMap); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphLeftAttr), err)
 	}
 
-	d.Set(graphLineStyleAttr, g.LineStyle)
-	d.Set(graphNameAttr, g.Title)
-	d.Set(graphNotesAttr, indirect(g.Notes))
+	_ = d.Set(graphLineStyleAttr, g.LineStyle)
+	_ = d.Set(graphNameAttr, g.Title)
+	_ = d.Set(graphNotesAttr, indirect(g.Notes))
 
 	if err := d.Set(graphRightAttr, rightAxisMap); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphRightAttr), err)
@@ -516,7 +516,7 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphMetricClusterAttr), err)
 	}
 
-	d.Set(graphStyleAttr, g.Style)
+	_ = d.Set(graphStyleAttr, g.Style)
 
 	if err := d.Set(graphTagsAttr, tagsToState(apiToTags(g.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphTagsAttr), err)
@@ -634,12 +634,12 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 	}
 
 	if v, found := d.GetOk(graphLineStyleAttr); found {
-		switch v.(type) {
+		switch v := v.(type) {
 		case string:
-			s := v.(string)
+			s := v
 			g.LineStyle = &s
 		case *string:
-			g.LineStyle = v.(*string)
+			g.LineStyle = v
 		default:
 			return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphLineStyleAttr, v)
 		}
@@ -667,7 +667,8 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			if v, found := metricAttrs[graphMetricAlphaAttr]; found {
 				f := v.(float64)
 				if f != 0 {
-					datapoint.Alpha = &f
+					dps := fmt.Sprintf("%v", f)
+					datapoint.Alpha = &dps
 				}
 			}
 
@@ -697,12 +698,12 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricAttrs[graphMetricFormulaAttr]; found {
-				switch v.(type) {
+				switch v := v.(type) {
 				case string:
-					s := v.(string)
+					s := v
 					datapoint.DataFormula = &s
 				case *string:
-					datapoint.DataFormula = v.(*string)
+					datapoint.DataFormula = v
 				default:
 					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricAttr, v)
 				}
@@ -832,24 +833,24 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if v, found := metricClusterAttrs[graphMetricFormulaAttr]; found {
-				switch v.(type) {
+				switch v := v.(type) {
 				case string:
-					s := v.(string)
+					s := v
 					metricCluster.DataFormula = &s
 				case *string:
-					metricCluster.DataFormula = v.(*string)
+					metricCluster.DataFormula = v
 				default:
 					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricFormulaAttr, v)
 				}
 			}
 
 			if v, found := metricClusterAttrs[graphMetricFormulaLegendAttr]; found {
-				switch v.(type) {
+				switch v := v.(type) {
 				case string:
-					s := v.(string)
+					s := v
 					metricCluster.LegendFormula = &s
 				case *string:
-					metricCluster.LegendFormula = v.(*string)
+					metricCluster.LegendFormula = v
 				default:
 					return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphMetricFormulaLegendAttr, v)
 				}
@@ -894,12 +895,12 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 	}
 
 	if v, found := d.GetOk(graphStyleAttr); found {
-		switch v.(type) {
+		switch v := v.(type) {
 		case string:
-			s := v.(string)
+			s := v
 			g.Style = &s
 		case *string:
-			g.Style = v.(*string)
+			g.Style = v
 		default:
 			return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphStyleAttr, v)
 		}
@@ -938,8 +939,8 @@ func (g *circonusGraph) Update(ctxt *providerContext) error {
 
 func (g *circonusGraph) Validate() error {
 	for i, datapoint := range g.Datapoints {
-		if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != 0 {
-			return fmt.Errorf("%s can not be set on graphs with style %s", graphMetricAlphaAttr, apiGraphStyleLine)
+		if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != "0" {
+			return fmt.Errorf("%s (%s) can not be set on graphs with style %s", graphMetricAlphaAttr, *datapoint.Alpha, apiGraphStyleLine)
 		}
 
 		if datapoint.CheckID != 0 && datapoint.MetricName == "" {

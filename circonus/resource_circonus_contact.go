@@ -8,16 +8,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/circonus-labs/circonus-gometrics/api/config"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
 	// circonus_contact attributes
 	contactAggregationWindowAttr = "aggregation_window"
+	contactAlwaysSendClearAttr   = "always_send_clear"
+	contactGroupTypeAttr         = "group_type"
 	contactAlertOptionAttr       = "alert_option"
 	contactEmailAttr             = "email"
 	contactHTTPAttr              = "http"
@@ -46,9 +48,9 @@ const (
 	//contactUserCIDAttr
 
 	// circonus_contact.http attributes
-	contactHTTPAddressAttr schemaAttr = "address"
 	contactHTTPFormatAttr             = "format"
 	contactHTTPMethodAttr             = "method"
+	contactHTTPAddressAttr schemaAttr = "address"
 
 	// circonus_contact.irc attributes
 	//contactUserCIDAttr
@@ -133,6 +135,8 @@ type contactVictorOpsInfo struct {
 
 var contactGroupDescriptions = attrDescrs{
 	contactAggregationWindowAttr:    "",
+	contactAlwaysSendClearAttr:      "",
+	contactGroupTypeAttr:            "",
 	contactAlertOptionAttr:          "",
 	contactContactGroupFallbackAttr: "",
 	contactEmailAttr:                "",
@@ -226,6 +230,14 @@ func resourceContactGroup() *schema.Resource {
 				ValidateFunc: validateFuncs(
 					validateDurationMin(contactAggregationWindowAttr, "0s"),
 				),
+			},
+			contactAlwaysSendClearAttr: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			contactGroupTypeAttr: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			contactAlertOptionAttr: {
 				Type:     schema.TypeSet,
@@ -597,7 +609,9 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	d.Set(contactAggregationWindowAttr, fmt.Sprintf("%ds", cg.AggregationWindow))
+	_ = d.Set(contactAggregationWindowAttr, fmt.Sprintf("%ds", cg.AggregationWindow))
+	_ = d.Set(contactAlwaysSendClearAttr, cg.AlwaysSendClear)
+	_ = d.Set(contactGroupTypeAttr, cg.GroupType)
 
 	if err := d.Set(contactAlertOptionAttr, contactGroupAlertOptionsToState(cg)); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactAlertOptionAttr), err)
@@ -615,17 +629,17 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactIRCAttr), err)
 	}
 
-	d.Set(contactLongMessageAttr, cg.AlertFormats.LongMessage)
-	d.Set(contactLongSubjectAttr, cg.AlertFormats.LongSubject)
-	d.Set(contactLongSummaryAttr, cg.AlertFormats.LongSummary)
-	d.Set(contactNameAttr, cg.Name)
+	_ = d.Set(contactLongMessageAttr, cg.AlertFormats.LongMessage)
+	_ = d.Set(contactLongSubjectAttr, cg.AlertFormats.LongSubject)
+	_ = d.Set(contactLongSummaryAttr, cg.AlertFormats.LongSummary)
+	_ = d.Set(contactNameAttr, cg.Name)
 
 	if err := d.Set(contactPagerDutyAttr, pagerDutyState); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactPagerDutyAttr), err)
 	}
 
-	d.Set(contactShortMessageAttr, cg.AlertFormats.ShortMessage)
-	d.Set(contactShortSummaryAttr, cg.AlertFormats.ShortSummary)
+	_ = d.Set(contactShortMessageAttr, cg.AlertFormats.ShortMessage)
+	_ = d.Set(contactShortSummaryAttr, cg.AlertFormats.ShortSummary)
 
 	if err := d.Set(contactSlackAttr, slackState); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactSlackAttr), err)
@@ -648,8 +662,8 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Out parameters
-	d.Set(contactLastModifiedAttr, cg.LastModified)
-	d.Set(contactLastModifiedByAttr, cg.LastModifiedBy)
+	_ = d.Set(contactLastModifiedAttr, cg.LastModified)
+	_ = d.Set(contactLastModifiedByAttr, cg.LastModifiedBy)
 
 	return nil
 }
@@ -782,6 +796,14 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 	if v, ok := d.GetOk(contactAggregationWindowAttr); ok {
 		aggWindow, _ := time.ParseDuration(v.(string))
 		cg.AggregationWindow = uint(aggWindow.Seconds())
+	}
+	if v, ok := d.GetOk(contactAlwaysSendClearAttr); ok {
+		cg.AlwaysSendClear = v.(bool)
+	}
+	if v, ok := d.GetOk(contactGroupTypeAttr); ok {
+		if v.(string) != "" {
+			cg.GroupType = v.(string)
+		}
 	}
 
 	if v, ok := d.GetOk(contactAlertOptionAttr); ok {

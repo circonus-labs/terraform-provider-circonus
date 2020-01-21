@@ -2,15 +2,26 @@ package circonus
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
-	"github.com/circonus-labs/circonus-gometrics/api/config"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+)
+
+const (
+	consulAccBrokerEnvVar  = "TF_ACC_CIRC_ENT_BROKER_CID"
+	consulAccBrokerSkipMsg = "'%s' missing from env, unable to test w/o enterprise broker w/resmon:consul enabled, skipping..."
 )
 
 func TestAccCirconusCheckConsul_node(t *testing.T) {
+	accEnterpriseBrokerCID := os.Getenv(consulAccBrokerEnvVar)
+	if accEnterpriseBrokerCID == "" {
+		t.Skipf(consulAccBrokerSkipMsg, consulAccBrokerEnvVar)
+	}
+
 	checkName := fmt.Sprintf("Terraform test: consul.service.consul mode=state check - %s", acctest.RandString(5))
 
 	checkNode := fmt.Sprintf("my-node-name-or-node-id-%s", acctest.RandString(5))
@@ -21,12 +32,12 @@ func TestAccCirconusCheckConsul_node(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckConsulConfigV1HealthNodeFmt, checkName, checkNode),
+				Config: fmt.Sprintf(testAccCirconusCheckConsulConfigV1HealthNodeFmt, checkName, accEnterpriseBrokerCID, checkNode),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "active", "true"),
 					resource.TestMatchResourceAttr("circonus_check.consul_server", "check_id", regexp.MustCompile(config.CheckCIDRegex)),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", "/broker/2110"),
+					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.#", "1"),
 					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ca_chain", ""),
 					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.certificate_file", ""),
@@ -68,6 +79,11 @@ func TestAccCirconusCheckConsul_node(t *testing.T) {
 }
 
 func TestAccCirconusCheckConsul_service(t *testing.T) {
+	accEnterpriseBrokerCID := os.Getenv(consulAccBrokerEnvVar)
+	if accEnterpriseBrokerCID == "" {
+		t.Skipf(consulAccBrokerSkipMsg, consulAccBrokerEnvVar)
+	}
+
 	checkName := fmt.Sprintf("Terraform test: consul.service.consul mode=service check - %s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
@@ -76,12 +92,12 @@ func TestAccCirconusCheckConsul_service(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckConsulConfigV1HealthServiceFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckConsulConfigV1HealthServiceFmt, accEnterpriseBrokerCID, checkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "active", "true"),
 					resource.TestMatchResourceAttr("circonus_check.consul_server", "check_id", regexp.MustCompile(config.CheckCIDRegex)),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", "/broker/2110"),
+					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.#", "1"),
 					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ca_chain", ""),
 					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.certificate_file", ""),
@@ -123,6 +139,11 @@ func TestAccCirconusCheckConsul_service(t *testing.T) {
 }
 
 func TestAccCirconusCheckConsul_state(t *testing.T) {
+	accEnterpriseBrokerCID := os.Getenv(consulAccBrokerEnvVar)
+	if accEnterpriseBrokerCID == "" {
+		t.Skipf(consulAccBrokerSkipMsg, consulAccBrokerEnvVar)
+	}
+
 	checkName := fmt.Sprintf("Terraform test: consul.service.consul mode=state check - %s", acctest.RandString(5))
 
 	checkState := "critical"
@@ -132,12 +153,12 @@ func TestAccCirconusCheckConsul_state(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckConsulConfigV1HealthStateFmt, checkName, checkState),
+				Config: fmt.Sprintf(testAccCirconusCheckConsulConfigV1HealthStateFmt, checkName, accEnterpriseBrokerCID, checkState),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "active", "true"),
 					resource.TestMatchResourceAttr("circonus_check.consul_server", "check_id", regexp.MustCompile(config.CheckCIDRegex)),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", "/broker/2110"),
+					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.#", "1"),
 					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ca_chain", ""),
 					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.certificate_file", ""),
@@ -184,7 +205,7 @@ resource "circonus_check" "consul_server" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "%s"
   }
 
   consul {
@@ -220,7 +241,7 @@ resource "circonus_check" "consul_server" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "%s"
   }
 
   consul {
@@ -254,7 +275,7 @@ resource "circonus_check" "consul_server" {
   period = "60s"
 
   collector {
-    id = "/broker/2110"
+    id = "%s"
   }
 
   consul {

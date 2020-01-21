@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccCirconusMetricCluster_basic(t *testing.T) {
@@ -77,9 +77,8 @@ func checkMetricClusterExists(c *providerContext, metricClusterCID api.CIDType) 
 
 const testAccCirconusMetricClusterConfigFmt = `
 resource "circonus_metric_cluster" "nomad-job1" {
-  description = <<EOF
-Metric Cluster Description
-EOF
+  description = "Metric Cluster Description"
+
   name = "%s"
 
   query {

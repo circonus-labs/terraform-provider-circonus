@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
+	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -128,10 +128,10 @@ func worksheetRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(w.CID)
 
-	d.Set(workspaceTitleAttr, w.Title)
-	d.Set(workspaceDescriptionAttr, w.Description)
-	d.Set(workspaceFavouriteAttr, w.Favorite)
-	d.Set(workspaceNotesAttr, w.Notes)
+	_ = d.Set(workspaceTitleAttr, w.Title)
+	_ = d.Set(workspaceDescriptionAttr, w.Description)
+	_ = d.Set(workspaceFavouriteAttr, w.Favorite)
+	_ = d.Set(workspaceNotesAttr, w.Notes)
 
 	if err := d.Set(workspaceGraphsAttr, worksheetGraphsToState(apiToWorksheetGraphs(w.Graphs))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store workspace %q attribute: {{err}}", workspaceTagsAttr), err)

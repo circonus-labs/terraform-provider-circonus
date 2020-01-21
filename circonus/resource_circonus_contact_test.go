@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccCirconusContactGroup_basic(t *testing.T) {
@@ -21,59 +21,66 @@ func TestAccCirconusContactGroup_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// testAccContactGroupExists("circonus_contact_group.staging-sev3", "foo"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "name", "ops-staging-sev3"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.#", "3"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1119127802.address", ""),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1119127802.user", "/user/5469"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1456570992.address", ""),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1456570992.user", "/user/6331"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.343263208.address", "user@example.com"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.343263208.user", ""),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.#", "1"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.address", "https://www.example.org/post/endpoint"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.format", "json"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.method", "POST"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.#", "0"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.#", "3"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1119127802.address", ""),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1119127802.user", "/user/5469"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1456570992.address", ""),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.1456570992.user", "/user/6331"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.343263208.address", "user@example.com"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.343263208.user", ""),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.#", "0"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.#", "1"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.address", "https://www.example.org/post/endpoint"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.format", "json"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.method", "POST"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "irc.#", "0"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "irc.918937268.user", "/user/6331"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.#", "1"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.channel", "#ops-staging"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.team", "T123UT98F"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.username", "Circonus"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.buttons", "true"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "sms.#", "1"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "sms.1119127802.user", "/user/5469"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.#", "0"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.#", "1"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.channel", "#ops-staging"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.team", "T123UT98F"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.username", "Circonus"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.buttons", "true"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "sms.#", "0"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "sms.#", "1"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "sms.1119127802.user", "/user/5469"),
 
 					// xmpp.# will be 0 for user faux user accounts that don't have an
 					// XMPP address setup.
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "xmpp.#", "0"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "xmpp.1119127802.user", "/user/5469"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.#", "1"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.api_key", "123"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.critical", "2"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.info", "5"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.team", "bender"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.warning", "3"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.#", "0"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.#", "1"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.api_key", "123"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.critical", "2"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.info", "5"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.team", "bender"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "victorops.2029434450.warning", "3"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "aggregation_window", "60s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.#", "5"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.severity", "1"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.reminder", "60s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.escalate_after", "3600s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.escalate_to", "/contact_group/2913"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.severity", "2"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.reminder", "120s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.escalate_after", "7200s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.escalate_to", "/contact_group/2913"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.severity", "3"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.reminder", "180s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.escalate_after", "10800s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.escalate_to", "/contact_group/2913"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.severity", "4"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.reminder", "240s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.escalate_after", "14400s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.escalate_to", "/contact_group/2913"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.severity", "5"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.reminder", "300s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.escalate_after", "18000s"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.escalate_to", "/contact_group/2913"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "group_type", "normal"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.#", "0"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.#", "5"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.severity", "1"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.reminder", "60s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.escalate_after", "3600s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.severity", "2"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.reminder", "120s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.escalate_after", "7200s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.severity", "3"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.reminder", "180s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.escalate_after", "10800s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.severity", "4"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.reminder", "240s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.escalate_after", "14400s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.severity", "5"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.reminder", "300s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.escalate_after", "18000s"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.escalate_to", "/contact_group/4661"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "long_message", "a long message"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "long_subject", "long subject"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "long_summary", "long summary"),
@@ -132,6 +139,9 @@ const testAccCirconusContactGroupConfig = `
 resource "circonus_contact_group" "staging-sev3" {
   name = "ops-staging-sev3"
 
+  // these can't really be tested without actually creating users on the account
+
+/*
   email {
     user = "/user/5469"
   }
@@ -149,7 +159,7 @@ resource "circonus_contact_group" "staging-sev3" {
     format = "json"
     method = "POST"
   }
-
+*/
 /*
   // Account needs to be setup with IRC before this can work.
   irc {
@@ -163,17 +173,25 @@ resource "circonus_contact_group" "staging-sev3" {
   }
 */
 
+/*
+  // needs to be wired up to a valid slack instance
   slack {
     channel = "#ops-staging"
     team = "T123UT98F"
     username = "Circonus"
     buttons = true
   }
+*/
 
+/*
+  // sms has to be setup on the account
   sms {
     user = "/user/5469"
   }
+*/
 
+/*
+  // victorops has to be setup on the account
   victorops {
     api_key = "123"
     critical = 2
@@ -181,7 +199,7 @@ resource "circonus_contact_group" "staging-sev3" {
     team = "bender"
     warning = 3
   }
-
+*/
 	// Faux user accounts that don't have an XMPP address setup will not return a
 	// valid response in the future.
   //
@@ -191,41 +209,42 @@ resource "circonus_contact_group" "staging-sev3" {
 
   aggregation_window = "1m"
 
+/*
   alert_option {
     severity = 1
     reminder = "60s"
     escalate_after = "3600s"
-    escalate_to = "/contact_group/2913"
+    escalate_to = "/contact_group/4661"
   }
 
   alert_option {
     severity = 2
     reminder = "2m"
     escalate_after = "2h"
-    escalate_to = "/contact_group/2913"
+    escalate_to = "/contact_group/4661"
   }
 
   alert_option {
     severity = 3
     reminder = "3m"
     escalate_after = "3h"
-    escalate_to = "/contact_group/2913"
+    escalate_to = "/contact_group/4661"
   }
 
   alert_option {
     severity = 4
     reminder = "4m"
     escalate_after = "4h"
-    escalate_to = "/contact_group/2913"
+    escalate_to = "/contact_group/4661"
   }
 
   alert_option {
     severity = 5
     reminder = "5m"
     escalate_after = "5h"
-    escalate_to = "/contact_group/2913"
+    escalate_to = "/contact_group/4661"
   }
-
+*/
   // alert_formats: omit to use defaults
   long_message = "a long message"
   long_subject = "long subject"
@@ -237,5 +256,7 @@ resource "circonus_contact_group" "staging-sev3" {
     "author:terraform",
     "other:foo",
   ]
+
+  group_type = "normal"
 }
 `

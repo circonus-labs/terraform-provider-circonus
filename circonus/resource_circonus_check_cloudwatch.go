@@ -7,10 +7,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/circonus-labs/circonus-gometrics/api/config"
+	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (
@@ -226,11 +226,9 @@ func checkConfigToAPICloudWatch(c *circonusCheck, l interfaceList) error {
 			c.Config[config.APISecret] = v.(string)
 		}
 
-		if dimmensions := cloudwatchConfig.CollectMap(checkCloudWatchDimmensionsAttr); dimmensions != nil {
-			for k, v := range dimmensions {
-				dimKey := config.DimPrefix + config.Key(k)
-				c.Config[dimKey] = v
-			}
+		for k, v := range cloudwatchConfig.CollectMap(checkCloudWatchDimmensionsAttr) {
+			dimKey := config.DimPrefix + config.Key(k)
+			c.Config[dimKey] = v
 		}
 
 		if v, found := cloudwatchConfig[checkCloudWatchMetricAttr]; found {

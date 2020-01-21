@@ -3,8 +3,8 @@ package circonus
 import (
 	"fmt"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
-	"github.com/hashicorp/terraform/terraform"
+	api "github.com/circonus-labs/go-apiclient"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func testAccCheckDestroyCirconusCheckBundle(s *terraform.State) error {

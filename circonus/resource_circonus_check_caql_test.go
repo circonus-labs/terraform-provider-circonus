@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccCirconusCheckCAQL_basic(t *testing.T) {
@@ -23,7 +23,7 @@ func TestAccCirconusCheckCAQL_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "collector.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "collector.36214388.id", "/broker/1490"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "caql.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "caql.4060628048.query", `search:metric:histogram("*consul*runtime`+"`"+`gc_pause_ns* (active:1)") | histogram:merge() | histogram:percentile(99)`),
+					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "caql.4060628048.query", `search:metric:histogram("*consul*runtime`+"`"+`gc_pause_ns* (active:1)") | histogram:merge() | histogram:percentile(99)`+"\n"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "period", "60s"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "metric.#", "1"),
@@ -64,11 +64,11 @@ EOF
 
   metric {
     name = "output[1]"
-    tags = [ "${var.test_tags}" ]
+    tags = "${var.test_tags}"
     type = "histogram"
     unit = "seconds"
   }
 
-  tags = [ "${var.test_tags}" ]
+  tags = "${var.test_tags}"
 }
 `
