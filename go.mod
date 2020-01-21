@@ -1,4 +1,4 @@
-module github.com/rileyberton/terraform-provider-circonus
+module github.com/terraform-providers/terraform-provider-circonus
 
 require (
 	github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible
