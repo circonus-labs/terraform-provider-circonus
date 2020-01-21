@@ -17,7 +17,7 @@ const (
 	defaultCirconusAggregationWindow     = "300s"
 	defaultCirconusAlertMinEscalateAfter = "300s"
 	defaultCirconusCheckPeriodMax        = "300s"
-	defaultCirconusCheckPeriodMin        = "30s"
+	defaultCirconusCheckPeriodMin        = "10s"
 	defaultCirconusHTTPFormat            = "json"
 	defaultCirconusHTTPMethod            = "POST"
 	defaultCirconusSlackUsername         = "Circonus"
@@ -100,6 +100,7 @@ func Provider() terraform.ResourceProvider {
 			"circonus_metric":         resourceMetric(),
 			"circonus_metric_cluster": resourceMetricCluster(),
 			"circonus_rule_set":       resourceRuleSet(),
+			"circonus_rule_set_group": resourceRuleSetGroup(),
 			"circonus_worksheet":      resourceWorksheet(),
 		},
 	}
@@ -119,11 +120,21 @@ func Provider() terraform.ResourceProvider {
 func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, error) {
 	globalAutoTag = d.Get(providerAutoTagAttr).(bool)
 
+	envLevel := os.Getenv("TF_LOG")
+	var debug = false
+	if envLevel != "" {
+		debug = true
+	}
+
 	config := &api.Config{
 		URL:      d.Get(providerAPIURLAttr).(string),
 		TokenKey: d.Get(providerKeyAttr).(string),
 		TokenApp: tfAppName(),
-		Debug:    true,
+	}
+
+	if debug {
+		config.Debug = true
+		config.Log = log.New(log.Writer(), "", log.LstdFlags)
 	}
 
 	// turn on logging if terraform log level set to debug

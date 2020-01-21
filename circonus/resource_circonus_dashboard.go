@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/circonus-labs/circonus-gometrics/api"
+	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceDashboard() *schema.Resource {
@@ -25,6 +25,11 @@ func resourceDashboard() *schema.Resource {
 				Required:    true,
 				StateFunc:   suppressWhitespace,
 				Description: "The title of the dashboard.",
+			},
+			"uuid": &schema.Schema{
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The uuid of the dashboard.",
 			},
 			"shared": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -167,6 +172,10 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"autoformat": &schema.Schema{
+										Type:     schema.TypeBool,
+										Optional: true,
+									},
 									"body_format": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
@@ -194,6 +203,30 @@ func resourceDashboard() *schema.Resource {
 									"content_type": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
+									},
+									"datapoints": &schema.Schema{
+										Type:     schema.TypeSet,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"_metric_type": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"_check_id": &schema.Schema{
+													Type:     schema.TypeInt,
+													Required: true,
+												},
+												"label": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"metric": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+											},
+										},
 									},
 									"dependents": &schema.Schema{
 										Type:     schema.TypeString,
@@ -279,6 +312,28 @@ func resourceDashboard() *schema.Resource {
 									"threshold": &schema.Schema{
 										Type:     schema.TypeFloat,
 										Optional: true,
+									},
+									"thresholds": &schema.Schema{
+										Type:     schema.TypeSet,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"colors": &schema.Schema{
+													Type:     schema.TypeList,
+													Required: true,
+													Elem:     &schema.Schema{Type: schema.TypeString},
+												},
+												"values": &schema.Schema{
+													Type:     schema.TypeList,
+													Required: true,
+													Elem:     &schema.Schema{Type: schema.TypeString},
+												},
+												"flip": &schema.Schema{
+													Type:     schema.TypeBool,
+													Required: true,
+												},
+											},
+										},
 									},
 									"time_window": &schema.Schema{
 										Type:     schema.TypeString,
@@ -439,10 +494,11 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetAttrs["widget_id"] = widget.WidgetID
 		dashWidgetAttrs["width"] = int(widget.Width)
 
-		dashWidgetSettingsAttrs := make(map[string]interface{}, 60)
+		dashWidgetSettingsAttrs := make(map[string]interface{}, 63)
 		dashWidgetSettingsAttrs["account_id"] = widget.Settings.AccountID
 		dashWidgetSettingsAttrs["acknowledged"] = widget.Settings.Acknowledged
 		dashWidgetSettingsAttrs["algorithm"] = widget.Settings.Algorithm
+		dashWidgetSettingsAttrs["autoformat"] = widget.Settings.Autoformat
 		dashWidgetSettingsAttrs["body_format"] = widget.Settings.BodyFormat
 		dashWidgetSettingsAttrs["chart_type"] = widget.Settings.ChartType
 		dashWidgetSettingsAttrs["check_uuid"] = widget.Settings.CheckUUID
@@ -451,6 +507,16 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["cluster_name"] = widget.Settings.ClusterName
 		dashWidgetSettingsAttrs["contact_groups"] = widget.Settings.ContactGroups
 		dashWidgetSettingsAttrs["content_type"] = widget.Settings.ContentType
+		dps := make([]map[string]interface{}, 0, len(widget.Settings.Datapoints))
+		for _, dp := range widget.Settings.Datapoints {
+			dpAttrs := make(map[string]interface{}, 4)
+			dpAttrs["label"] = dp.Label
+			dpAttrs["_metric_type"] = dp.MetricType
+			dpAttrs["metric"] = dp.Metric
+			dpAttrs["_check_id"] = int(dp.CheckID)
+			dps = append(dps, dpAttrs)
+		}
+		dashWidgetSettingsAttrs["datapoints"] = dps
 		dashWidgetSettingsAttrs["dependents"] = widget.Settings.Dependents
 		dashWidgetSettingsAttrs["disable_autoformat"] = widget.Settings.DisableAutoformat
 		dashWidgetSettingsAttrs["display"] = widget.Settings.Display
@@ -465,8 +531,12 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["min_age"] = widget.Settings.MinAge
 		dashWidgetSettingsAttrs["off_hours"] = widget.Settings.OffHours
 		dashWidgetSettingsAttrs["overlay_set_id"] = widget.Settings.OverlaySetID
-		dashWidgetSettingsAttrs["range_high"] = int(widget.Settings.RangeHigh)
-		dashWidgetSettingsAttrs["range_low"] = int(widget.Settings.RangeLow)
+		if widget.Settings.RangeHigh != nil {
+			dashWidgetSettingsAttrs["range_high"] = int(*widget.Settings.RangeHigh)
+		}
+		if widget.Settings.RangeLow != nil {
+			dashWidgetSettingsAttrs["range_low"] = int(*widget.Settings.RangeLow)
+		}
 		dashWidgetSettingsAttrs["resource_limit"] = widget.Settings.ResourceLimit
 		dashWidgetSettingsAttrs["resource_usage"] = widget.Settings.ResourceUsage
 		dashWidgetSettingsAttrs["search"] = widget.Settings.Search
@@ -474,6 +544,13 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["size"] = widget.Settings.Size
 		dashWidgetSettingsAttrs["tag_filter_set"] = widget.Settings.TagFilterSet
 		dashWidgetSettingsAttrs["threshold"] = widget.Settings.Threshold
+		if widget.Settings.Thresholds != nil {
+			t := make(map[string]interface{}, 3)
+			t["colors"] = widget.Settings.Thresholds.Colors
+			t["values"] = widget.Settings.Thresholds.Values
+			t["flip"] = widget.Settings.Thresholds.Flip
+			dashWidgetSettingsAttrs["thresholds"] = t
+		}
 		dashWidgetSettingsAttrs["time_window"] = widget.Settings.TimeWindow
 		dashWidgetSettingsAttrs["title"] = widget.Settings.Title
 		dashWidgetSettingsAttrs["title_format"] = widget.Settings.TitleFormat
@@ -535,6 +612,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("account_default", dash.AccountDefault)
 	d.Set("shared", dash.Shared)
 	d.Set("title", dash.Title)
+	d.Set("uuid", dash.UUID)
 
 	return nil
 }
@@ -563,6 +641,7 @@ func dashboardDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
+	d.Set("uuid", "")
 
 	return nil
 }
@@ -689,6 +768,8 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 			wAttrs := widgetListElem.(map[string]interface{})
 
 			w := api.DashboardWidget{}
+			w.Settings.RangeHigh = nil
+			w.Settings.RangeLow = nil
 
 			if v, found := wAttrs["active"]; found {
 				w.Active = v.(bool)
@@ -732,6 +813,9 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["algorithm"]; found {
 						w.Settings.Algorithm = (v.(string))
 					}
+					if v, found := sMap["autoformat"]; found {
+						w.Settings.Autoformat = v.(bool)
+					}
 					if v, found := sMap["body_format"]; found {
 						w.Settings.BodyFormat = (v.(string))
 					}
@@ -762,9 +846,32 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					// if v, found := sMap[string(dashWidgetSettingsDefinitionAttr)]; found {
 					// 	w.Settings.Definition = (v.(string))
 					// }
+					if v, found := sMap["datapoints"]; found {
+						w.Settings.Datapoints = make([]api.ChartTextWidgetDatapoint, 0)
+
+						datapointList := v.(*schema.Set).List()
+						for _, dpElem := range datapointList {
+							dpAttrs := dpElem.(map[string]interface{})
+							dp := api.ChartTextWidgetDatapoint{}
+							if vv, found := dpAttrs["label"]; found {
+								dp.Label = (vv.(string))
+							}
+							if vv, found := dpAttrs["_metric_type"]; found {
+								dp.MetricType = (vv.(string))
+							}
+							if vv, found := dpAttrs["_check_id"]; found {
+								dp.CheckID = uint(vv.(int))
+							}
+							if vv, found := dpAttrs["metric"]; found {
+								dp.Metric = (vv.(string))
+							}
+							w.Settings.Datapoints = append(w.Settings.Datapoints, dp)
+						}
+					}
 					if v, found := sMap["dependents"]; found {
 						w.Settings.Dependents = (v.(string))
 					}
+
 					if v, found := sMap["disable_autoformat"]; found {
 						w.Settings.DisableAutoformat = v.(bool)
 					}
@@ -829,10 +936,26 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Period = uint(v.(int))
 					}
 					if v, found := sMap["range_high"]; found {
-						w.Settings.RangeHigh = v.(int)
+						y, ok := wAttrs["type"]
+						if ok && y.(string) == "gauge" {
+							x := v.(int)
+							w.Settings.RangeHigh = &x
+						} else {
+							w.Settings.RangeHigh = nil
+						}
+					} else {
+						w.Settings.RangeHigh = nil
 					}
 					if v, found := sMap["range_low"]; found {
-						w.Settings.RangeLow = v.(int)
+						y, ok := wAttrs["type"]
+						if ok && y.(string) == "gauge" {
+							x := v.(int)
+							w.Settings.RangeLow = &x
+						} else {
+							w.Settings.RangeLow = nil
+						}
+					} else {
+						w.Settings.RangeLow = nil
 					}
 					if v, found := sMap["realtime"]; found {
 						w.Settings.Realtime = v.(bool)
@@ -857,6 +980,35 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					}
 					if v, found := sMap["threshold"]; found {
 						w.Settings.Threshold = float32((v.(float64)))
+					}
+					if v, found := sMap["thresholds"]; found {
+						t := api.ForecastGaugeWidgetThresholds{}
+
+						// there will be only 1
+						tList := v.(*schema.Set).List()
+						if len(tList) > 0 {
+							for _, tElem := range tList {
+								tAttrs := tElem.(map[string]interface{})
+								if vv, found := tAttrs["colors"]; found {
+									t.Colors = make([]string, len(vv.([]interface{})))
+									for i, x := range vv.([]interface{}) {
+										t.Colors[i] = (x.(string))
+									}
+								}
+								if vv, found := tAttrs["values"]; found {
+									t.Values = make([]string, len(vv.([]interface{})))
+									for i, x := range vv.([]interface{}) {
+										t.Values[i] = (x.(string))
+									}
+								}
+								if vv, found := tAttrs["flip"]; found {
+									t.Flip = vv.(bool)
+								}
+							}
+							w.Settings.Thresholds = &t
+						} else {
+							w.Settings.Thresholds = nil
+						}
 					}
 					if v, found := sMap["time_window"]; found {
 						w.Settings.TimeWindow = (v.(string))
@@ -900,6 +1052,7 @@ func (dash *circonusDashboard) Create(ctxt *providerContext) error {
 	}
 
 	dash.CID = ng.CID
+	dash.UUID = ng.UUID
 
 	return nil
 }

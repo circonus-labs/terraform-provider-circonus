@@ -60,7 +60,9 @@ github.com/aws/aws-sdk-go/service/sts/stsiface
 github.com/bgentry/go-netrc/netrc
 # github.com/bgentry/speakeasy v0.1.0
 github.com/bgentry/speakeasy
-# github.com/circonus-labs/go-apiclient v0.7.0
+# github.com/circonus-labs/go-apiclient v0.7.2
+# github.com/blang/semver v3.5.1+incompatible
+github.com/blang/semver
 github.com/circonus-labs/go-apiclient
 github.com/circonus-labs/go-apiclient/config
 # github.com/davecgh/go-spew v1.1.1
@@ -104,8 +106,12 @@ github.com/hashicorp/go-hclog
 github.com/hashicorp/go-multierror
 # github.com/hashicorp/go-plugin v1.0.1
 github.com/hashicorp/go-plugin
+<<<<<<< HEAD
 github.com/hashicorp/go-plugin/internal/plugin
 # github.com/hashicorp/go-retryablehttp v0.6.4
+=======
+# github.com/hashicorp/go-retryablehttp v0.5.4
+>>>>>>> updates
 github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-safetemp v1.0.0
 github.com/hashicorp/go-safetemp
@@ -217,7 +223,11 @@ github.com/mitchellh/reflectwalk
 github.com/oklog/run
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
+<<<<<<< HEAD
 # github.com/posener/complete v1.2.3
+=======
+# github.com/posener/complete v1.1.2
+>>>>>>> updates
 github.com/posener/complete
 github.com/posener/complete/cmd
 github.com/posener/complete/cmd/install

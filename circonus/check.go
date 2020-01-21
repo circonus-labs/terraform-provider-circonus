@@ -27,11 +27,16 @@ const (
 	apiCheckTypeCAQL       circonusCheckType = "caql"
 	apiCheckTypeConsul     circonusCheckType = "consul"
 	apiCheckTypeICMPPing   circonusCheckType = "ping_icmp"
+	apiCheckTypeExternal   circonusCheckType = "external"
 	apiCheckTypeHTTP       circonusCheckType = "http"
+	apiCheckTypeJMX        circonusCheckType = "jmx"
+	apiCheckTypeMemcached  circonusCheckType = "memcached"
 	apiCheckTypeJSON       circonusCheckType = "json"
 	apiCheckTypeMySQL      circonusCheckType = "mysql"
+	apiCheckTypeSNMP       circonusCheckType = "snmp"
 	apiCheckTypeStatsd     circonusCheckType = "statsd"
 	apiCheckTypePostgreSQL circonusCheckType = "postgres"
+	apiCheckTypePromText   circonusCheckType = "promtext"
 	apiCheckTypeTCP        circonusCheckType = "tcp"
 )
 
@@ -109,8 +114,13 @@ func (c *circonusCheck) Fixup() error {
 }
 
 func (c *circonusCheck) Validate() error {
-	if len(c.Metrics) == 0 {
-		return fmt.Errorf("At least one %s must be specified", checkMetricAttr)
+	// there must be at least 1 metric or at least 1 metric_filter but only one of the lists can contain members.
+	if len(c.Metrics) > 0 && len(c.MetricFilters) > 0 {
+		return fmt.Errorf("Metrics and MetricFilters both have entries, you can only have one or the other")
+	}
+
+	if len(c.Metrics) == 0 && len(c.MetricFilters) == 0 {
+		return fmt.Errorf("You must supply one or more 'metric' blocks *or* one or more 'metric_filter' blocks")
 	}
 
 	if c.Timeout > float32(c.Period) {
