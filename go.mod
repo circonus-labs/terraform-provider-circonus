@@ -4,8 +4,6 @@ require (
 	cloud.google.com/go v0.49.0 // indirect
 	cloud.google.com/go/storage v1.4.0 // indirect
 	github.com/aws/aws-sdk-go v1.25.43 // indirect
-	github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible
-	github.com/circonus-labs/circonusllhist v0.1.3 // indirect
 	github.com/circonus-labs/go-apiclient v0.7.2
 	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
 	github.com/hashicorp/errwrap v1.0.0
@@ -14,7 +12,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.1
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.1.0 // indirect
-	github.com/hashicorp/terraform v0.12.7
+	github.com/hashicorp/terraform v0.12.7 // indirect
 	github.com/hashicorp/terraform-plugin-sdk v1.5.0
 	github.com/hashicorp/terraform-svchost v0.0.0-20191119180714-d2e4933b9136 // indirect
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
