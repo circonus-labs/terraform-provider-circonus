@@ -228,7 +228,6 @@ func resourceGraph() *schema.Resource {
 						graphMetricAlphaAttr: {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  "0",
 						},
 						graphMetricAxisAttr: {
 							Type:         schema.TypeString,
@@ -742,6 +741,11 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 				datapoint.Alpha = &f
 			} else {
 				datapoint.Alpha = nil
+			}
+
+			defaultAlpha := "0"
+			if datapoint.Alpha == nil || *datapoint.Alpha == "" {
+				datapoint.Alpha = &defaultAlpha
 			}
 
 			if v, found := metricAttrs[graphMetricAxisAttr]; found {

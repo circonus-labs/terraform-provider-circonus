@@ -77,7 +77,7 @@ variable "test_tags" {
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 
-resource "circonus_check" "api_latency" {
+resource "circonus_check" "api_latency_2" {
   active = true
   name = "%s"
   period = "60s"
@@ -108,16 +108,16 @@ resource "circonus_check" "api_latency" {
   target = "api.circonus.com"
 }
 
-resource "circonus_graph" "mixed-points" {
+resource "circonus_graph" "mixed-points_2" {
   name = "%s"
-  description = "Terraform Test: mixed graph"
+  description = "Terraform Test: mixed graph two"
   notes = "test notes"
   graph_style = "line"
   line_style = "stepped"
 
   metric {
     # caql = "" # conflicts with metric_name/check
-    check = "${circonus_check.api_latency.checks[0]}"
+    check = "${circonus_check.api_latency_2.checks[0]}"
     metric_name = "maximum"
     metric_type = "numeric"
     name = "Maximum Latency"
@@ -129,7 +129,7 @@ resource "circonus_graph" "mixed-points" {
 
   metric {
     # caql = "" # conflicts with metric_name/check
-    check = "${circonus_check.api_latency.checks[0]}"
+    check = "${circonus_check.api_latency_2.checks[0]}"
     metric_name = "minimum"
     metric_type = "numeric"
     name = "Minimum Latency"
@@ -155,7 +155,7 @@ resource "circonus_graph" "mixed-points" {
 resource "circonus_worksheet" "test" {
   title = "%s"
   graphs = [
-    "${circonus_graph.mixed-points.id}",
+    "${circonus_graph.mixed-points_2.id}",
   ]
 }
 `

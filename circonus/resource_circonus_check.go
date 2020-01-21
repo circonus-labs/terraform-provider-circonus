@@ -261,7 +261,6 @@ func resourceCheck() *schema.Resource {
 			checkNameAttr: {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 			checkNotesAttr: {
 				Type:      schema.TypeString,
@@ -288,7 +287,7 @@ func resourceCheck() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validateRegexp(checkTagsAttr, `.+`),
+				ValidateFunc: validateRegexp(checkTargetAttr, `.+`),
 			},
 			checkTCPAttr: schemaCheckTCP,
 			checkTimeoutAttr: {
