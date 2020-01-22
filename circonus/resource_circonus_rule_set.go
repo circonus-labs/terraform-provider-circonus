@@ -2,7 +2,9 @@ package circonus
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"time"
@@ -16,14 +18,16 @@ import (
 
 const (
 	// circonus_rule_set.* resource attribute names
-	ruleSetCheckAttr      = "check"
-	ruleSetIfAttr         = "if"
-	ruleSetLinkAttr       = "link"
-	ruleSetMetricTypeAttr = "metric_type"
-	ruleSetNotesAttr      = "notes"
-	ruleSetParentAttr     = "parent"
-	ruleSetMetricNameAttr = "metric_name"
-	ruleSetTagsAttr       = "tags"
+	ruleSetCheckAttr         = "check"
+	ruleSetIfAttr            = "if"
+	ruleSetLinkAttr          = "link"
+	ruleSetMetricTypeAttr    = "metric_type"
+	ruleSetNotesAttr         = "notes"
+	ruleSetParentAttr        = "parent"
+	ruleSetMetricNameAttr    = "metric_name"
+	ruleSetMetricPatternAttr = "metric_pattern"
+	ruleSetMetricFilterAttr  = "metric_filter"
+	ruleSetTagsAttr          = "tags"
 
 	// circonus_rule_set.if.* resource attribute names
 	ruleSetThenAttr  = "then"
@@ -48,6 +52,9 @@ const (
 	// circonus_rule_set.if.value.over.* resource attribute names
 	ruleSetLastAttr  = "last"
 	ruleSetUsingAttr = "using"
+
+	// out attributes
+	ruleSetIdAttr = "rule_set_id"
 )
 
 const (
@@ -64,14 +71,17 @@ const (
 
 var ruleSetDescriptions = attrDescrs{
 	// circonus_rule_set.* resource attribute names
-	ruleSetCheckAttr:      "The CID of the check that contains the metric for this rule set",
-	ruleSetIfAttr:         "A rule to execute for this rule set",
-	ruleSetLinkAttr:       "URL to show users when this rule set is active (e.g. wiki)",
-	ruleSetMetricTypeAttr: "The type of data flowing through the specified metric stream",
-	ruleSetNotesAttr:      "Notes describing this rule set",
-	ruleSetParentAttr:     "Parent CID that must be healthy for this rule set to be active",
-	ruleSetMetricNameAttr: "The name of the metric stream within a check to register the rule set with",
-	ruleSetTagsAttr:       "Tags associated with this rule set",
+	ruleSetCheckAttr:         "The CID of the check that contains the metric for this rule set",
+	ruleSetIfAttr:            "A rule to execute for this rule set",
+	ruleSetLinkAttr:          "URL to show users when this rule set is active (e.g. wiki)",
+	ruleSetMetricTypeAttr:    "The type of data flowing through the specified metric stream",
+	ruleSetNotesAttr:         "Notes describing this rule set",
+	ruleSetParentAttr:        "Parent CID that must be healthy for this rule set to be active",
+	ruleSetMetricNameAttr:    "The name of the metric stream within a check to register the rule set with",
+	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
+	ruleSetMetricFilterAttr:  "The tag filter a pattern match ruleset will user",
+	ruleSetTagsAttr:          "Tags associated with this rule set",
+	ruleSetIdAttr:            "out",
 }
 
 var ruleSetIfDescriptions = attrDescrs{
@@ -97,7 +107,7 @@ var ruleSetIfValueDescriptions = attrDescrs{
 var ruleSetIfValueOverDescriptions = attrDescrs{
 	// circonus_rule_set.if.value.over.* resource attribute names
 	ruleSetLastAttr:  "Duration over which data from the last interval is examined",
-	ruleSetUsingAttr: "Define the window funciton to use over the last duration",
+	ruleSetUsingAttr: "Define the window function to use over the last duration",
 }
 
 var ruleSetIfThenDescriptions = attrDescrs{
@@ -294,11 +304,27 @@ func resourceRuleSet() *schema.Resource {
 			},
 			ruleSetMetricNameAttr: {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricNameAttr, `^[\S]+$`),
 			},
+			ruleSetMetricPatternAttr: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
+			},
+			ruleSetMetricFilterAttr: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
+			},
 			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
+			ruleSetIdAttr: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		}),
 	}
 }
@@ -348,6 +374,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(rs.CID)
+	d.Set(ruleSetIdAttr, rs.CID)
 
 	ifRules := make([]interface{}, 0, defaultRuleSetRuleLen)
 	for _, rule := range rs.Rules {
@@ -414,11 +441,13 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetIfAttr), err)
 	}
 
-	_ = d.Set(ruleSetLinkAttr, indirect(rs.Link))
-	_ = d.Set(ruleSetMetricNameAttr, rs.MetricName)
-	_ = d.Set(ruleSetMetricTypeAttr, rs.MetricType)
-	_ = d.Set(ruleSetNotesAttr, indirect(rs.Notes))
-	_ = d.Set(ruleSetParentAttr, indirect(rs.Parent))
+	d.Set(ruleSetLinkAttr, indirect(rs.Link))
+	d.Set(ruleSetMetricNameAttr, rs.MetricName)
+	d.Set(ruleSetMetricPatternAttr, rs.MetricPattern)
+	d.Set(ruleSetMetricFilterAttr, rs.Filter)
+	d.Set(ruleSetMetricTypeAttr, rs.MetricType)
+	d.Set(ruleSetNotesAttr, indirect(rs.Notes))
+	d.Set(ruleSetParentAttr, indirect(rs.Parent))
 
 	if err := d.Set(ruleSetTagsAttr, tagsToState(apiToTags(rs.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetTagsAttr), err)
@@ -436,6 +465,7 @@ func ruleSetUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	rs.CID = d.Id()
+
 	if err := rs.Update(ctxt); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("unable to update rule set %q: {{err}}", d.Id()), err)
 	}
@@ -452,6 +482,7 @@ func ruleSetDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
+	d.Set(ruleSetIdAttr, "")
 
 	return nil
 }
@@ -481,6 +512,8 @@ func loadRuleSet(ctxt *providerContext, cid api.CIDType) (circonusRuleSet, error
 	if err != nil {
 		return circonusRuleSet{}, err
 	}
+	s, _ := json.MarshalIndent(*crs, "", "  ")
+	log.Printf("RuleSet: %s\n", s)
 	rs.RuleSet = *crs
 
 	return rs, nil
@@ -638,13 +671,22 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.MetricName = v.(string)
 	}
 
-	rs.Rules = make([]api.RuleSetRule, 0, defaultRuleSetRuleLen)
+	if v, found := d.GetOk(ruleSetMetricPatternAttr); found {
+		rs.MetricPattern = v.(string)
+	}
+
+	if v, found := d.GetOk(ruleSetMetricFilterAttr); found {
+		rs.Filter = v.(string)
+	}
+
+	rs.Rules = make([]api.RuleSetRule, 0, 0)
 	if ifListRaw, found := d.GetOk(ruleSetIfAttr); found {
 		ifList := ifListRaw.([]interface{})
 		for _, ifListElem := range ifList {
 			ifAttrs := newInterfaceMap(ifListElem.(map[string]interface{}))
 
 			rule := api.RuleSetRule{}
+			rule.WindowingFunction = nil
 
 			if thenListRaw, found := ifAttrs[ruleSetThenAttr]; found {
 				thenList := thenListRaw.(*schema.Set).List()
@@ -696,11 +738,14 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 				for _, valueListRaw := range ruleSetValueList {
 					valueAttrs := newInterfaceMap(valueListRaw)
+					log.Printf("valueAttrs: %v\n", valueAttrs)
 
 				METRIC_TYPE:
 					switch rs.MetricType {
 					case ruleSetMetricTypeNumeric:
-						if v, found := valueAttrs[ruleSetAbsentAttr]; found {
+						log.Printf("Building numeric rule\n")
+						if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
+							log.Printf("Building absent rule\n")
 							s := v.(string)
 							if s != "" {
 								d, _ := time.ParseDuration(s)
@@ -711,6 +756,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						}
 
 						if v, found := valueAttrs[ruleSetChangedAttr]; found {
+							log.Printf("Building changed rule\n")
 							b := v.(bool)
 							if b {
 								rule.Criteria = apiRuleSetChanged
@@ -719,6 +765,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						}
 
 						if v, found := valueAttrs[ruleSetMinValueAttr]; found {
+							log.Printf("Building min rule\n")
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetMinValue
@@ -728,6 +775,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						}
 
 						if v, found := valueAttrs[ruleSetMaxValueAttr]; found {
+							log.Printf("Building max rule\n")
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetMaxValue
@@ -795,26 +843,33 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 					if ruleSetOverListRaw, found := valueAttrs[ruleSetOverAttr]; found {
 						overList := ruleSetOverListRaw.(*schema.Set).List()
-
 						for _, overListRaw := range overList {
 							overAttrs := newInterfaceMap(overListRaw)
+
+							windowDuration := uint(0)
+							windowFunction := ""
 
 							if v, found := overAttrs[ruleSetLastAttr]; found {
 								last, err := time.ParseDuration(v.(string))
 								if err != nil {
 									return errwrap.Wrapf(fmt.Sprintf("unable to parse duration %s attribute", ruleSetLastAttr), err)
 								}
-								rule.WindowingDuration = uint(last.Seconds())
+								windowDuration = uint(last.Seconds())
 							}
 
 							if v, found := overAttrs[ruleSetUsingAttr]; found {
-								s := v.(string)
-								rule.WindowingFunction = &s
+								windowFunction = v.(string)
+							}
+
+							if windowFunction != "" && windowDuration > 0 {
+								rule.WindowingFunction = &windowFunction
+								rule.WindowingDuration = windowDuration
 							}
 						}
 					}
 				}
 			}
+			log.Printf("Appending rule: %v\n", rule)
 			rs.Rules = append(rs.Rules, rule)
 		}
 	}
@@ -823,6 +878,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.Tags = derefStringList(flattenSet(v.(*schema.Set)))
 	}
 
+	log.Printf("RuleSet: %v\n", rs)
 	if err := rs.Validate(); err != nil {
 		return err
 	}
@@ -858,7 +914,19 @@ func (rs *circonusRuleSet) Validate() error {
 	// have been collected for, and should not be lower than either the period or
 	// timeout of the metric being collected.
 
+	if len(rs.MetricName) > 0 && len(rs.MetricPattern) > 0 {
+		return fmt.Errorf("RuleSet for check ID %s has both metric_name and metric_pattern, must be one or the other", rs.CheckCID)
+	}
+
+	if len(rs.MetricName) == 0 && len(rs.MetricPattern) == 0 {
+		return fmt.Errorf("RuleSet for check ID %s must supply either metric_name or metric_pattern", rs.CheckCID)
+	}
+
+	log.Printf("RuleSet: %v\n", rs)
+
 	for i, rule := range rs.Rules {
+		log.Printf("Rule %d: %v\n", i, rule)
+
 		if rule.Criteria == "" {
 			return fmt.Errorf("rule %d for check ID %s has an empty criteria", i, rs.CheckCID)
 		}

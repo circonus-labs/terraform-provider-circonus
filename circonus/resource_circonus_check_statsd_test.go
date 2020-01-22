@@ -25,7 +25,7 @@ func TestAccCirconusCheckStatsd_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckStatsdConfigFmt, accEnterpriseBrokerCID, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckStatsdConfigFmt, checkName, accEnterpriseBrokerCID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.statsd_dump", "collector.#", "1"),

@@ -20,6 +20,7 @@ const (
 
 	queryNameAttr  = "name"
 	queryQueryAttr = "query"
+	queryOrderAttr = "order"
 )
 
 var worksheetDescriptions = attrDescrs{
@@ -35,6 +36,7 @@ var worksheetDescriptions = attrDescrs{
 var worksheetSmartQueryDescriptions = attrDescrs{
 	queryNameAttr:  "",
 	queryQueryAttr: "",
+	queryOrderAttr: "",
 }
 
 func resourceWorksheet() *schema.Resource {
@@ -92,10 +94,16 @@ func resourceWorksheet() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						queryOrderAttr: {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					}),
 				},
 			},
-
 			workspaceTagsAttr: tagMakeConfigSchema(workspaceTagsAttr),
 		}),
 	}
@@ -148,6 +156,7 @@ func worksheetRead(d *schema.ResourceData, meta interface{}) error {
 		newQuery := map[string]interface{}{
 			"name":  query.Name,
 			"query": query.Query,
+			"order": query.Order,
 		}
 
 		smartQueries = append(smartQueries, newQuery)
@@ -274,7 +283,6 @@ func (w *circonusWorksheet) ParseConfig(d *schema.ResourceData) error {
 
 		for _, queryListRaw := range queriesList {
 			var query api.WorksheetSmartQuery
-			query.Order = []string{}
 			queryAttrs := queryListRaw.(map[string]interface{})
 
 			if v, found := queryAttrs[queryNameAttr]; found {
@@ -285,6 +293,13 @@ func (w *circonusWorksheet) ParseConfig(d *schema.ResourceData) error {
 				query.Query = v.(string)
 			}
 
+			if v, found := queryAttrs[queryOrderAttr]; found {
+				orderList := v.(*schema.Set).List()
+				query.Order = make([]string, len(orderList))
+				for _, s := range orderList {
+					query.Order = append(query.Order, s.(string))
+				}
+			}
 			smaryQueries = append(smaryQueries, query)
 		}
 

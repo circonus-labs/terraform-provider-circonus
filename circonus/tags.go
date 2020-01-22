@@ -26,9 +26,9 @@ func (t circonusTag) Category() string {
 	tagInfo := strings.SplitN(string(t), ":", 2)
 	switch len(tagInfo) {
 	case 1:
-		return string(t)
+		return strings.ToLower(string(t))
 	case 2:
-		return tagInfo[0]
+		return strings.ToLower(tagInfo[0])
 	default:
 		log.Printf("[ERROR]: Invalid category on tag %q", string(t))
 		return ""
@@ -41,7 +41,7 @@ func (t circonusTag) Value() string {
 	case 1:
 		return ""
 	case 2:
-		return tagInfo[1]
+		return strings.ToLower(tagInfo[1])
 	default:
 		log.Printf("[ERROR]: Invalid value on tag %q", string(t))
 		return ""
@@ -51,7 +51,7 @@ func (t circonusTag) Value() string {
 func tagsToState(tags circonusTags) *schema.Set {
 	tagSet := schema.NewSet(schema.HashString, nil)
 	for i := range tags {
-		tagSet.Add(string(tags[i]))
+		tagSet.Add(strings.ToLower(string(tags[i])))
 	}
 	return tagSet
 }
