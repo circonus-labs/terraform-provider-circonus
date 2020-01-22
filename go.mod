@@ -5,33 +5,22 @@ require (
 	cloud.google.com/go/storage v1.4.0 // indirect
 	github.com/aws/aws-sdk-go v1.25.43 // indirect
 	github.com/circonus-labs/go-apiclient v0.7.2
-	github.com/cosiner/argv v0.0.1 // indirect
-	github.com/go-delve/delve v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-hclog v0.10.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.4 // indirect
 	github.com/hashicorp/go-uuid v1.0.1
+	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.1.0 // indirect
-	github.com/hashicorp/terraform v0.12.7 // indirect
 	github.com/hashicorp/terraform-plugin-sdk v1.5.0
 	github.com/hashicorp/terraform-svchost v0.0.0-20191119180714-d2e4933b9136 // indirect
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
-	github.com/mattn/go-runewidth v0.0.8 // indirect
-	github.com/peterh/liner v1.1.0 // indirect
 	github.com/posener/complete v1.2.3 // indirect
-	github.com/sirupsen/logrus v1.4.2 // indirect
-	github.com/spf13/cobra v0.0.5 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926 // indirect
 	github.com/ulikunitz/xz v0.5.6 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	go.opencensus.io v0.22.2 // indirect
-	go.starlark.net v0.0.0-20191227232015-caa3e9aa5008 // indirect
-	golang.org/x/arch v0.0.0-20191126211547-368ea8f32fff // indirect
 	golang.org/x/crypto v0.0.0-20200117160349-530e935923ad // indirect
 	golang.org/x/exp v0.0.0-20191126135315-41df83031236 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
