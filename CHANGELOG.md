@@ -1,4 +1,27 @@
-## 0.4.1 (Unreleased)
+## 0.5.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `circonus_overlay_set` 
+* **New Resource:** `circonus_rule_set_group` 
+* **New Resource:** `circonus_dashboard` 
+
+* New support for check types:
+  - external
+  - jmx
+  - memcached
+  - promtext
+  - snmp
+
+IMPROVEMENTS:
+
+* Circonus go-apiclient 0.7.2
+* Support for Metric allow/deny filters in Checks
+* Support for guide lines in graphs
+* Support for search based datapoints graphs
+* Support for pattern based Rule sets
+* Support for query order in worksheets
+
 ## 0.4.0 (December 02, 2019)
 
 IMPROVEMENTS:

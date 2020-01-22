@@ -54,6 +54,9 @@ resource "circonus_graph" "latency-graph" {
 
 * `description` - (Optional) Description of what the graph is for.
 
+* `guide` - (Optional) A list of guide lines to draw on the graph.  See
+  below for options.
+
 * `graph_style` - (Optional) How the graph should be rendered.  Valid options
   are `area` or `line` (default).
 
@@ -80,6 +83,21 @@ resource "circonus_graph" "latency-graph" {
 
 * `tags` - (Optional) A list of tags assigned to this graph.
 
+## `guide` Configuration
+
+A line to draw on the graph as a visual indicator of some level.
+
+* `hidden` - (Optional) Whether or not this guide is hidden, defaults to `false`
+
+* `color` - (Optional) The color of this guide line in hex RGB.
+
+* `formula` - (Optional) The formula to use for this line.
+
+* `legend_formula` - (Optional) The formula to use in the legend for this guide line.
+
+* `name` - (Optional) The human readable name for the legend for this guide line.
+
+
 ## `metric` Configuration
 
 An individual metric stream is the underlying source of data points used for
@@ -94,7 +112,10 @@ set.
 * `axis` - (Optional) The axis that the metric stream will use.  Valid options
   are `left` (default) or `right`.
 
-* `caql` - (Optional) A CAQL formula.  Conflicts with the `check` and `metric`
+* `caql` - (Optional) A CAQL formula.  Conflicts with the `check` and `metric` and `search`
+  attributes.
+  
+* `search` - (Optional) A metric search.  Conflicts with the `check` and `metric` and `caql`
   attributes.
 
 * `check` - (Optional) The check that this metric stream belongs to.

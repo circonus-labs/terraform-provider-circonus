@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"sort"
@@ -511,7 +512,8 @@ func loadRuleSet(ctxt *providerContext, cid api.CIDType) (circonusRuleSet, error
 	if err != nil {
 		return circonusRuleSet{}, err
 	}
-	log.Printf("RuleSet: %v\n", *crs)
+	s, _ := json.MarshalIndent(*crs, "", "  ")
+	log.Printf("RuleSet: %s\n", s)
 	rs.RuleSet = *crs
 
 	return rs, nil
@@ -677,7 +679,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.Filter = v.(string)
 	}
 
-	rs.Rules = make([]api.RuleSetRule, 0, defaultRuleSetRuleLen)
+	rs.Rules = make([]api.RuleSetRule, 0, 0)
 	if ifListRaw, found := d.GetOk(ruleSetIfAttr); found {
 		ifList := ifListRaw.([]interface{})
 		for _, ifListElem := range ifList {
@@ -731,12 +733,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 				}
 			}
 
-			log.Printf("ifAttrs: %v\n", ifAttrs)
-			v, _ := ifAttrs["value"]
-			log.Printf("ifAttrs.value: %v\n", v)
-
 			if ruleSetValueListRaw, found := ifAttrs[ruleSetValueAttr]; found {
-				log.Printf("ruleValueListRaw: %v\n", ruleSetValueListRaw)
 				ruleSetValueList := ruleSetValueListRaw.(*schema.Set).List()
 
 				for _, valueListRaw := range ruleSetValueList {
