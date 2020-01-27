@@ -1,4 +1,11 @@
 ## 0.5.1 (Unreleased)
+
+* **New Resource:** `circonus_maintenance` 
+
+IMPROVEMENTS:
+
+* Small fixes for ruleset processing
+
 ## 0.5.0 (January 23, 2020)
 
 FEATURES:

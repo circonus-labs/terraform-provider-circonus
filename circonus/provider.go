@@ -97,6 +97,7 @@ func Provider() terraform.ResourceProvider {
 			"circonus_graph":          resourceGraph(),
 			"circonus_overlay_set":    resourceOverlaySet(),
 			"circonus_dashboard":      resourceDashboard(),
+			"circonus_maintenance":    resourceMaintenance(),
 			"circonus_metric":         resourceMetric(),
 			"circonus_metric_cluster": resourceMetricCluster(),
 			"circonus_rule_set":       resourceRuleSet(),

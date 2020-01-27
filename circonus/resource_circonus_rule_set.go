@@ -405,6 +405,9 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("PROVIDER BUG: Unsupported criteria %q", rule.Criteria)
 		}
 
+		s, _ := json.MarshalIndent(valueAttrs, "", "  ")
+		log.Printf("valueAttrs from API read: %s\n", s)
+
 		if rule.Wait > 0 {
 			thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%ds", 60*rule.Wait)
 		}
@@ -755,7 +758,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetChangedAttr]; found {
+						if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(bool) == true {
 							log.Printf("Building changed rule\n")
 							b := v.(bool)
 							if b {
@@ -764,7 +767,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetMinValueAttr]; found {
+						if v, found := valueAttrs[ruleSetMinValueAttr]; found && v.(string) != "" {
 							log.Printf("Building min rule\n")
 							s := v.(string)
 							if s != "" {
@@ -774,7 +777,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetMaxValueAttr]; found {
+						if v, found := valueAttrs[ruleSetMaxValueAttr]; found && v.(string) != "" {
 							log.Printf("Building max rule\n")
 							s := v.(string)
 							if s != "" {
@@ -784,7 +787,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 					case ruleSetMetricTypeText:
-						if v, found := valueAttrs[ruleSetAbsentAttr]; found {
+						if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
 							s := v.(string)
 							if s != "" {
 								d, _ := time.ParseDuration(s)
@@ -794,7 +797,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetChangedAttr]; found {
+						if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(bool) == true {
 							b := v.(bool)
 							if b {
 								rule.Criteria = apiRuleSetChanged
@@ -802,7 +805,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetContainsAttr]; found {
+						if v, found := valueAttrs[ruleSetContainsAttr]; found && v.(string) != "" {
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetContains
@@ -811,7 +814,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetMatchAttr]; found {
+						if v, found := valueAttrs[ruleSetMatchAttr]; found && v.(string) != "" {
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetMatch
@@ -820,7 +823,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetNotMatchAttr]; found {
+						if v, found := valueAttrs[ruleSetNotMatchAttr]; found && v.(string) != "" {
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetNotMatch
@@ -829,7 +832,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 						}
 
-						if v, found := valueAttrs[ruleSetNotContainAttr]; found {
+						if v, found := valueAttrs[ruleSetNotContainAttr]; found && v.(string) != "" {
 							s := v.(string)
 							if s != "" {
 								rule.Criteria = apiRuleSetNotContains
@@ -869,8 +872,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					}
 				}
 			}
-			log.Printf("Appending rule: %v\n", rule)
-			rs.Rules = append(rs.Rules, rule)
+			if rule.Criteria != "" {
+				log.Printf("Appending rule: %v\n", rule)
+				rs.Rules = append(rs.Rules, rule)
+			}
 		}
 	}
 
