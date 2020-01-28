@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -13,6 +14,8 @@ import (
 
 func TestAccCirconusMaintenance_basic(t *testing.T) {
 	checkName := fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
+	startTime, _ := time.Parse(time.RFC3339, "2020-01-26T19:00:00-05:00")
+	stopTime, _ := time.Parse(time.RFC3339, "2020-01-30T19:00:00-05:00")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -20,11 +23,11 @@ func TestAccCirconusMaintenance_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusMaintenance,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusMaintenanceConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusMaintenanceConfigFmt, checkName, startTime.Format(time.RFC3339), stopTime.Format(time.RFC3339)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_maintenance.check-maintenance", "check"),
-					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "start", "2020-01-26T19:00:00-05:00"),
-					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "stop", "2020-01-30T19:00:00-05:00"),
+					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "start", startTime.Format(time.RFC3339)),
+					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "stop", stopTime.Format(time.RFC3339)),
 					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "notes", "foo notes"),
 					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "severities.#", "5"),
 					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "severities.0", "1"),
@@ -103,8 +106,8 @@ resource "circonus_check" "api_latency" {
 
 resource "circonus_maintenance" "check-maintenance" {
   check = circonus_check.api_latency.check_id
-  start = "2020-01-26T19:00:00-05:00"
-  stop = "2020-01-30T19:00:00-05:00"
+  start = "%s"
+  stop = "%s"
   notes = "foo notes"
   severities = ["1", "2", "3", "4", "5"]
 }
