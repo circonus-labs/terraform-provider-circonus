@@ -14,8 +14,10 @@ import (
 
 func TestAccCirconusMaintenance_basic(t *testing.T) {
 	checkName := fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
-	startTime, _ := time.Parse(time.RFC3339, "2020-01-26T19:00:00-05:00")
-	stopTime, _ := time.Parse(time.RFC3339, "2020-01-30T19:00:00-05:00")
+	st, _ := time.Parse(time.RFC3339, "2020-01-26T19:00:00-05:00")
+	et, _ := time.Parse(time.RFC3339, "2020-01-30T19:00:00-05:00")
+	startTime := st.UTC()
+	stopTime := et.UTC()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
