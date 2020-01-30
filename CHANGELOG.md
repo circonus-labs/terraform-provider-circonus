@@ -1,4 +1,4 @@
-## 0.5.1 (Unreleased)
+## 0.6.0 (Unreleased)
 
 * **New Resource:** `circonus_maintenance` 
 
