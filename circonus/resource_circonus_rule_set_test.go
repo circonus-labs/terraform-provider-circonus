@@ -168,7 +168,7 @@ EOF
 
   if {
     value {
-      absent = "70s"
+      absent = "70"
     }
 
     then {
@@ -181,7 +181,7 @@ EOF
   if {
     value {
       over {
-        last = "120s"
+        last = "120"
         using = "average"
       }
 
@@ -198,7 +198,7 @@ EOF
   if {
     value {
       over {
-        last = "180s"
+        last = "180"
         using = "average"
       }
 
@@ -220,7 +220,7 @@ EOF
     then {
 #	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
 	  notify = [ "/contact_group/4679" ]
-      after = "2400s"
+      after = "2400"
       severity = 4
     }
   }

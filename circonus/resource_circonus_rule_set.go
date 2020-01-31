@@ -1,18 +1,14 @@
 package circonus
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
 	"sort"
-	"strings"
+	"strconv"
 	"time"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -156,13 +152,9 @@ func resourceRuleSet() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: convertToHelperSchema(ruleSetIfThenDescriptions, map[schemaAttr]*schema.Schema{
 									ruleSetAfterAttr: {
-										Type:             schema.TypeString,
-										Optional:         true,
-										DiffSuppressFunc: suppressEquivalentTimeDurations,
-										StateFunc:        normalizeTimeDurationStringToSeconds,
-										ValidateFunc: validateFuncs(
-											validateDurationMin(ruleSetAfterAttr, "0s"),
-										),
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetAfterAttr, "^[0-9]+$"),
 									},
 									ruleSetNotifyAttr: {
 										Type:     schema.TypeList,
@@ -187,22 +179,18 @@ func resourceRuleSet() *schema.Resource {
 						},
 						ruleSetValueAttr: {
 							Type:     schema.TypeSet,
-							Optional: true,
 							MaxItems: 1,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: convertToHelperSchema(ruleSetIfValueDescriptions, map[schemaAttr]*schema.Schema{
 									ruleSetAbsentAttr: {
-										Type:             schema.TypeString, // Applies to text or numeric metrics
-										Optional:         true,
-										DiffSuppressFunc: suppressEquivalentTimeDurations,
-										StateFunc:        normalizeTimeDurationStringToSeconds,
-										ValidateFunc: validateFuncs(
-											validateDurationMin(ruleSetAbsentAttr, ruleSetAbsentMin),
-										),
+										Type:          schema.TypeString, // Applies to text or numeric metrics
+										Optional:      true,
+										ValidateFunc:  validateRegexp(ruleSetAbsentAttr, "^[0-9]+$"),
 										ConflictsWith: makeConflictsWith(ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetChangedAttr: {
-										Type:          schema.TypeBool, // Applies to text or numeric metrics
+										Type:          schema.TypeString, // Applies to text or numeric metrics
 										Optional:      true,
 										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
@@ -253,19 +241,13 @@ func resourceRuleSet() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: convertToHelperSchema(ruleSetIfValueOverDescriptions, map[schemaAttr]*schema.Schema{
 												ruleSetLastAttr: {
-													Type:             schema.TypeString,
-													Optional:         true,
-													Default:          defaultRuleSetLast,
-													DiffSuppressFunc: suppressEquivalentTimeDurations,
-													StateFunc:        normalizeTimeDurationStringToSeconds,
-													ValidateFunc: validateFuncs(
-														validateDurationMin(ruleSetLastAttr, "0s"),
-													),
+													Type:         schema.TypeString,
+													Optional:     true,
+													ValidateFunc: validateRegexp(ruleSetLastAttr, "^[0-9]+$"),
 												},
 												ruleSetUsingAttr: {
 													Type:         schema.TypeString,
 													Optional:     true,
-													Default:      defaultRuleSetWindowFunc,
 													ValidateFunc: validateStringIn(ruleSetUsingAttr, validRuleSetWindowFuncs),
 												},
 											}),
@@ -388,7 +370,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			d, _ := time.ParseDuration(fmt.Sprintf("%fs", rule.Value.(float64)))
 			valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%ds", int(d.Seconds()))
 		case apiRuleSetChanged:
-			valueAttrs[string(ruleSetChangedAttr)] = true
+			valueAttrs[string(ruleSetChangedAttr)] = "true"
 		case apiRuleSetContains:
 			valueAttrs[string(ruleSetContainsAttr)] = rule.Value
 		case apiRuleSetMatch:
@@ -405,11 +387,8 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("PROVIDER BUG: Unsupported criteria %q", rule.Criteria)
 		}
 
-		s, _ := json.MarshalIndent(valueAttrs, "", "  ")
-		log.Printf("valueAttrs from API read: %s\n", s)
-
 		if rule.Wait > 0 {
-			thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%ds", 60*rule.Wait)
+			thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
 		}
 		thenAttrs[string(ruleSetSeverityAttr)] = int(rule.Severity)
 
@@ -417,25 +396,26 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			valueOverAttrs[string(ruleSetUsingAttr)] = *rule.WindowingFunction
 
 			// NOTE: Only save the window duration if a function was specified
-			valueOverAttrs[string(ruleSetLastAttr)] = fmt.Sprintf("%ds", rule.WindowingDuration)
+			valueOverAttrs[string(ruleSetLastAttr)] = fmt.Sprintf("%d", rule.WindowingDuration)
 		}
-		valueOverSet := schema.NewSet(ruleSetValueOverChecksum, nil)
-		valueOverSet.Add(valueOverAttrs)
+		valueOverSet := make([]interface{}, 0, 0)
+		valueOverSet = append(valueOverSet, valueOverAttrs)
 		valueAttrs[string(ruleSetOverAttr)] = valueOverSet
 
 		if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
 			sort.Strings(contactGroups)
 			thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
 		}
-		thenSet := schema.NewSet(ruleSetThenChecksum, nil)
-		thenSet.Add(thenAttrs)
+		thenSet := make([]interface{}, 0, 0)
+		thenSet = append(thenSet, thenAttrs)
 
-		valueSet := schema.NewSet(ruleSetValueChecksum, nil)
-		valueSet.Add(valueAttrs)
+		valueSet := make([]interface{}, 0, 0)
+		valueSet = append(valueSet, valueAttrs)
 		ifAttrs[string(ruleSetThenAttr)] = thenSet
 		ifAttrs[string(ruleSetValueAttr)] = valueSet
 
 		ifRules = append(ifRules, ifAttrs)
+
 	}
 
 	_ = d.Set(ruleSetCheckAttr, rs.CheckCID)
@@ -504,7 +484,7 @@ func newRuleSet() circonusRuleSet {
 		rs.ContactGroups[i+1] = make([]string, 0, 1)
 	}
 
-	rs.Rules = make([]api.RuleSetRule, 0, 1)
+	rs.Rules = make([]api.RuleSetRule, 0, 0)
 
 	return rs
 }
@@ -515,138 +495,16 @@ func loadRuleSet(ctxt *providerContext, cid api.CIDType) (circonusRuleSet, error
 	if err != nil {
 		return circonusRuleSet{}, err
 	}
-	s, _ := json.MarshalIndent(*crs, "", "  ")
-	log.Printf("RuleSet: %s\n", s)
 	rs.RuleSet = *crs
 
 	return rs, nil
 }
 
-func ruleSetThenChecksum(v interface{}) int {
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
-
-	writeInt := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			i := v.(int)
-			if i != 0 {
-				fmt.Fprintf(b, "%x", i)
-			}
-		}
-	}
-
-	writeString := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			s := strings.TrimSpace(v.(string))
-			if s != "" {
-				fmt.Fprint(b, s)
-			}
-		}
-	}
-
-	writeStringArray := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			a := v.([]string)
-			if a != nil {
-				sort.Strings(a)
-				for _, s := range a {
-					fmt.Fprint(b, strings.TrimSpace(s))
-				}
-			}
-		}
-	}
-
-	m := v.(map[string]interface{})
-
-	writeString(m, ruleSetAfterAttr)
-	writeStringArray(m, ruleSetNotifyAttr)
-	writeInt(m, ruleSetSeverityAttr)
-
-	s := b.String()
-	return hashcode.String(s)
-}
-
-func ruleSetValueChecksum(v interface{}) int {
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
-
-	writeBool := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			fmt.Fprintf(b, "%t", v.(bool))
-		}
-	}
-
-	writeDuration := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			s := v.(string)
-			if s != "" {
-				d, _ := time.ParseDuration(s)
-				fmt.Fprint(b, d.String())
-			}
-		}
-	}
-
-	writeString := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			s := strings.TrimSpace(v.(string))
-			if s != "" {
-				fmt.Fprint(b, s)
-			}
-		}
-	}
-
-	m := v.(map[string]interface{})
-
-	if v, found := m[ruleSetValueAttr]; found {
-		valueMap := v.(map[string]interface{})
-		if valueMap != nil {
-			writeDuration(valueMap, ruleSetAbsentAttr)
-			writeBool(valueMap, ruleSetChangedAttr)
-			writeString(valueMap, ruleSetContainsAttr)
-			writeString(valueMap, ruleSetMatchAttr)
-			writeString(valueMap, ruleSetNotMatchAttr)
-			writeString(valueMap, ruleSetMinValueAttr)
-			writeString(valueMap, ruleSetNotContainAttr)
-			writeString(valueMap, ruleSetMaxValueAttr)
-
-			if v, found := valueMap[ruleSetOverAttr]; found {
-				overMap := v.(map[string]interface{})
-				writeDuration(overMap, ruleSetLastAttr)
-				writeString(overMap, ruleSetUsingAttr)
-			}
-		}
-	}
-
-	s := b.String()
-	return hashcode.String(s)
-}
-
-func ruleSetValueOverChecksum(v interface{}) int {
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
-
-	writeString := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			s := strings.TrimSpace(v.(string))
-			if s != "" {
-				fmt.Fprint(b, s)
-			}
-		}
-	}
-
-	m := v.(map[string]interface{})
-
-	writeString(m, ruleSetLastAttr)
-	writeString(m, ruleSetUsingAttr)
-
-	s := b.String()
-	return hashcode.String(s)
-}
-
 // ParseConfig reads Terraform config data and stores the information into a
-// Circonus RuleSet object.  ParseConfig, ruleSetRead(), and ruleSetChecksum
+// Circonus RuleSet object.  ParseConfig and ruleSetRead()
 // must be kept in sync.
 func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
+
 	if v, found := d.GetOk(ruleSetCheckAttr); found {
 		rs.CheckCID = v.(string)
 	}
@@ -686,7 +544,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 	if ifListRaw, found := d.GetOk(ruleSetIfAttr); found {
 		ifList := ifListRaw.([]interface{})
 		for _, ifListElem := range ifList {
-			ifAttrs := newInterfaceMap(ifListElem.(map[string]interface{}))
+			ifAttrs := ifListElem.(map[string]interface{})
 
 			rule := api.RuleSetRule{}
 			rule.WindowingFunction = nil
@@ -695,12 +553,12 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 				thenList := thenListRaw.(*schema.Set).List()
 
 				for _, thenListRaw := range thenList {
-					thenAttrs := newInterfaceMap(thenListRaw)
+					thenAttrs := thenListRaw.(map[string]interface{})
 
 					if v, found := thenAttrs[ruleSetAfterAttr]; found {
 						s := v.(string)
 						if s != "" {
-							d, err := time.ParseDuration(v.(string))
+							d, err := time.ParseDuration(v.(string) + "s")
 							if err != nil {
 								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetAfterAttr, v.(string)), err)
 							}
@@ -738,142 +596,106 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 			if ruleSetValueListRaw, found := ifAttrs[ruleSetValueAttr]; found {
 				ruleSetValueList := ruleSetValueListRaw.(*schema.Set).List()
+				vr := ruleSetValueList[0]
+				valueAttrs := vr.(map[string]interface{})
 
-				for _, valueListRaw := range ruleSetValueList {
-					valueAttrs := newInterfaceMap(valueListRaw)
-					log.Printf("valueAttrs: %v\n", valueAttrs)
-
-				METRIC_TYPE:
-					switch rs.MetricType {
-					case ruleSetMetricTypeNumeric:
-						log.Printf("Building numeric rule\n")
-						if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
-							log.Printf("Building absent rule\n")
-							s := v.(string)
-							if s != "" {
-								d, _ := time.ParseDuration(s)
-								rule.Criteria = apiRuleSetAbsent
-								rule.Value = float64(d.Seconds())
-								break METRIC_TYPE
-							}
+				switch rs.MetricType {
+				case ruleSetMetricTypeNumeric:
+					if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							d, _ := time.ParseDuration(s)
+							rule.Criteria = apiRuleSetAbsent
+							rule.Value = float64(d.Seconds())
 						}
-
-						if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(bool) == true {
-							log.Printf("Building changed rule\n")
-							b := v.(bool)
-							if b {
-								rule.Criteria = apiRuleSetChanged
-								break METRIC_TYPE
-							}
+					} else if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(string) != "" {
+						b := v.(string)
+						if b == "true" {
+							rule.Criteria = apiRuleSetChanged
 						}
-
-						if v, found := valueAttrs[ruleSetMinValueAttr]; found && v.(string) != "" {
-							log.Printf("Building min rule\n")
-							s := v.(string)
-							if s != "" {
-								rule.Criteria = apiRuleSetMinValue
-								rule.Value = s
-								break METRIC_TYPE
-							}
+					} else if v, found := valueAttrs[ruleSetMinValueAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetMinValue
+							rule.Value = s
 						}
-
-						if v, found := valueAttrs[ruleSetMaxValueAttr]; found && v.(string) != "" {
-							log.Printf("Building max rule\n")
-							s := v.(string)
-							if s != "" {
-								rule.Criteria = apiRuleSetMaxValue
-								rule.Value = s
-								break METRIC_TYPE
-							}
+					} else if v, found := valueAttrs[ruleSetMaxValueAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetMaxValue
+							rule.Value = s
 						}
-					case ruleSetMetricTypeText:
-						if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
-							s := v.(string)
-							if s != "" {
-								d, _ := time.ParseDuration(s)
-								rule.Criteria = apiRuleSetAbsent
-								rule.Value = float64(d.Seconds())
-								break METRIC_TYPE
-							}
-						}
-
-						if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(bool) == true {
-							b := v.(bool)
-							if b {
-								rule.Criteria = apiRuleSetChanged
-								break METRIC_TYPE
-							}
-						}
-
-						if v, found := valueAttrs[ruleSetContainsAttr]; found && v.(string) != "" {
-							s := v.(string)
-							if s != "" {
-								rule.Criteria = apiRuleSetContains
-								rule.Value = s
-								break METRIC_TYPE
-							}
-						}
-
-						if v, found := valueAttrs[ruleSetMatchAttr]; found && v.(string) != "" {
-							s := v.(string)
-							if s != "" {
-								rule.Criteria = apiRuleSetMatch
-								rule.Value = s
-								break METRIC_TYPE
-							}
-						}
-
-						if v, found := valueAttrs[ruleSetNotMatchAttr]; found && v.(string) != "" {
-							s := v.(string)
-							if s != "" {
-								rule.Criteria = apiRuleSetNotMatch
-								rule.Value = s
-								break METRIC_TYPE
-							}
-						}
-
-						if v, found := valueAttrs[ruleSetNotContainAttr]; found && v.(string) != "" {
-							s := v.(string)
-							if s != "" {
-								rule.Criteria = apiRuleSetNotContains
-								rule.Value = s
-								break METRIC_TYPE
-							}
-						}
-					default:
-						return fmt.Errorf("PROVIDER BUG: unsupported rule set metric type: %q", rs.MetricType)
 					}
+				case ruleSetMetricTypeText:
+					if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							d, _ := time.ParseDuration(s)
+							rule.Criteria = apiRuleSetAbsent
+							rule.Value = float64(d.Seconds())
+						}
+					} else if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(string) != "" {
+						b := v.(string)
+						if b == "true" {
+							rule.Criteria = apiRuleSetChanged
+						}
+					} else if v, found := valueAttrs[ruleSetContainsAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetContains
+							rule.Value = s
+						}
+					} else if v, found := valueAttrs[ruleSetMatchAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetMatch
+							rule.Value = s
+						}
+					} else if v, found := valueAttrs[ruleSetNotMatchAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetNotMatch
+							rule.Value = s
+						}
+					} else if v, found := valueAttrs[ruleSetNotContainAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetNotContains
+							rule.Value = s
+						}
+					}
+				default:
+					return fmt.Errorf("PROVIDER BUG: unsupported rule set metric type: %q", rs.MetricType)
+				}
 
-					if ruleSetOverListRaw, found := valueAttrs[ruleSetOverAttr]; found {
-						overList := ruleSetOverListRaw.(*schema.Set).List()
-						for _, overListRaw := range overList {
-							overAttrs := newInterfaceMap(overListRaw)
+				if ruleSetOverListRaw, found := valueAttrs[ruleSetOverAttr]; found {
+					overList := ruleSetOverListRaw.(*schema.Set).List()
+					for _, overListRaw := range overList {
+						overAttrs := overListRaw.(map[string]interface{})
 
-							windowDuration := uint(0)
-							windowFunction := ""
+						windowDuration := uint(0)
+						windowFunction := ""
 
-							if v, found := overAttrs[ruleSetLastAttr]; found {
-								last, err := time.ParseDuration(v.(string))
-								if err != nil {
-									return errwrap.Wrapf(fmt.Sprintf("unable to parse duration %s attribute", ruleSetLastAttr), err)
-								}
-								windowDuration = uint(last.Seconds())
+						if v, found := overAttrs[ruleSetLastAttr]; found {
+							i, err := strconv.Atoi(v.(string))
+							if err != nil {
+								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetLastAttr, v.(string)), err)
 							}
+							windowDuration = uint(i)
+						}
 
-							if v, found := overAttrs[ruleSetUsingAttr]; found {
-								windowFunction = v.(string)
-							}
+						if v, found := overAttrs[ruleSetUsingAttr]; found {
+							windowFunction = v.(string)
+						}
 
-							if windowFunction != "" && windowDuration > 0 {
-								rule.WindowingFunction = &windowFunction
-								rule.WindowingDuration = windowDuration
-							}
+						if windowFunction != "" && windowDuration > 0 {
+							rule.WindowingFunction = &windowFunction
+							rule.WindowingDuration = windowDuration
 						}
 					}
 				}
 			}
 			if rule.Criteria != "" {
-				log.Printf("Appending rule: %v\n", rule)
 				rs.Rules = append(rs.Rules, rule)
 			}
 		}
@@ -883,7 +705,6 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.Tags = derefStringList(flattenSet(v.(*schema.Set)))
 	}
 
-	log.Printf("RuleSet: %v\n", rs)
 	if err := rs.Validate(); err != nil {
 		return err
 	}
@@ -927,10 +748,7 @@ func (rs *circonusRuleSet) Validate() error {
 		return fmt.Errorf("RuleSet for check ID %s must supply either metric_name or metric_pattern", rs.CheckCID)
 	}
 
-	log.Printf("RuleSet: %v\n", rs)
-
 	for i, rule := range rs.Rules {
-		log.Printf("Rule %d: %v\n", i, rule)
 
 		if rule.Criteria == "" {
 			return fmt.Errorf("rule %d for check ID %s has an empty criteria", i, rs.CheckCID)
