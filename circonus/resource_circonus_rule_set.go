@@ -368,7 +368,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		switch rule.Criteria {
 		case apiRuleSetAbsent:
 			d, _ := time.ParseDuration(fmt.Sprintf("%fs", rule.Value.(float64)))
-			valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%ds", int(d.Seconds()))
+			valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%d", int(d.Seconds()))
 		case apiRuleSetChanged:
 			valueAttrs[string(ruleSetChangedAttr)] = "true"
 		case apiRuleSetContains:
@@ -604,7 +604,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
 						s := v.(string)
 						if s != "" {
-							d, _ := time.ParseDuration(s)
+							d, _ := time.ParseDuration(s + "s")
 							rule.Criteria = apiRuleSetAbsent
 							rule.Value = float64(d.Seconds())
 						}
@@ -630,7 +630,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
 						s := v.(string)
 						if s != "" {
-							d, _ := time.ParseDuration(s)
+							d, _ := time.ParseDuration(s + "s")
 							rule.Criteria = apiRuleSetAbsent
 							rule.Value = float64(d.Seconds())
 						}
