@@ -1,4 +1,15 @@
 ## 0.7.0 (Unreleased)
+
+FEATURES:
+
+* New support for check types:
+  - redis
+
+IMPROVEMENTS:
+
+* Change to `circonus_rule_set` to eliminate false differences due to time conversion.
+  Now all times in a `circonus_rule_set` are seconds.
+
 ## 0.6.0 (January 30, 2020)
 
 * **New Resource:** `circonus_maintenance` 

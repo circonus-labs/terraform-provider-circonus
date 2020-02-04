@@ -128,7 +128,10 @@ resource "circonus_metric" "used" {
 
 * `postgresql` - (Optional) A PostgreSQL check.  See below for details on how to
   configure the `postgresql` check.
-
+  
+* `redis` - (Optional) A Redis check.  See below for details on how to
+  configure the `redis` check.
+  
 * `statsd` - (Optional) A statsd check.  See below for details on how to
   configure the `statsd` check.
 
@@ -538,6 +541,19 @@ The `postgresql` check requires the `target` top-level attribute to be set.
 * `query` - (Required) The SQL query to execute.
 
 Available metric names are dependent on the output of the `query` being run.
+
+### `redis` Check Type Attributes
+
+* `command` - (Optional) String value specifies the redis command
+  to run to gather metrics.  Default: "INFO"
+
+* `password` - (Optional) Sensitive String Specify the password to 
+  use with the redis instance.
+  
+* `port` - (Optional) Integer The port to communicate on.  Default 6379
+
+* `db_index` - (Optional) Integer Which of the redis databases to gather 
+  metrics about.  Default 0
 
 ### `statsd` Check Type Attributes
 
