@@ -1,7 +1,9 @@
 package circonus
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"time"
@@ -146,7 +148,7 @@ func resourceRuleSet() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(ruleSetIfDescriptions, map[schemaAttr]*schema.Schema{
 						ruleSetThenAttr: {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
@@ -178,7 +180,7 @@ func resourceRuleSet() *schema.Resource {
 							},
 						},
 						ruleSetValueAttr: {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
@@ -231,7 +233,7 @@ func resourceRuleSet() *schema.Resource {
 										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr),
 									},
 									ruleSetOverAttr: {
-										Type:     schema.TypeSet,
+										Type:     schema.TypeList,
 										Optional: true,
 										MaxItems: 1,
 										// ruleSetOverAttr is only compatible with checks of
@@ -368,7 +370,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		switch rule.Criteria {
 		case apiRuleSetAbsent:
 			d, _ := time.ParseDuration(fmt.Sprintf("%fs", rule.Value.(float64)))
-			valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%ds", int(d.Seconds()))
+			valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%d", int(d.Seconds()))
 		case apiRuleSetChanged:
 			valueAttrs[string(ruleSetChangedAttr)] = "true"
 		case apiRuleSetContains:
@@ -397,10 +399,10 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 
 			// NOTE: Only save the window duration if a function was specified
 			valueOverAttrs[string(ruleSetLastAttr)] = fmt.Sprintf("%d", rule.WindowingDuration)
+			valueOverSet := make([]interface{}, 0, 0)
+			valueOverSet = append(valueOverSet, valueOverAttrs)
+			valueAttrs[string(ruleSetOverAttr)] = valueOverSet
 		}
-		valueOverSet := make([]interface{}, 0, 0)
-		valueOverSet = append(valueOverSet, valueOverAttrs)
-		valueAttrs[string(ruleSetOverAttr)] = valueOverSet
 
 		if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
 			sort.Strings(contactGroups)
@@ -419,6 +421,9 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	_ = d.Set(ruleSetCheckAttr, rs.CheckCID)
+
+	s, _ := json.MarshalIndent(ifRules, "", "  ")
+	log.Printf("%s", s)
 
 	if err := d.Set(ruleSetIfAttr, ifRules); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetIfAttr), err)
@@ -550,7 +555,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 			rule.WindowingFunction = nil
 
 			if thenListRaw, found := ifAttrs[ruleSetThenAttr]; found {
-				thenList := thenListRaw.(*schema.Set).List()
+				thenList := thenListRaw.([]interface{})
 
 				for _, thenListRaw := range thenList {
 					thenAttrs := thenListRaw.(map[string]interface{})
@@ -595,7 +600,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 			}
 
 			if ruleSetValueListRaw, found := ifAttrs[ruleSetValueAttr]; found {
-				ruleSetValueList := ruleSetValueListRaw.(*schema.Set).List()
+				ruleSetValueList := ruleSetValueListRaw.([]interface{})
 				vr := ruleSetValueList[0]
 				valueAttrs := vr.(map[string]interface{})
 
@@ -604,7 +609,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
 						s := v.(string)
 						if s != "" {
-							d, _ := time.ParseDuration(s)
+							d, _ := time.ParseDuration(s + "s")
 							rule.Criteria = apiRuleSetAbsent
 							rule.Value = float64(d.Seconds())
 						}
@@ -630,7 +635,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
 						s := v.(string)
 						if s != "" {
-							d, _ := time.ParseDuration(s)
+							d, _ := time.ParseDuration(s + "s")
 							rule.Criteria = apiRuleSetAbsent
 							rule.Value = float64(d.Seconds())
 						}
@@ -669,7 +674,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 				}
 
 				if ruleSetOverListRaw, found := valueAttrs[ruleSetOverAttr]; found {
-					overList := ruleSetOverListRaw.(*schema.Set).List()
+					overList := ruleSetOverListRaw.([]interface{})
 					for _, overListRaw := range overList {
 						overAttrs := overListRaw.(map[string]interface{})
 

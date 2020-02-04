@@ -14,10 +14,11 @@ import (
 
 func TestAccCirconusMaintenance_basic(t *testing.T) {
 	checkName := fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
-	st, _ := time.Parse(time.RFC3339, "2020-01-26T19:00:00-05:00")
-	et, _ := time.Parse(time.RFC3339, "2020-01-30T19:00:00-05:00")
-	startTime := st.UTC()
-	stopTime := et.UTC()
+
+	st := time.Now()
+	et := st.Add(1 * time.Hour)
+	startTime := st.Format(time.RFC3339)
+	stopTime := et.Format(time.RFC3339)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -25,11 +26,11 @@ func TestAccCirconusMaintenance_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusMaintenance,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusMaintenanceConfigFmt, checkName, startTime.Format(time.RFC3339), stopTime.Format(time.RFC3339)),
+				Config: fmt.Sprintf(testAccCirconusMaintenanceConfigFmt, checkName, startTime, stopTime),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_maintenance.check-maintenance", "check"),
-					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "start", startTime.Format(time.RFC3339)),
-					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "stop", stopTime.Format(time.RFC3339)),
+					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "start", startTime),
+					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "stop", stopTime),
 					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "notes", "foo notes"),
 					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "severities.#", "5"),
 					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "severities.0", "1"),

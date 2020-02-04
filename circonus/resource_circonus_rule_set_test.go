@@ -28,52 +28,45 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "metric_type", "numeric"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "notes", "Simple check to create notifications based on ICMP performance."),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "link", "https://wiki.example.org/playbook/what-to-do-when-high-latency-strikes"),
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "parent", "some check ID"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.#", "4"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.#", "1"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.360613670.absent", "70s"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.360613670.over.#", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.0.absent", "70"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.0.over.#", "0"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.#", "1"),
-					// Computed:
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.<computed>.notify.#", "1"),
-					// resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.0.then.<computed>.notify.0"),
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.<computed>.severity", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.notify.0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.severity", "1"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.#", "1"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.2300199732.over.#", "1"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.2300199732.over.689776960.last", "120s"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.2300199732.over.689776960.using", "average"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.2300199732.min_value", "2"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.over.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.over.0.last", "120"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.over.0.using", "average"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.min_value", "2"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.then.#", "1"),
-					// Computed:
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.then.<computed>.notify.#", "1"),
-					// resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.1.then.<computed>.notify.0"),
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.then.<computed>.severity", "2"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.1.then.0.notify.0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.then.0.severity", "2"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.#", "1"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.2842654150.over.#", "1"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.2842654150.over.999877839.last", "180s"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.2842654150.over.999877839.using", "average"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.2842654150.max_value", "300"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.over.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.over.0.last", "180"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.over.0.using", "average"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.max_value", "300"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.then.#", "1"),
-					// Computed:
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.then.<computed>.notify.#", "1"),
-					// resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.2.then.<computed>.notify.0"),
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.then.<computed>.severity", "3"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.2.then.0.notify.0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.then.0.severity", "3"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.value.#", "1"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.value.803690187.over.#", "0"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.value.803690187.max_value", "400"),
-					// Computed:
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.then.<computed>.notify.#", "1"),
-					// resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.3.then.<computed>.notify.0"),
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.then.<computed>.after", "2400s"),
-					// resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.then.<computed>.severity", "4"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.value.0.over.#", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.value.0.max_value", "400"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.3.then.0.notify.0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.then.0.after", "2400"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.3.then.0.severity", "4"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.1401442048", "lifecycle:unittest"),
 				),
 			},
 		},
@@ -160,7 +153,7 @@ resource "circonus_rule_set" "icmp-latency-alarm" {
   metric_name = "maximum"
   // metric_name = "${circonus_check.api_latency.metric["maximum"].name}"
   // metric_type = "${circonus_check.api_latency.metric["maximum"].type}"
-  notes = <<EOF
+  notes = <<-EOF
 Simple check to create notifications based on ICMP performance.
 EOF
   link = "https://wiki.example.org/playbook/what-to-do-when-high-latency-strikes"
