@@ -1,4 +1,14 @@
 ## 0.8.0 (Unreleased)
+
+FEATURES:
+
+* New support for check types:
+  - dns
+
+IMPROVEMENTS:
+
+* Change `circonus_check.metric_filters` a List to preserve order of filters
+
 ## 0.7.0 (February 05, 2020)
 
 FEATURES:
