@@ -91,6 +91,9 @@ resource "circonus_metric" "used" {
 * `consul` - (Optional) A native Consul check.  See below for details on how to
   configure a `consul` check.
 
+* `dns` - (Optional) A DNS check.  See below for details on how to
+  configure a `dns` check.
+
 * `http` - (Optional) A poll-based HTTP check.  See below for details on how to configure
   the `http` check.
 
@@ -388,6 +391,56 @@ resource "circonus_check" "consul_server" {
   tags = [ "source:consul", "lifecycle:unittest" ]
 }
 ```
+
+### `dns` Check Type Attributes
+
+* `ctype` - (Optional) The DNS class of the query. IN: Internet, CH: Chaos, HS: Hesoid.  Defaults to "IN".
+* `nameserver` - (Optional) For non-"IN" ctype checks, the nameserver you want to use.
+* `query` - (Required) The name to query.
+* `rtype` - (Required) The DNS resource record type of the query. Default is A.
+
+Available metrics include: `answer`, `rtt`, and `ttl`.  See the
+[`dns` check type](https://login.circonus.com/resources/api/calls/check_bundle)
+for additional details.
+
+Example DNS check (partial metrics collection):
+
+```hcl
+resource "circonus_check" "dns_google_mx" {
+  active = true
+  name = "%s"
+  period = "60s"
+
+  collector {
+    id = "/broker/1"
+  }
+
+  dns {
+    query = "google.com"
+    rtype = "MX"
+  }
+
+  metric {
+    name = "answer"
+    type = "text"
+  }
+
+  metric {
+    name = "rtt"
+    type = "numeric"
+    unit = "milliseconds"
+  }
+
+  metric {
+    name = "ttl"
+    type = "numeric"
+    unit = "seconds"
+  }
+
+  tags = [ "source:consul", "lifecycle:unittest" ]
+}
+```
+
 
 ### `http` Check Type Attributes
 

@@ -18,14 +18,12 @@ package circonus
  */
 
 import (
-	"bytes"
 	"fmt"
 	"time"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -36,6 +34,7 @@ const (
 	checkCloudWatchAttr   = "cloudwatch"
 	checkCollectorAttr    = "collector"
 	checkConsulAttr       = "consul"
+	checkDNSAttr          = "dns"
 	checkExternalAttr     = "external"
 	checkHTTPAttr         = "http"
 	checkHTTPTrapAttr     = "httptrap"
@@ -86,6 +85,7 @@ const (
 	apiCheckTypeCAQLAttr       apiCheckType = "caql"
 	apiCheckTypeCloudWatchAttr apiCheckType = "cloudwatch"
 	apiCheckTypeConsulAttr     apiCheckType = "consul"
+	apiCheckTypeDNSAttr        apiCheckType = "dns"
 	apiCheckTypeExternalAttr   apiCheckType = "external"
 	apiCheckTypeHTTPAttr       apiCheckType = "http"
 	apiCheckTypeHTTPTrapAttr   apiCheckType = "httptrap"
@@ -108,6 +108,7 @@ var checkDescriptions = attrDescrs{
 	checkCloudWatchAttr:   "CloudWatch check configuration",
 	checkCollectorAttr:    "The collector(s) that are responsible for gathering the metrics",
 	checkConsulAttr:       "Consul check configuration",
+	checkDNSAttr:          "DNS check configuration",
 	checkExternalAttr:     "External check configuration",
 	checkHTTPAttr:         "HTTP check configuration",
 	checkHTTPTrapAttr:     "HTTP Trap check configuration",
@@ -149,9 +150,10 @@ var checkCollectorDescriptions = attrDescrs{
 
 var checkMetricDescriptions = metricDescriptions
 var checkMetricFilterDescriptions = attrDescrs{
-	"type":    "'allow' or 'deny'",
-	"regex":   "Regex of the filter",
-	"comment": "Comment on this filter",
+	"type":      "'allow' or 'deny'",
+	"regex":     "Regex of the filter",
+	"comment":   "Comment on this filter",
+	"tag_query": "The tag query to apply",
 }
 
 func resourceCheck() *schema.Resource {
@@ -188,6 +190,7 @@ func resourceCheck() *schema.Resource {
 				},
 			},
 			checkConsulAttr:    schemaCheckConsul,
+			checkDNSAttr:       schemaCheckDNS,
 			checkExternalAttr:  schemaCheckExternal,
 			checkHTTPAttr:      schemaCheckHTTP,
 			checkHTTPTrapAttr:  schemaCheckHTTPTrap,
@@ -228,9 +231,8 @@ func resourceCheck() *schema.Resource {
 				},
 			},
 			checkMetricFilterAttr: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList, // order matters here so use a List
 				Optional: true,
-				Set:      checkMetricFilterChecksum,
 				MinItems: 0,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(checkMetricFilterDescriptions, map[schemaAttr]*schema.Schema{
@@ -245,6 +247,11 @@ func resourceCheck() *schema.Resource {
 							ValidateFunc: validateRegexp(metricNameAttr, `.+`),
 						},
 						"comment": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(metricNameAttr, `.+`),
+						},
+						"tag_query": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validateRegexp(metricNameAttr, `.+`),
@@ -432,15 +439,21 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 		metrics.Add(metricAttrs)
 	}
 
-	metricFilters := schema.NewSet(checkMetricFilterChecksum, nil)
+	metricFilters := make([]interface{}, 0)
 	for _, m := range c.MetricFilters {
 		metricFilterAttrs := map[string]interface{}{
-			"type":    m[0],
-			"regex":   m[1],
-			"comment": m[2],
+			"type":  m[0],
+			"regex": m[1],
+		}
+		if m[2] == "tags" {
+			metricFilterAttrs["tag_query"] = m[3]
+			metricFilterAttrs["comment"] = m[4]
+		} else {
+			metricFilterAttrs["tag_query"] = ""
+			metricFilterAttrs["comment"] = m[2]
 		}
 
-		metricFilters.Add(metricFilterAttrs)
+		metricFilters = append(metricFilters, metricFilterAttrs)
 	}
 
 	// Write the global circonus_check parameters followed by the check
@@ -544,29 +557,6 @@ func checkMetricChecksum(v interface{}) int {
 	return csum
 }
 
-func checkMetricFilterChecksum(v interface{}) int {
-	m := v.(map[string]interface{})
-
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
-
-	// Order writes to the buffer using lexically sorted list for easy visual
-	// reconciliation with other lists.
-	if v, found := m["comment"]; found {
-		fmt.Fprint(b, v.(string))
-	}
-	if v, found := m["regex"]; found {
-		fmt.Fprint(b, v.(string))
-	}
-	if v, found := m["type"]; found {
-		fmt.Fprint(b, v.(string))
-	}
-
-	s := b.String()
-	csum := hashcode.String(s)
-	return csum
-}
-
 // ParseConfig reads Terraform config data and stores the information into a
 // Circonus CheckBundle object.
 func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
@@ -639,7 +629,7 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 	}
 
 	if v, found := d.GetOk(checkMetricFilterAttr); found {
-		metricFilterList := v.(*schema.Set).List()
+		metricFilterList := v.([]interface{})
 		c.MetricFilters = make([][]string, 0, len(metricFilterList))
 
 		for _, metricFilterListRaw := range metricFilterList {
@@ -652,6 +642,11 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 			if av, found := metricFilterAttrs["regex"]; found {
 				m = append(m, av.(string))
 			}
+			if av, found := metricFilterAttrs["tag_query"]; found {
+				m = append(m, "tags")
+				m = append(m, av.(string))
+			}
+
 			if av, found := metricFilterAttrs["comment"]; found {
 				m = append(m, av.(string))
 			}
@@ -700,6 +695,7 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 		checkCAQLAttr:       checkConfigToAPICAQL,
 		checkCloudWatchAttr: checkConfigToAPICloudWatch,
 		checkConsulAttr:     checkConfigToAPIConsul,
+		checkDNSAttr:        checkConfigToAPIDNS,
 		checkExternalAttr:   checkConfigToAPIExternal,
 		checkHTTPAttr:       checkConfigToAPIHTTP,
 		checkHTTPTrapAttr:   checkConfigToAPIHTTPTrap,
@@ -743,6 +739,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 		apiCheckTypeCAQLAttr:       checkAPIToStateCAQL,
 		apiCheckTypeCloudWatchAttr: checkAPIToStateCloudWatch,
 		apiCheckTypeConsulAttr:     checkAPIToStateConsul,
+		apiCheckTypeDNSAttr:        checkAPIToStateDNS,
 		apiCheckTypeExternalAttr:   checkAPIToStateExternal,
 		apiCheckTypeHTTPAttr:       checkAPIToStateHTTP,
 		apiCheckTypeHTTPTrapAttr:   checkAPIToStateHTTPTrap,

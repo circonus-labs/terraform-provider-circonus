@@ -26,6 +26,7 @@ const (
 const (
 	apiCheckTypeCAQL       circonusCheckType = "caql"
 	apiCheckTypeConsul     circonusCheckType = "consul"
+	apiCheckTypeDNS        circonusCheckType = "dns"
 	apiCheckTypeICMPPing   circonusCheckType = "ping_icmp"
 	apiCheckTypeExternal   circonusCheckType = "external"
 	apiCheckTypeHTTP       circonusCheckType = "http"
