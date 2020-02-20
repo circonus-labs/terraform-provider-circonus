@@ -1,4 +1,5 @@
-## 0.7.0 (Unreleased)
+## 0.8.0 (Unreleased)
+## 0.7.0 (February 05, 2020)
 
 FEATURES:
 
