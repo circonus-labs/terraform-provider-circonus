@@ -7,7 +7,7 @@ FEATURES:
 
 IMPROVEMENTS:
 
-* Circonus go-apiclient 0.7.2
+* Circonus go-apiclient 0.7.3
 * Change `circonus_check.metric_filters` a List to preserve order of filters
 * Add `state` widget support to the `circonus_dashboard`
 
