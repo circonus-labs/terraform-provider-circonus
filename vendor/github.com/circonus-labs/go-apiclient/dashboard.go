@@ -99,6 +99,13 @@ type ForecastGaugeWidgetThresholds struct {
 }
 
 // StatusWidgetAgentStatusSettings defines agent status settings
+type StateWidgetBadRulesSettings struct {
+	Value     string `json:"value,omitempty"`
+	Criterion string `json:"criterion,omitempty"`
+	Color     string `json:"color,omitempty"`
+}
+
+// StatusWidgetAgentStatusSettings defines agent status settings
 type StatusWidgetAgentStatusSettings struct {
 	Search         string `json:"search,omitempty"`
 	ShowAgentTypes string `json:"show_agent_types,omitempty"`
@@ -120,14 +127,16 @@ type StatusWidgetHostStatusSettings struct {
 // DashboardWidgetSettings defines settings specific to widget
 // Note: optional attributes which are structs need to be pointers so they will be omitted
 type DashboardWidgetSettings struct {
-	AccountID           string                           `json:"account_id,omitempty"`            // alerts, clusters, gauges, graphs, lists, status
+	AccountID           string                           `json:"account_id,omitempty"`            // alerts, clusters, gauges, graphs, lists, state, status
 	Acknowledged        string                           `json:"acknowledged,omitempty"`          // alerts
 	AgentStatusSettings *StatusWidgetAgentStatusSettings `json:"agent_status_settings,omitempty"` // status
 	Algorithm           string                           `json:"algorithm,omitempty"`             // clusters
 	Autoformat          bool                             `json:"autoformat,omitempty"`            // text
+	BadRules            []StateWidgetBadRulesSettings    `json:"bad_rules,omitempty"`             // state
 	BodyFormat          string                           `json:"body_format,omitempty"`           // text
+	Caql                string                           `json:"caql,omitempty"`                  // state
 	ChartType           string                           `json:"chart_type,omitempty"`            // charts
-	CheckUUID           string                           `json:"check_uuid,omitempty"`            // gauges
+	CheckUUID           string                           `json:"check_uuid,omitempty"`            // gauges, state
 	Cleared             string                           `json:"cleared,omitempty"`               // alerts
 	ClusterID           uint                             `json:"cluster_id,omitempty"`            // clusters
 	ClusterName         string                           `json:"cluster_name,omitempty"`          // clusters
@@ -139,8 +148,10 @@ type DashboardWidgetSettings struct {
 	Dependents          string                           `json:"dependents,omitempty"`            // alerts
 	DisableAutoformat   bool                             `json:"disable_autoformat,omitempty"`    // gauges
 	Display             string                           `json:"display,omitempty"`               // alerts
+	DisplayMarkup       string                           `json:"display_markup,omitempty"`        // state
 	Format              string                           `json:"format,omitempty"`                // forecasts
 	Formula             string                           `json:"formula,omitempty"`               // gauges
+	GoodColor           string                           `json:"good_color,omitempty"`            // state
 	GraphUUID           string                           `json:"graph_id,omitempty"`              // graphs
 	HideXAxis           bool                             `json:"hide_xaxis,omitempty"`            // graphs
 	HideYAxis           bool                             `json:"hide_yaxis,omitempty"`            // graphs
@@ -151,11 +162,13 @@ type DashboardWidgetSettings struct {
 	KeyWrap             bool                             `json:"key_wrap,omitempty"`              // graphs
 	Label               string                           `json:"label,omitempty"`                 // graphs
 	Layout              string                           `json:"layout,omitempty"`                // clusters
+	LayoutStyle         string                           `json:"layout_style,omitempty"`          // state
 	Limit               uint                             `json:"limit,omitempty"`                 // lists
+	LinkUrl             string                           `json:"link_url,omitempty"`              // link_url
 	Maintenance         string                           `json:"maintenance,omitempty"`           // alerts
 	Markup              string                           `json:"markup,omitempty"`                // html
-	MetricDisplayName   string                           `json:"metric_display_name,omitempty"`   // gauges
-	MetricName          string                           `json:"metric_name,omitempty"`           // gauges
+	MetricDisplayName   string                           `json:"metric_display_name,omitempty"`   // gauges, state
+	MetricName          string                           `json:"metric_name,omitempty"`           // gauges, state
 	MinAge              string                           `json:"min_age,omitempty"`               // alerts
 	OffHours            []uint                           `json:"off_hours,omitempty"`             // alerts
 	OverlaySetID        string                           `json:"overlay_set_id,omitempty"`        // graphs
@@ -168,12 +181,14 @@ type DashboardWidgetSettings struct {
 	Search              string                           `json:"search,omitempty"`                // alerts, lists
 	Severity            string                           `json:"severity,omitempty"`              // alerts
 	ShowFlags           bool                             `json:"show_flags,omitempty"`            // graphs
+	ShowValue           bool                             `json:"show_value,omitempty"`            // state
 	Size                string                           `json:"size,omitempty"`                  // clusters
+	TextAlign           string                           `json:"text_align,omitempty"`            // state
 	TagFilterSet        []string                         `json:"tag_filter_set,omitempty"`        // alerts
 	Threshold           float32                          `json:"threshold,omitempty"`             // clusters
 	Thresholds          *ForecastGaugeWidgetThresholds   `json:"thresholds,omitempty"`            // forecasts, gauges
 	TimeWindow          string                           `json:"time_window,omitempty"`           // alerts
-	Title               string                           `json:"title,omitempty"`                 // alerts, charts, forecasts, gauges, html
+	Title               string                           `json:"title,omitempty"`                 // alerts, charts, forecasts, gauges, html, state
 	TitleFormat         string                           `json:"title_format,omitempty"`          // text
 	Trend               string                           `json:"trend,omitempty"`                 // forecasts
 	Type                string                           `json:"type,omitempty"`                  // gauges, lists

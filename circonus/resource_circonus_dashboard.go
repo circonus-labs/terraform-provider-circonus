@@ -176,7 +176,32 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
+									"bad_rules": &schema.Schema{
+										Type:     schema.TypeList,
+										Optional: true,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"value": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"criterion": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+												"color": &schema.Schema{
+													Type:     schema.TypeString,
+													Required: true,
+												},
+											},
+										},
+									},
 									"body_format": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"caql": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
 									},
@@ -241,6 +266,10 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"display_markup": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
 									"format": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
@@ -249,12 +278,24 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"good_color": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
 									"layout": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"layout_style": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
 									},
 									"limit": &schema.Schema{
 										Type:     schema.TypeInt,
+										Optional: true,
+									},
+									"link_url": &schema.Schema{
+										Type:     schema.TypeString,
 										Optional: true,
 									},
 									"maintenance": &schema.Schema{
@@ -305,7 +346,15 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"show_value": &schema.Schema{
+										Type:     schema.TypeBool,
+										Optional: true,
+									},
 									"size": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"text_align": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
 									},
@@ -499,7 +548,17 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["acknowledged"] = widget.Settings.Acknowledged
 		dashWidgetSettingsAttrs["algorithm"] = widget.Settings.Algorithm
 		dashWidgetSettingsAttrs["autoformat"] = widget.Settings.Autoformat
+		brs := make([]map[string]interface{}, 0, 0)
+		for _, br := range widget.Settings.BadRules {
+			brAttrs := make(map[string]interface{}, 3)
+			brAttrs["value"] = br.Value
+			brAttrs["criterion"] = br.Criterion
+			brAttrs["color"] = br.Color
+			brs = append(brs, brAttrs)
+		}
+		dashWidgetSettingsAttrs["bad_rules"] = brs
 		dashWidgetSettingsAttrs["body_format"] = widget.Settings.BodyFormat
+		dashWidgetSettingsAttrs["caql"] = widget.Settings.Caql
 		dashWidgetSettingsAttrs["chart_type"] = widget.Settings.ChartType
 		dashWidgetSettingsAttrs["check_uuid"] = widget.Settings.CheckUUID
 		dashWidgetSettingsAttrs["cleared"] = widget.Settings.Cleared
@@ -520,10 +579,14 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["dependents"] = widget.Settings.Dependents
 		dashWidgetSettingsAttrs["disable_autoformat"] = widget.Settings.DisableAutoformat
 		dashWidgetSettingsAttrs["display"] = widget.Settings.Display
+		dashWidgetSettingsAttrs["display_markup"] = widget.Settings.DisplayMarkup
 		dashWidgetSettingsAttrs["format"] = widget.Settings.Format
 		dashWidgetSettingsAttrs["formula"] = widget.Settings.Formula
+		dashWidgetSettingsAttrs["good_color"] = widget.Settings.GoodColor
 		dashWidgetSettingsAttrs["layout"] = widget.Settings.Layout
+		dashWidgetSettingsAttrs["layout_style"] = widget.Settings.LayoutStyle
 		dashWidgetSettingsAttrs["limit"] = int(widget.Settings.Limit)
+		dashWidgetSettingsAttrs["link_url"] = widget.Settings.LinkUrl
 		dashWidgetSettingsAttrs["maintenance"] = widget.Settings.Maintenance
 		dashWidgetSettingsAttrs["markup"] = widget.Settings.Markup
 		dashWidgetSettingsAttrs["metric_display_name"] = widget.Settings.MetricDisplayName
@@ -541,7 +604,9 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["resource_usage"] = widget.Settings.ResourceUsage
 		dashWidgetSettingsAttrs["search"] = widget.Settings.Search
 		dashWidgetSettingsAttrs["severity"] = widget.Settings.Severity
+		dashWidgetSettingsAttrs["show_value"] = widget.Settings.ShowValue
 		dashWidgetSettingsAttrs["size"] = widget.Settings.Size
+		dashWidgetSettingsAttrs["text_align"] = widget.Settings.TextAlign
 		dashWidgetSettingsAttrs["tag_filter_set"] = widget.Settings.TagFilterSet
 		dashWidgetSettingsAttrs["threshold"] = widget.Settings.Threshold
 		if widget.Settings.Thresholds != nil {
@@ -816,8 +881,30 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["autoformat"]; found {
 						w.Settings.Autoformat = v.(bool)
 					}
+					if v, found := sMap["bad_rules"]; found {
+						w.Settings.BadRules = make([]api.StateWidgetBadRulesSettings, 0)
+
+						brList := v.([]interface{})
+						for _, brElem := range brList {
+							brAttrs := brElem.(map[string]interface{})
+							br := api.StateWidgetBadRulesSettings{}
+							if vv, found := brAttrs["value"]; found {
+								br.Value = (vv.(string))
+							}
+							if vv, found := brAttrs["criterion"]; found {
+								br.Criterion = (vv.(string))
+							}
+							if vv, found := brAttrs["color"]; found {
+								br.Color = (vv.(string))
+							}
+							w.Settings.BadRules = append(w.Settings.BadRules, br)
+						}
+					}
 					if v, found := sMap["body_format"]; found {
 						w.Settings.BodyFormat = (v.(string))
+					}
+					if v, found := sMap["caql"]; found {
+						w.Settings.Caql = (v.(string))
 					}
 					if v, found := sMap["chart_type"]; found {
 						w.Settings.ChartType = (v.(string))
@@ -878,11 +965,17 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["display"]; found {
 						w.Settings.Display = (v.(string))
 					}
+					if v, found := sMap["display_markup"]; found {
+						w.Settings.Display = (v.(string))
+					}
 					if v, found := sMap["format"]; found {
 						w.Settings.Format = (v.(string))
 					}
 					if v, found := sMap["formula"]; found {
 						w.Settings.Formula = (v.(string))
+					}
+					if v, found := sMap["good_color"]; found {
+						w.Settings.GoodColor = (v.(string))
 					}
 					if v, found := sMap["graph_uuid"]; found {
 						w.Settings.GraphUUID = (v.(string))
@@ -909,6 +1002,12 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Label = (v.(string))
 					}
 					if v, found := sMap["layout"]; found {
+						w.Settings.Layout = (v.(string))
+					}
+					if v, found := sMap["layout_style"]; found {
+						w.Settings.Layout = (v.(string))
+					}
+					if v, found := sMap["link_url"]; found {
 						w.Settings.Layout = (v.(string))
 					}
 					if v, found := sMap["limit"]; found {
@@ -975,8 +1074,14 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["show_flags"]; found {
 						w.Settings.ShowFlags = v.(bool)
 					}
+					if v, found := sMap["show_value"]; found {
+						w.Settings.ShowFlags = v.(bool)
+					}
 					if v, found := sMap["size"]; found {
 						w.Settings.Size = (v.(string))
+					}
+					if v, found := sMap["text_align"]; found {
+						w.Settings.TextAlign = (v.(string))
 					}
 					if v, found := sMap["threshold"]; found {
 						w.Settings.Threshold = float32((v.(float64)))
