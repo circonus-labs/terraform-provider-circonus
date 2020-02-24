@@ -1005,10 +1005,10 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Layout = (v.(string))
 					}
 					if v, found := sMap["layout_style"]; found {
-						w.Settings.Layout = (v.(string))
+						w.Settings.LayoutStyle = (v.(string))
 					}
 					if v, found := sMap["link_url"]; found {
-						w.Settings.Layout = (v.(string))
+						w.Settings.LinkUrl = (v.(string))
 					}
 					if v, found := sMap["limit"]; found {
 						w.Settings.Limit = uint(v.(int))
