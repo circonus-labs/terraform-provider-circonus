@@ -958,7 +958,6 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["dependents"]; found {
 						w.Settings.Dependents = (v.(string))
 					}
-
 					if v, found := sMap["disable_autoformat"]; found {
 						w.Settings.DisableAutoformat = v.(bool)
 					}
@@ -966,7 +965,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Display = (v.(string))
 					}
 					if v, found := sMap["display_markup"]; found {
-						w.Settings.Display = (v.(string))
+						w.Settings.DisplayMarkup = (v.(string))
 					}
 					if v, found := sMap["format"]; found {
 						w.Settings.Format = (v.(string))
