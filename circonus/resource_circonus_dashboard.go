@@ -958,7 +958,6 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["dependents"]; found {
 						w.Settings.Dependents = (v.(string))
 					}
-
 					if v, found := sMap["disable_autoformat"]; found {
 						w.Settings.DisableAutoformat = v.(bool)
 					}
@@ -966,7 +965,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Display = (v.(string))
 					}
 					if v, found := sMap["display_markup"]; found {
-						w.Settings.Display = (v.(string))
+						w.Settings.DisplayMarkup = (v.(string))
 					}
 					if v, found := sMap["format"]; found {
 						w.Settings.Format = (v.(string))
@@ -1005,10 +1004,10 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.Layout = (v.(string))
 					}
 					if v, found := sMap["layout_style"]; found {
-						w.Settings.Layout = (v.(string))
+						w.Settings.LayoutStyle = (v.(string))
 					}
 					if v, found := sMap["link_url"]; found {
-						w.Settings.Layout = (v.(string))
+						w.Settings.LinkUrl = (v.(string))
 					}
 					if v, found := sMap["limit"]; found {
 						w.Settings.Limit = uint(v.(int))
@@ -1075,7 +1074,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.ShowFlags = v.(bool)
 					}
 					if v, found := sMap["show_value"]; found {
-						w.Settings.ShowFlags = v.(bool)
+						w.Settings.ShowValue = v.(bool)
 					}
 					if v, found := sMap["size"]; found {
 						w.Settings.Size = (v.(string))
