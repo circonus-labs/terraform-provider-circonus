@@ -1075,7 +1075,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.ShowFlags = v.(bool)
 					}
 					if v, found := sMap["show_value"]; found {
-						w.Settings.ShowFlags = v.(bool)
+						w.Settings.ShowValue = v.(bool)
 					}
 					if v, found := sMap["size"]; found {
 						w.Settings.Size = (v.(string))
