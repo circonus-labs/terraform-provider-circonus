@@ -199,9 +199,8 @@ func resourceCheck() *schema.Resource {
 			checkMemcachedAttr: schemaCheckMemcached,
 			checkJSONAttr:      schemaCheckJSON,
 			checkMetricAttr: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
-				Set:      checkMetricChecksum,
 				MinItems: 0,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(checkMetricDescriptions, map[schemaAttr]*schema.Schema{
@@ -426,7 +425,7 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 		checkID = c.Checks[0]
 	}
 
-	metrics := schema.NewSet(checkMetricChecksum, nil)
+	metrics := make([]interface{}, 0)
 	for _, m := range c.Metrics {
 		metricAttrs := map[string]interface{}{
 			string(metricActiveAttr): metricAPIStatusToBool(m.Status),
@@ -436,7 +435,7 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 			string(metricUnitAttr):   indirect(m.Units),
 		}
 
-		metrics.Add(metricAttrs)
+		metrics = append(metrics, metricAttrs)
 	}
 
 	metricFilters := make([]interface{}, 0)
@@ -551,12 +550,6 @@ func checkDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func checkMetricChecksum(v interface{}) int {
-	m := v.(map[string]interface{})
-	csum := metricChecksum(m)
-	return csum
-}
-
 // ParseConfig reads Terraform config data and stores the information into a
 // Circonus CheckBundle object.
 func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
@@ -600,7 +593,7 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 	}
 
 	if v, found := d.GetOk(checkMetricAttr); found {
-		metricList := v.(*schema.Set).List()
+		metricList := v.([]interface{})
 		c.Metrics = make([]api.CheckBundleMetric, 0, len(metricList))
 
 		for _, metricListRaw := range metricList {
