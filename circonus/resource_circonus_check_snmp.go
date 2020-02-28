@@ -76,6 +76,7 @@ var schemaCheckSNMP = &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkSNMPAuthProtocol, `(MD5|SHA)`),
+				Default:      "MD5",
 			},
 			checkSNMPCommunity: {
 				Type:         schema.TypeString,
@@ -105,6 +106,7 @@ var schemaCheckSNMP = &schema.Schema{
 			checkSNMPPrivacyProtocol: {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Default:      "DES",
 				ValidateFunc: validateRegexp(checkSNMPPrivacyProtocol, `(DES|AES128|AES)`),
 			},
 			checkSNMPSecurityEngine: {
@@ -116,6 +118,7 @@ var schemaCheckSNMP = &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkSNMPSecurityLevel, `(noAuthNoPriv|authNoPriv|authPriv)`),
+				Default:      "authPriv",
 			},
 			checkSNMPSecurityName: {
 				Type:         schema.TypeString,
@@ -125,11 +128,13 @@ var schemaCheckSNMP = &schema.Schema{
 			checkSNMPSeparateQueries: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			checkSNMPVersion: {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateRegexp(checkSNMPVersion, `(1|2c|3)`),
+				Default:      "2c",
 			},
 			checkSNMPOID: {
 				Type:     schema.TypeList,
