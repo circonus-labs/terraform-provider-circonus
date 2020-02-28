@@ -134,7 +134,6 @@ var schemaCheckSNMP = &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateRegexp(checkSNMPVersion, `(1|2c|3)`),
-				Default:      "2c",
 			},
 			checkSNMPOID: {
 				Type:     schema.TypeList,
