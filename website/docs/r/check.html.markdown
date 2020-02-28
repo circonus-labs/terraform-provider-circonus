@@ -53,9 +53,9 @@ EOF
     }
   }
 
-  period       = 60
+  period       = "60s"
   tags         = ["source:circonus", "author:terraform"]
-  timeout      = 10
+  timeout      = "10s"
 }
 
 resource "circonus_metric" "used" {
@@ -127,7 +127,7 @@ resource "circonus_metric" "used" {
 * `notes` - (Optional) Notes about this check.
 
 * `period` - (Optional) The period between each time the check is made in
-  seconds.
+  seconds. Default is `"60s"`.
 
 * `postgresql` - (Optional) A PostgreSQL check.  See below for details on how to
   configure the `postgresql` check.
@@ -148,8 +148,8 @@ resource "circonus_metric" "used" {
 * `tcp` - (Optional) A TCP check.  See below for details on how to configure the
   `tcp` check (includes TLS support).
 
-* `timeout` - (Optional) A floating point number representing the maximum number
-  of seconds this check should wait for a result.  Defaults to `10.0`.
+* `timeout` - (Optional) A string representing the maximum number
+  of seconds this check should wait for a result.  Defaults to `"10s"`.
 
 ## Supported `metric` Attributes
 
