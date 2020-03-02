@@ -737,6 +737,15 @@ func (rs *circonusRuleSet) Update(ctxt *providerContext) error {
 	return nil
 }
 
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
 func (rs *circonusRuleSet) Validate() error {
 	// TODO(sean@): From https://login.circonus.com/resources/api/calls/rule_set
 	// under `value`:
@@ -757,6 +766,17 @@ func (rs *circonusRuleSet) Validate() error {
 
 		if rule.Criteria == "" {
 			return fmt.Errorf("rule %d for check ID %s has an empty criteria", i, rs.CheckCID)
+		}
+
+		if stringInSlice(rule.Criteria, []string{apiRuleSetMatch, apiRuleSetNotMatch, apiRuleSetContains, apiRuleSetNotContains}) {
+			if rs.MetricType != "text" {
+				return fmt.Errorf("rule %d for check ID %s is using a textual criteria '%s' but is flagged as a numeric type.  Did you mean 'metric_type = \"text\"'?", i, rs.CheckCID, rule.Criteria)
+			}
+		}
+		if stringInSlice(rule.Criteria, []string{apiRuleSetMaxValue, apiRuleSetMinValue}) {
+			if rs.MetricType != "numeric" {
+				return fmt.Errorf("rule %d for check ID %s is using a numeric criteria '%s' but is flagged as a text type.  Did you mean 'metric_type = \"numeric\"'?", i, rs.CheckCID, rule.Criteria)
+			}
 		}
 	}
 
