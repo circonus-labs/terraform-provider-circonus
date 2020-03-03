@@ -314,6 +314,10 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"metric_type": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
 									"min_age": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
@@ -591,6 +595,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["markup"] = widget.Settings.Markup
 		dashWidgetSettingsAttrs["metric_display_name"] = widget.Settings.MetricDisplayName
 		dashWidgetSettingsAttrs["metric_name"] = widget.Settings.MetricName
+		dashWidgetSettingsAttrs["metric_type"] = widget.Settings.MetricType
 		dashWidgetSettingsAttrs["min_age"] = widget.Settings.MinAge
 		dashWidgetSettingsAttrs["off_hours"] = widget.Settings.OffHours
 		dashWidgetSettingsAttrs["overlay_set_id"] = widget.Settings.OverlaySetID
@@ -1023,6 +1028,9 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					}
 					if v, found := sMap["metric_name"]; found {
 						w.Settings.MetricName = (v.(string))
+					}
+					if v, found := sMap["metric_type"]; found {
+						w.Settings.MetricType = (v.(string))
 					}
 					if v, found := sMap["min_age"]; found {
 						w.Settings.MinAge = (v.(string))

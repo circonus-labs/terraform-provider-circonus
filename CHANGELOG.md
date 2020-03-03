@@ -1,4 +1,13 @@
 ## 0.9.0 (Unreleased)
+
+IMPROVEMENTS:
+
+* Fix to prevent noop updates to SNMP checks 
+* The metrics in a check should be a list, not a set, to preserve order (noop updates again)
+* Add a test for metric_filters in a check
+* Add validation for a ruleset to prevent metric_type -> Rule.Criteria mismatches
+
+
 ## 0.8.0 (February 24, 2020)
 
 FEATURES:
