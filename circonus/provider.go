@@ -149,6 +149,8 @@ func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, e
 		return nil, errwrap.Wrapf("Error initializing Circonus: %s", err)
 	}
 
+	client.EnableExponentialBackoff()
+
 	tfVer = tfVersion
 
 	return &providerContext{
