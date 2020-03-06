@@ -1,3 +1,7 @@
+# v0.7.5
+
+* fix: break, return error on 404 result with exponential backoff
+
 # v0.7.4
 
 * fix: `metric_type` field on dashboard state widget
