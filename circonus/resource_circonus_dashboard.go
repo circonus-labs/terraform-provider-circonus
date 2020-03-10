@@ -489,47 +489,47 @@ func resourceDashboard() *schema.Resource {
 	}
 }
 
-type ByWidgetId []interface{}
+type ByWidgetId []map[string]interface{}
 
 func (a ByWidgetId) Len() int      { return len(a) }
 func (a ByWidgetId) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByWidgetId) Less(i, j int) bool {
-	x := a[i].(map[string]interface{})
-	y := a[j].(map[string]interface{})
+	x := a[i]
+	y := a[j]
 	return x["widget_id"].(string) < y["widget_id"].(string)
 }
 
 func hashWidgets(vv interface{}) int {
 	b := &bytes.Buffer{}
 	b.Grow(defaultHashBufSize)
-	widgetsRaw := vv.(*schema.Set).List()
+
+	writeBool := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok {
+			fmt.Fprintf(b, "%t", v.(bool))
+		}
+	}
+
+	writeFloat := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok {
+			fmt.Fprintf(b, "%f", v.(float64))
+		}
+	}
+
+	writeInt := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok {
+			fmt.Fprintf(b, "%x", v.(int))
+		}
+	}
+
+	writeString := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok && v.(string) != "" {
+			fmt.Fprint(b, strings.TrimSpace(v.(string)))
+		}
+	}
+
+	widgetsRaw := vv.([]map[string]interface{})
 	sort.Sort(ByWidgetId(widgetsRaw))
-	for _, v := range widgetsRaw {
-		m := v.(map[string]interface{})
-
-		writeBool := func(m map[string]interface{}, attrName string) {
-			if v, ok := m[attrName]; ok {
-				fmt.Fprintf(b, "%t", v.(bool))
-			}
-		}
-
-		writeFloat := func(m map[string]interface{}, attrName string) {
-			if v, ok := m[attrName]; ok {
-				fmt.Fprintf(b, "%f", v.(float64))
-			}
-		}
-
-		writeInt := func(m map[string]interface{}, attrName string) {
-			if v, ok := m[attrName]; ok {
-				fmt.Fprintf(b, "%x", v.(int))
-			}
-		}
-
-		writeString := func(m map[string]interface{}, attrName string) {
-			if v, ok := m[attrName]; ok && v.(string) != "" {
-				fmt.Fprint(b, strings.TrimSpace(v.(string)))
-			}
-		}
+	for _, m := range widgetsRaw {
 
 		// Order writes to the buffer using lexically sorted list for easy visual
 		// reconciliation with other lists.
