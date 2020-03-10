@@ -323,9 +323,12 @@ func hashCheckSNMP(v interface{}) int {
 
 	setType := reflect.TypeOf((*schema.Set)(nil)).Elem()
 
-	z := m[string(checkSNMPOID)]
 	var x []interface{}
-	if setType == z {
+
+	z := m[string(checkSNMPOID)]
+	value := reflect.ValueOf(z)
+	f := reflect.Indirect(value)
+	if f.IsValid() && f.Type() == setType {
 		x = z.(*schema.Set).List()
 	} else {
 		x = z.([]interface{})
