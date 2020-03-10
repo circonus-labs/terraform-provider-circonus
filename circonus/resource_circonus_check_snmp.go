@@ -320,7 +320,7 @@ func hashCheckSNMP(v interface{}) int {
 	writeBool(checkSNMPSeparateQueries)
 	writeString(checkSNMPVersion)
 
-	x := m[string(checkSNMPOID)].([]interface{})
+	x := m[string(checkSNMPOID)].(*schema.Set).List()
 	sort.Slice(x, func(i, j int) bool {
 		if x[i] != nil && x[j] != nil {
 			y := x[i].(map[string]interface{})
