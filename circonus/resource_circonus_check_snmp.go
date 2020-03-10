@@ -136,7 +136,7 @@ var schemaCheckSNMP = &schema.Schema{
 				ValidateFunc: validateRegexp(checkSNMPVersion, `(1|2c|3)`),
 			},
 			checkSNMPOID: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(checkSNMPOIDDescriptions, map[schemaAttr]*schema.Schema{
@@ -249,6 +249,15 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 			oid_list = append(oid_list, oidProps)
 		}
 	}
+
+	sort.Slice(oid_list, func(i, j int) bool {
+		if oid_list[i] != nil && oid_list[j] != nil {
+			y := oid_list[i].(map[string]interface{})
+			z := oid_list[j].(map[string]interface{})
+			return y["name"].(string) < z["name"].(string)
+		}
+		return true
+	})
 	snmpConfig[string(checkSNMPOID)] = oid_list
 
 	whitelistedConfigKeys := map[config.Key]struct{}{
