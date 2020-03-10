@@ -542,7 +542,7 @@ func hashWidgets(vv interface{}) int {
 		writeInt(m, "width")
 
 		if settingsRaw, ok := m["settings"]; ok {
-			settingsMap := settingsRaw.(map[string]interface{})
+			settingsMap := settingsRaw.([]map[string]interface{})[0]
 			writeString(settingsMap, "account_id")
 			writeString(settingsMap, "acknowledged")
 			writeString(settingsMap, "algorithm")
@@ -566,12 +566,12 @@ func hashWidgets(vv interface{}) int {
 			writeString(settingsMap, "content_type")
 
 			if datapointsRaw, ok := settingsMap["datapoints"]; ok {
-				datapointsListRaw := datapointsRaw.(*schema.Set).List()
+				datapointsListRaw := datapointsRaw.([]map[string]interface{})
 				for i := range datapointsListRaw {
 					if datapointsListRaw[i] == nil {
 						continue
 					}
-					dp := datapointsListRaw[i].(map[string]interface{})
+					dp := datapointsListRaw[i]
 					writeString(dp, "_metric_type")
 					writeInt(dp, "_check_id")
 					writeString(dp, "label")
@@ -609,12 +609,12 @@ func hashWidgets(vv interface{}) int {
 			writeFloat(settingsMap, "threshold")
 
 			if thresholdsRaw, ok := settingsMap["thresholds"]; ok {
-				thresholdsListRaw := thresholdsRaw.(*schema.Set).List()
+				thresholdsListRaw := thresholdsRaw.([]map[string]interface{})
 				for i := range thresholdsListRaw {
 					if thresholdsListRaw[i] == nil {
 						continue
 					}
-					t := thresholdsListRaw[i].(map[string]interface{})
+					t := thresholdsListRaw[i]
 					colors := t["colors"].([]string)
 					for c := range colors {
 						if colors[c] != "" {
