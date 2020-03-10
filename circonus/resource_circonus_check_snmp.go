@@ -137,7 +137,7 @@ var schemaCheckSNMP = &schema.Schema{
 				ValidateFunc: validateRegexp(checkSNMPVersion, `(1|2c|3)`),
 			},
 			checkSNMPOID: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(checkSNMPOIDDescriptions, map[schemaAttr]*schema.Schema{
@@ -255,7 +255,7 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 		if oid_list[i] != nil && oid_list[j] != nil {
 			y := oid_list[i].(map[string]interface{})
 			z := oid_list[j].(map[string]interface{})
-			return y["name"].(string) < z["name"].(string)
+			return y[string(checkSNMPOIDName)].(string) < z[string(checkSNMPOIDName)].(string)
 		}
 		return true
 	})
@@ -328,16 +328,20 @@ func hashCheckSNMP(v interface{}) int {
 	z := m[string(checkSNMPOID)]
 	value := reflect.ValueOf(z)
 	f := reflect.Indirect(value)
+	log.Printf("setType: %s, zType: %s\n", setType.String(), f.Type().String())
 	if f.IsValid() && f.Type() == setType {
+		log.Printf("Converting schema.Set\n")
 		x = z.(*schema.Set).List()
 	} else {
+		log.Printf("Converting Slice\n")
 		x = z.([]interface{})
 	}
+
 	sort.Slice(x, func(i, j int) bool {
 		if x[i] != nil && x[j] != nil {
 			y := x[i].(map[string]interface{})
 			z := x[j].(map[string]interface{})
-			return y["name"].(string) < z["name"].(string)
+			return y[string(checkSNMPOIDName)].(string) < z[string(checkSNMPOIDName)].(string)
 		}
 		return true
 	})
@@ -345,16 +349,15 @@ func hashCheckSNMP(v interface{}) int {
 	for _, s := range x {
 		if s != nil {
 			t := s.(map[string]interface{})
-			tstring := "any"
-			if tt, ok := t["type"]; ok {
-				tstring = tt.(string)
-			}
-			fmt.Fprintf(b, "%s%s%s", strings.TrimSpace(t["path"].(string)), strings.TrimSpace(t["name"].(string)), tstring)
+			log.Printf("path: %s, name: %s\n", t["path"].(string), t["name"].(string))
+			fmt.Fprintf(b, "%s%s", strings.TrimSpace(t["path"].(string)), strings.TrimSpace(t["name"].(string)))
 		}
 	}
 
 	s := b.String()
-	return hashcode.String(s)
+	hc := hashcode.String(s)
+	log.Printf("Hashcode: %d\n", hc)
+	return hc
 }
 
 func checkConfigToAPISNMP(c *circonusCheck, l interfaceList) error {
