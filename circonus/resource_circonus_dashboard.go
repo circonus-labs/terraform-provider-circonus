@@ -548,9 +548,9 @@ func hashWidgets(vv interface{}) int {
 			writeString(settingsMap, "algorithm")
 			writeBool(settingsMap, "autoformat")
 			if badRulesRaw, ok := settingsMap["bad_rules"]; ok {
-				badRulesList := badRulesRaw.([]interface{})
+				badRulesList := badRulesRaw.([]map[string]interface{})
 				for i := range badRulesList {
-					br := badRulesList[i].(map[string]interface{})
+					br := badRulesList[i]
 					writeString(br, "value")
 					writeString(br, "criterion")
 					writeString(br, "color")
