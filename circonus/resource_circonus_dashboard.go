@@ -3,6 +3,7 @@ package circonus
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
@@ -488,155 +489,169 @@ func resourceDashboard() *schema.Resource {
 	}
 }
 
-func hashWidgets(v interface{}) int {
-	m := v.(map[string]interface{})
+type ByWidgetId []interface{}
+
+func (a ByWidgetId) Len() int      { return len(a) }
+func (a ByWidgetId) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByWidgetId) Less(i, j int) bool {
+	x := a[i].(map[string]interface{})
+	y := a[j].(map[string]interface{})
+	return x["widget_id"].(string) < y["widget_id"].(string)
+}
+
+func hashWidgets(vv interface{}) int {
 	b := &bytes.Buffer{}
 	b.Grow(defaultHashBufSize)
+	widgetsRaw := vv.(*schema.Set).List()
+	sort.Sort(ByWidgetId(widgetsRaw))
+	for _, v := range widgetsRaw {
+		m := v.(map[string]interface{})
 
-	writeBool := func(m map[string]interface{}, attrName string) {
-		if v, ok := m[attrName]; ok {
-			fmt.Fprintf(b, "%t", v.(bool))
-		}
-	}
-
-	writeFloat := func(m map[string]interface{}, attrName string) {
-		if v, ok := m[attrName]; ok {
-			fmt.Fprintf(b, "%f", v.(float64))
-		}
-	}
-
-	writeInt := func(m map[string]interface{}, attrName string) {
-		if v, ok := m[attrName]; ok {
-			fmt.Fprintf(b, "%x", v.(int))
-		}
-	}
-
-	writeString := func(m map[string]interface{}, attrName string) {
-		if v, ok := m[attrName]; ok && v.(string) != "" {
-			fmt.Fprint(b, strings.TrimSpace(v.(string)))
-		}
-	}
-
-	// Order writes to the buffer using lexically sorted list for easy visual
-	// reconciliation with other lists.
-	writeBool(m, "active")
-	writeInt(m, "height")
-	writeString(m, "name")
-	writeString(m, "origin")
-	writeString(m, "type")
-	writeString(m, "widget_id")
-	writeInt(m, "width")
-
-	if settingsRaw, ok := m["settings"]; ok {
-		settingsMap := settingsRaw.(map[string]interface{})
-		writeString(settingsMap, "account_id")
-		writeString(settingsMap, "acknowledged")
-		writeString(settingsMap, "algorithm")
-		writeBool(settingsMap, "autoformat")
-		if badRulesRaw, ok := settingsMap["bad_rules"]; ok {
-			badRulesList := badRulesRaw.([]interface{})
-			for i := range badRulesList {
-				br := badRulesList[i].(map[string]interface{})
-				writeString(br, "value")
-				writeString(br, "criterion")
-				writeString(br, "color")
-			}
-		}
-		writeString(settingsMap, "body_format")
-		writeString(settingsMap, "caql")
-		writeString(settingsMap, "chart_type")
-		writeString(settingsMap, "check_uuid")
-		writeString(settingsMap, "cleared")
-		writeInt(settingsMap, "cluster_id")
-		writeString(settingsMap, "cluster_name")
-		writeString(settingsMap, "content_type")
-
-		if datapointsRaw, ok := settingsMap["datapoints"]; ok {
-			datapointsListRaw := datapointsRaw.(*schema.Set).List()
-			for i := range datapointsListRaw {
-				if datapointsListRaw[i] == nil {
-					continue
-				}
-				dp := datapointsListRaw[i].(map[string]interface{})
-				writeString(dp, "_metric_type")
-				writeInt(dp, "_check_id")
-				writeString(dp, "label")
-				writeString(dp, "metric")
+		writeBool := func(m map[string]interface{}, attrName string) {
+			if v, ok := m[attrName]; ok {
+				fmt.Fprintf(b, "%t", v.(bool))
 			}
 		}
 
-		writeString(settingsMap, "dependents")
-		writeBool(settingsMap, "disable_autoformat")
-		writeString(settingsMap, "display")
-		writeString(settingsMap, "display_markup")
-		writeString(settingsMap, "format")
-		writeString(settingsMap, "formula")
-		writeString(settingsMap, "good_color")
-		writeString(settingsMap, "layout")
-		writeString(settingsMap, "layout_style")
-		writeInt(settingsMap, "limit")
-		writeString(settingsMap, "link_url")
-		writeString(settingsMap, "maintenance")
-		writeString(settingsMap, "markup")
-		writeString(settingsMap, "metric_display_name")
-		writeString(settingsMap, "metric_name")
-		writeString(settingsMap, "metric_type")
-		writeString(settingsMap, "min_age")
-		writeString(settingsMap, "overlay_set_id")
-		writeInt(settingsMap, "range_high")
-		writeInt(settingsMap, "range_low")
-		writeString(settingsMap, "resource_limit")
-		writeString(settingsMap, "resource_usage")
-		writeString(settingsMap, "search")
-		writeString(settingsMap, "severity")
-		writeBool(settingsMap, "show_value")
-		writeString(settingsMap, "size")
-		writeString(settingsMap, "text_align")
-		writeFloat(settingsMap, "threshold")
+		writeFloat := func(m map[string]interface{}, attrName string) {
+			if v, ok := m[attrName]; ok {
+				fmt.Fprintf(b, "%f", v.(float64))
+			}
+		}
 
-		if thresholdsRaw, ok := settingsMap["thresholds"]; ok {
-			thresholdsListRaw := thresholdsRaw.(*schema.Set).List()
-			for i := range thresholdsListRaw {
-				if thresholdsListRaw[i] == nil {
-					continue
+		writeInt := func(m map[string]interface{}, attrName string) {
+			if v, ok := m[attrName]; ok {
+				fmt.Fprintf(b, "%x", v.(int))
+			}
+		}
+
+		writeString := func(m map[string]interface{}, attrName string) {
+			if v, ok := m[attrName]; ok && v.(string) != "" {
+				fmt.Fprint(b, strings.TrimSpace(v.(string)))
+			}
+		}
+
+		// Order writes to the buffer using lexically sorted list for easy visual
+		// reconciliation with other lists.
+		writeBool(m, "active")
+		writeInt(m, "height")
+		writeString(m, "name")
+		writeString(m, "origin")
+		writeString(m, "type")
+		writeString(m, "widget_id")
+		writeInt(m, "width")
+
+		if settingsRaw, ok := m["settings"]; ok {
+			settingsMap := settingsRaw.(map[string]interface{})
+			writeString(settingsMap, "account_id")
+			writeString(settingsMap, "acknowledged")
+			writeString(settingsMap, "algorithm")
+			writeBool(settingsMap, "autoformat")
+			if badRulesRaw, ok := settingsMap["bad_rules"]; ok {
+				badRulesList := badRulesRaw.([]interface{})
+				for i := range badRulesList {
+					br := badRulesList[i].(map[string]interface{})
+					writeString(br, "value")
+					writeString(br, "criterion")
+					writeString(br, "color")
 				}
-				t := thresholdsListRaw[i].(map[string]interface{})
-				colors := t["colors"].([]string)
-				for c := range colors {
-					if colors[c] != "" {
-						fmt.Fprint(b, strings.TrimSpace(colors[c]))
+			}
+			writeString(settingsMap, "body_format")
+			writeString(settingsMap, "caql")
+			writeString(settingsMap, "chart_type")
+			writeString(settingsMap, "check_uuid")
+			writeString(settingsMap, "cleared")
+			writeInt(settingsMap, "cluster_id")
+			writeString(settingsMap, "cluster_name")
+			writeString(settingsMap, "content_type")
+
+			if datapointsRaw, ok := settingsMap["datapoints"]; ok {
+				datapointsListRaw := datapointsRaw.(*schema.Set).List()
+				for i := range datapointsListRaw {
+					if datapointsListRaw[i] == nil {
+						continue
 					}
+					dp := datapointsListRaw[i].(map[string]interface{})
+					writeString(dp, "_metric_type")
+					writeInt(dp, "_check_id")
+					writeString(dp, "label")
+					writeString(dp, "metric")
 				}
-				values := t["values"].([]string)
-				for v := range values {
-					if values[v] != "" {
-						fmt.Fprint(b, strings.TrimSpace(values[v]))
-					}
-				}
-
-				writeBool(t, "flip")
 			}
-		}
 
-		writeString(settingsMap, "time_window")
-		writeString(settingsMap, "title")
-		writeString(settingsMap, "title_format")
-		writeString(settingsMap, "trend")
-		writeString(settingsMap, "type")
-		writeBool(settingsMap, "use_default")
-		writeString(settingsMap, "value_type")
-		writeString(settingsMap, "date_window")
-		writeString(settingsMap, "graph_uuid")
-		writeBool(settingsMap, "hide_xaxis")
-		writeBool(settingsMap, "hide_yaxis")
-		writeBool(settingsMap, "key_inline")
-		writeString(settingsMap, "key_loc")
-		writeInt(settingsMap, "key_size")
-		writeBool(settingsMap, "key_wrap")
-		writeString(settingsMap, "label")
-		writeInt(settingsMap, "period")
-		writeBool(settingsMap, "real_time")
-		writeBool(settingsMap, "show_flags")
+			writeString(settingsMap, "dependents")
+			writeBool(settingsMap, "disable_autoformat")
+			writeString(settingsMap, "display")
+			writeString(settingsMap, "display_markup")
+			writeString(settingsMap, "format")
+			writeString(settingsMap, "formula")
+			writeString(settingsMap, "good_color")
+			writeString(settingsMap, "layout")
+			writeString(settingsMap, "layout_style")
+			writeInt(settingsMap, "limit")
+			writeString(settingsMap, "link_url")
+			writeString(settingsMap, "maintenance")
+			writeString(settingsMap, "markup")
+			writeString(settingsMap, "metric_display_name")
+			writeString(settingsMap, "metric_name")
+			writeString(settingsMap, "metric_type")
+			writeString(settingsMap, "min_age")
+			writeString(settingsMap, "overlay_set_id")
+			writeInt(settingsMap, "range_high")
+			writeInt(settingsMap, "range_low")
+			writeString(settingsMap, "resource_limit")
+			writeString(settingsMap, "resource_usage")
+			writeString(settingsMap, "search")
+			writeString(settingsMap, "severity")
+			writeBool(settingsMap, "show_value")
+			writeString(settingsMap, "size")
+			writeString(settingsMap, "text_align")
+			writeFloat(settingsMap, "threshold")
+
+			if thresholdsRaw, ok := settingsMap["thresholds"]; ok {
+				thresholdsListRaw := thresholdsRaw.(*schema.Set).List()
+				for i := range thresholdsListRaw {
+					if thresholdsListRaw[i] == nil {
+						continue
+					}
+					t := thresholdsListRaw[i].(map[string]interface{})
+					colors := t["colors"].([]string)
+					for c := range colors {
+						if colors[c] != "" {
+							fmt.Fprint(b, strings.TrimSpace(colors[c]))
+						}
+					}
+					values := t["values"].([]string)
+					for v := range values {
+						if values[v] != "" {
+							fmt.Fprint(b, strings.TrimSpace(values[v]))
+						}
+					}
+
+					writeBool(t, "flip")
+				}
+			}
+
+			writeString(settingsMap, "time_window")
+			writeString(settingsMap, "title")
+			writeString(settingsMap, "title_format")
+			writeString(settingsMap, "trend")
+			writeString(settingsMap, "type")
+			writeBool(settingsMap, "use_default")
+			writeString(settingsMap, "value_type")
+			writeString(settingsMap, "date_window")
+			writeString(settingsMap, "graph_uuid")
+			writeBool(settingsMap, "hide_xaxis")
+			writeBool(settingsMap, "hide_yaxis")
+			writeBool(settingsMap, "key_inline")
+			writeString(settingsMap, "key_loc")
+			writeInt(settingsMap, "key_size")
+			writeBool(settingsMap, "key_wrap")
+			writeString(settingsMap, "label")
+			writeInt(settingsMap, "period")
+			writeBool(settingsMap, "real_time")
+			writeBool(settingsMap, "show_flags")
+		}
 	}
 
 	s := b.String()
