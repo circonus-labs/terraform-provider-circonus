@@ -787,10 +787,12 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["tag_filter_set"] = widget.Settings.TagFilterSet
 		dashWidgetSettingsAttrs["threshold"] = widget.Settings.Threshold
 		if widget.Settings.Thresholds != nil {
-			t := make(map[string]interface{}, 3)
-			t["colors"] = widget.Settings.Thresholds.Colors
-			t["values"] = widget.Settings.Thresholds.Values
-			t["flip"] = widget.Settings.Thresholds.Flip
+			t := make([]map[string]interface{}, 0, 1)
+			th := make(map[string]interface{}, 3)
+			th["colors"] = widget.Settings.Thresholds.Colors
+			th["values"] = widget.Settings.Thresholds.Values
+			th["flip"] = widget.Settings.Thresholds.Flip
+			t = append(t, th)
 			dashWidgetSettingsAttrs["thresholds"] = t
 		}
 		dashWidgetSettingsAttrs["time_window"] = widget.Settings.TimeWindow
