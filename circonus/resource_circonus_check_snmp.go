@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -320,7 +321,15 @@ func hashCheckSNMP(v interface{}) int {
 	writeBool(checkSNMPSeparateQueries)
 	writeString(checkSNMPVersion)
 
-	x := m[string(checkSNMPOID)].(*schema.Set).List()
+	setType := reflect.TypeOf((*schema.Set)(nil)).Elem()
+
+	z := m[string(checkSNMPOID)]
+	var x []interface{}
+	if setType == z {
+		x = z.(*schema.Set).List()
+	} else {
+		x = z.([]interface{})
+	}
 	sort.Slice(x, func(i, j int) bool {
 		if x[i] != nil && x[j] != nil {
 			y := x[i].(map[string]interface{})
