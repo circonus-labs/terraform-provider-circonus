@@ -511,7 +511,7 @@ func hashWidgets(vv interface{}) int {
 
 	writeFloat := func(m map[string]interface{}, attrName string) {
 		if v, ok := m[attrName]; ok {
-			fmt.Fprintf(b, "%f", v.(float64))
+			fmt.Fprintf(b, "%f", v.(float32))
 		}
 	}
 
