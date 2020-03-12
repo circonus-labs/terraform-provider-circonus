@@ -178,6 +178,7 @@ func resourceDashboard() *schema.Resource {
 									"autoformat": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"bad_rules": &schema.Schema{
 										Type:     schema.TypeList,
@@ -223,6 +224,7 @@ func resourceDashboard() *schema.Resource {
 									"cluster_id": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"cluster_name": &schema.Schema{
 										Type:     schema.TypeString,
@@ -296,6 +298,7 @@ func resourceDashboard() *schema.Resource {
 									"limit": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"link_url": &schema.Schema{
 										Type:     schema.TypeString,
@@ -332,10 +335,12 @@ func resourceDashboard() *schema.Resource {
 									"range_high": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"range_low": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"resource_limit": &schema.Schema{
 										Type:     schema.TypeString,
@@ -356,6 +361,7 @@ func resourceDashboard() *schema.Resource {
 									"show_value": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"size": &schema.Schema{
 										Type:     schema.TypeString,
@@ -368,6 +374,7 @@ func resourceDashboard() *schema.Resource {
 									"threshold": &schema.Schema{
 										Type:     schema.TypeFloat,
 										Optional: true,
+										Default:  0,
 									},
 									"thresholds": &schema.Schema{
 										Type:     schema.TypeSet,
@@ -414,6 +421,7 @@ func resourceDashboard() *schema.Resource {
 									"use_default": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"value_type": &schema.Schema{
 										Type:     schema.TypeString,
@@ -430,14 +438,17 @@ func resourceDashboard() *schema.Resource {
 									"hide_xaxis": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"hide_yaxis": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"key_inline": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"key_loc": &schema.Schema{
 										Type:     schema.TypeString,
@@ -446,10 +457,12 @@ func resourceDashboard() *schema.Resource {
 									"key_size": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"key_wrap": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"label": &schema.Schema{
 										Type:     schema.TypeString,
@@ -458,14 +471,17 @@ func resourceDashboard() *schema.Resource {
 									"period": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"real_time": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"show_flags": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 								},
 							},
