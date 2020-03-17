@@ -792,6 +792,7 @@ func contactGroupHTTPToState(cg *api.ContactGroup) ([]interface{}, error) {
 }
 
 func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
+	slack := false
 	cg := api.NewContactGroup()
 	if v, ok := d.GetOk(contactAggregationWindowAttr); ok {
 		aggWindow, _ := time.ParseDuration(v.(string))
@@ -966,6 +967,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 	}
 
 	if v, ok := d.GetOk(contactSlackAttr); ok {
+		slack = true
 		slackListRaw := v.(*schema.Set).List()
 		for _, slackMapRaw := range slackListRaw {
 			slackMap := slackMapRaw.(map[string]interface{})
@@ -1144,6 +1146,21 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 
 	if v, found := d.GetOk(checkTagsAttr); found {
 		cg.Tags = derefStringList(flattenSet(v.(*schema.Set)))
+	}
+
+	if cg.AlertFormats.LongMessage == nil && slack {
+		str := `slackformat:
+long=Check / Metric Name:{name}
+Status:{status}
+Severity:{severity}
+Occurred:{occurred}
+Value:{value}
+%(cleared != null) Cleared:{cleared}%
+%(cleared != null) Clear Value:{clear_value}%
+%(metric_link != null) More Info:{metric_link}%
+long=Notes:{metric_notes}
+long=Link to Alert:{link}`
+		cg.AlertFormats.LongMessage = &str
 	}
 
 	if err := validateContactGroup(cg); err != nil {
