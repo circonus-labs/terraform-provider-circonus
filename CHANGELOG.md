@@ -2,10 +2,14 @@
 
 IMPROVEMENTS:
 
+* go-apiclient 0.7.6
 * Fix to prevent noop updates to SNMP checks 
 * The metrics in a check should be a list, not a set, to preserve order (noop updates again)
 * Add a test for metric_filters in a check
 * Add validation for a ruleset to prevent metric_type -> Rule.Criteria mismatches
+* Prevent unnecessary updates to dashboards
+* Do exponential backoff when API returns 503's
+* Fix slack contact groups to have reasonable slack default text 
 
 
 ## 0.8.0 (February 24, 2020)
