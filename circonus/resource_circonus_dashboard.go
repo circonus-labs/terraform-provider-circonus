@@ -361,7 +361,6 @@ func resourceDashboard() *schema.Resource {
 									"show_value": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
-										Default:  false,
 									},
 									"size": &schema.Schema{
 										Type:     schema.TypeString,
