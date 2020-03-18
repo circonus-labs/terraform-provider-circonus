@@ -182,7 +182,7 @@ type DashboardWidgetSettings struct {
 	Search              string                           `json:"search,omitempty"`                // alerts, lists
 	Severity            string                           `json:"severity,omitempty"`              // alerts
 	ShowFlags           bool                             `json:"show_flags,omitempty"`            // graphs
-	ShowValue           bool                             `json:"show_value,omitempty"`            // state
+	ShowValue           *bool                            `json:"show_value,omitempty"`            // state
 	Size                string                           `json:"size,omitempty"`                  // clusters
 	TextAlign           string                           `json:"text_align,omitempty"`            // state
 	TagFilterSet        []string                         `json:"tag_filter_set,omitempty"`        // alerts

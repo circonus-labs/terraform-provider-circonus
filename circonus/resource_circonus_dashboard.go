@@ -797,7 +797,9 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["resource_usage"] = widget.Settings.ResourceUsage
 		dashWidgetSettingsAttrs["search"] = widget.Settings.Search
 		dashWidgetSettingsAttrs["severity"] = widget.Settings.Severity
-		dashWidgetSettingsAttrs["show_value"] = widget.Settings.ShowValue
+		if widget.Settings.ShowValue != nil {
+			dashWidgetSettingsAttrs["show_value"] = *widget.Settings.ShowValue
+		}
 		dashWidgetSettingsAttrs["size"] = widget.Settings.Size
 		dashWidgetSettingsAttrs["text_align"] = widget.Settings.TextAlign
 		dashWidgetSettingsAttrs["tag_filter_set"] = widget.Settings.TagFilterSet
@@ -1272,7 +1274,8 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.ShowFlags = v.(bool)
 					}
 					if v, found := sMap["show_value"]; found {
-						w.Settings.ShowValue = v.(bool)
+						x := v.(bool)
+						w.Settings.ShowValue = &x
 					}
 					if v, found := sMap["size"]; found {
 						w.Settings.Size = (v.(string))

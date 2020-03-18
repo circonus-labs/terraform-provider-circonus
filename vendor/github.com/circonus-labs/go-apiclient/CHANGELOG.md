@@ -1,3 +1,8 @@
+# v0.7.6
+
+* fix: skip backoff for HTTP/400
+* fix: change `Dashboard.Settings.ShowValue` to `*bool` to facilitate intentional `false` not being omitted
+
 # v0.7.5
 
 * fix: break, return error on 404 result with exponential backoff

@@ -249,6 +249,9 @@ func (a *API) apiRequest(reqMethod string, reqPath string, data []byte) ([]byte,
 			if !a.useExponentialBackoff {
 				break
 			}
+			if strings.Contains(err.Error(), "code 400") {
+				break
+			}
 			if strings.Contains(err.Error(), "code 403") {
 				break
 			}
