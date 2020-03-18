@@ -1062,6 +1062,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 
 			if mapRaw, found := wAttrs["settings"]; found {
 				listRaw := mapRaw.(*schema.Set).List()
+				w.Settings.ShowValue = nil
 				for _, settingElem := range listRaw {
 					sMap := settingElem.(map[string]interface{})
 
@@ -1272,9 +1273,16 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["show_flags"]; found {
 						w.Settings.ShowFlags = v.(bool)
 					}
-					if v, found := sMap["show_value"]; found {
-						x := v.(bool)
-						w.Settings.ShowValue = &x
+					if w.Type == "state" {
+						if v, found := sMap["show_value"]; found {
+							x := v.(bool)
+							w.Settings.ShowValue = &x
+						} else {
+							x := false
+							w.Settings.ShowValue = &x
+						}
+					} else {
+						w.Settings.ShowValue = nil
 					}
 					if v, found := sMap["size"]; found {
 						w.Settings.Size = (v.(string))
