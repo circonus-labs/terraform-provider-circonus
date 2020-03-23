@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -76,6 +77,7 @@ var schemaCheckSNMP = &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkSNMPAuthProtocol, `(MD5|SHA)`),
+				Default:      "MD5",
 			},
 			checkSNMPCommunity: {
 				Type:         schema.TypeString,
@@ -105,6 +107,7 @@ var schemaCheckSNMP = &schema.Schema{
 			checkSNMPPrivacyProtocol: {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Default:      "DES",
 				ValidateFunc: validateRegexp(checkSNMPPrivacyProtocol, `(DES|AES128|AES)`),
 			},
 			checkSNMPSecurityEngine: {
@@ -116,6 +119,7 @@ var schemaCheckSNMP = &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateRegexp(checkSNMPSecurityLevel, `(noAuthNoPriv|authNoPriv|authPriv)`),
+				Default:      "authPriv",
 			},
 			checkSNMPSecurityName: {
 				Type:         schema.TypeString,
@@ -125,6 +129,7 @@ var schemaCheckSNMP = &schema.Schema{
 			checkSNMPSeparateQueries: {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			checkSNMPVersion: {
 				Type:         schema.TypeString,
@@ -245,6 +250,15 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 			oid_list = append(oid_list, oidProps)
 		}
 	}
+
+	sort.Slice(oid_list, func(i, j int) bool {
+		if oid_list[i] != nil && oid_list[j] != nil {
+			y := oid_list[i].(map[string]interface{})
+			z := oid_list[j].(map[string]interface{})
+			return y[string(checkSNMPOIDName)].(string) < z[string(checkSNMPOIDName)].(string)
+		}
+		return true
+	})
 	snmpConfig[string(checkSNMPOID)] = oid_list
 
 	whitelistedConfigKeys := map[config.Key]struct{}{
@@ -307,12 +321,27 @@ func hashCheckSNMP(v interface{}) int {
 	writeBool(checkSNMPSeparateQueries)
 	writeString(checkSNMPVersion)
 
-	x := m[string(checkSNMPOID)].([]interface{})
+	setType := reflect.TypeOf((*schema.Set)(nil)).Elem()
+
+	var x []interface{}
+
+	z := m[string(checkSNMPOID)]
+	value := reflect.ValueOf(z)
+	f := reflect.Indirect(value)
+	log.Printf("setType: %s, zType: %s\n", setType.String(), f.Type().String())
+	if f.IsValid() && f.Type() == setType {
+		log.Printf("Converting schema.Set\n")
+		x = z.(*schema.Set).List()
+	} else {
+		log.Printf("Converting Slice\n")
+		x = z.([]interface{})
+	}
+
 	sort.Slice(x, func(i, j int) bool {
 		if x[i] != nil && x[j] != nil {
 			y := x[i].(map[string]interface{})
 			z := x[j].(map[string]interface{})
-			return y["name"].(string) < z["name"].(string)
+			return y[string(checkSNMPOIDName)].(string) < z[string(checkSNMPOIDName)].(string)
 		}
 		return true
 	})
@@ -320,16 +349,15 @@ func hashCheckSNMP(v interface{}) int {
 	for _, s := range x {
 		if s != nil {
 			t := s.(map[string]interface{})
-			tstring := "any"
-			if tt, ok := t["type"]; ok {
-				tstring = tt.(string)
-			}
-			fmt.Fprintf(b, "%s%s%s", strings.TrimSpace(t["path"].(string)), strings.TrimSpace(t["name"].(string)), tstring)
+			log.Printf("path: %s, name: %s\n", t["path"].(string), t["name"].(string))
+			fmt.Fprintf(b, "%s%s", strings.TrimSpace(t["path"].(string)), strings.TrimSpace(t["name"].(string)))
 		}
 	}
 
 	s := b.String()
-	return hashcode.String(s)
+	hc := hashcode.String(s)
+	log.Printf("Hashcode: %d\n", hc)
+	return hc
 }
 
 func checkConfigToAPISNMP(c *circonusCheck, l interfaceList) error {

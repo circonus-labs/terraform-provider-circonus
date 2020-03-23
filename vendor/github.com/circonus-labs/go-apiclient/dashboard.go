@@ -164,11 +164,12 @@ type DashboardWidgetSettings struct {
 	Layout              string                           `json:"layout,omitempty"`                // clusters
 	LayoutStyle         string                           `json:"layout_style,omitempty"`          // state
 	Limit               uint                             `json:"limit,omitempty"`                 // lists
-	LinkUrl             string                           `json:"link_url,omitempty"`              // link_url
+	LinkUrl             string                           `json:"link_url,omitempty"`              // state
 	Maintenance         string                           `json:"maintenance,omitempty"`           // alerts
 	Markup              string                           `json:"markup,omitempty"`                // html
 	MetricDisplayName   string                           `json:"metric_display_name,omitempty"`   // gauges, state
 	MetricName          string                           `json:"metric_name,omitempty"`           // gauges, state
+	MetricType          string                           `json:"metric_type,omitempty"`           // state
 	MinAge              string                           `json:"min_age,omitempty"`               // alerts
 	OffHours            []uint                           `json:"off_hours,omitempty"`             // alerts
 	OverlaySetID        string                           `json:"overlay_set_id,omitempty"`        // graphs
@@ -181,7 +182,7 @@ type DashboardWidgetSettings struct {
 	Search              string                           `json:"search,omitempty"`                // alerts, lists
 	Severity            string                           `json:"severity,omitempty"`              // alerts
 	ShowFlags           bool                             `json:"show_flags,omitempty"`            // graphs
-	ShowValue           bool                             `json:"show_value,omitempty"`            // state
+	ShowValue           *bool                            `json:"show_value,omitempty"`            // state
 	Size                string                           `json:"size,omitempty"`                  // clusters
 	TextAlign           string                           `json:"text_align,omitempty"`            // state
 	TagFilterSet        []string                         `json:"tag_filter_set,omitempty"`        // alerts

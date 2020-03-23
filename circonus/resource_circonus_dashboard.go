@@ -1,11 +1,14 @@
 package circonus
 
 import (
+	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -175,6 +178,7 @@ func resourceDashboard() *schema.Resource {
 									"autoformat": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"bad_rules": &schema.Schema{
 										Type:     schema.TypeList,
@@ -220,6 +224,7 @@ func resourceDashboard() *schema.Resource {
 									"cluster_id": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"cluster_name": &schema.Schema{
 										Type:     schema.TypeString,
@@ -293,6 +298,7 @@ func resourceDashboard() *schema.Resource {
 									"limit": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"link_url": &schema.Schema{
 										Type:     schema.TypeString,
@@ -314,6 +320,10 @@ func resourceDashboard() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"metric_type": &schema.Schema{
+										Type:     schema.TypeString,
+										Optional: true,
+									},
 									"min_age": &schema.Schema{
 										Type:     schema.TypeString,
 										Optional: true,
@@ -325,10 +335,12 @@ func resourceDashboard() *schema.Resource {
 									"range_high": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"range_low": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"resource_limit": &schema.Schema{
 										Type:     schema.TypeString,
@@ -361,6 +373,7 @@ func resourceDashboard() *schema.Resource {
 									"threshold": &schema.Schema{
 										Type:     schema.TypeFloat,
 										Optional: true,
+										Default:  0,
 									},
 									"thresholds": &schema.Schema{
 										Type:     schema.TypeSet,
@@ -407,6 +420,7 @@ func resourceDashboard() *schema.Resource {
 									"use_default": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"value_type": &schema.Schema{
 										Type:     schema.TypeString,
@@ -423,14 +437,17 @@ func resourceDashboard() *schema.Resource {
 									"hide_xaxis": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"hide_yaxis": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"key_inline": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"key_loc": &schema.Schema{
 										Type:     schema.TypeString,
@@ -439,10 +456,12 @@ func resourceDashboard() *schema.Resource {
 									"key_size": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"key_wrap": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"label": &schema.Schema{
 										Type:     schema.TypeString,
@@ -451,14 +470,17 @@ func resourceDashboard() *schema.Resource {
 									"period": &schema.Schema{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 									"real_time": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									"show_flags": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 								},
 							},
@@ -480,6 +502,175 @@ func resourceDashboard() *schema.Resource {
 			},
 		},
 	}
+}
+
+type ByWidgetId []map[string]interface{}
+
+func (a ByWidgetId) Len() int      { return len(a) }
+func (a ByWidgetId) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByWidgetId) Less(i, j int) bool {
+	x := a[i]
+	y := a[j]
+	return x["widget_id"].(string) < y["widget_id"].(string)
+}
+
+func hashWidgets(vv interface{}) int {
+	b := &bytes.Buffer{}
+	b.Grow(defaultHashBufSize)
+
+	writeBool := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok {
+			fmt.Fprintf(b, "%t", v.(bool))
+		}
+	}
+
+	writeFloat := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok {
+			fmt.Fprintf(b, "%f", v.(float32))
+		}
+	}
+
+	writeInt := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok {
+			fmt.Fprintf(b, "%x", v.(int))
+		}
+	}
+
+	writeString := func(m map[string]interface{}, attrName string) {
+		if v, ok := m[attrName]; ok && v.(string) != "" {
+			fmt.Fprint(b, strings.TrimSpace(v.(string)))
+		}
+	}
+
+	widgetsRaw := vv.([]map[string]interface{})
+	sort.Sort(ByWidgetId(widgetsRaw))
+	for _, m := range widgetsRaw {
+
+		// Order writes to the buffer using lexically sorted list for easy visual
+		// reconciliation with other lists.
+		writeBool(m, "active")
+		writeInt(m, "height")
+		writeString(m, "name")
+		writeString(m, "origin")
+		writeString(m, "type")
+		writeString(m, "widget_id")
+		writeInt(m, "width")
+
+		if settingsRaw, ok := m["settings"]; ok {
+			settingsMap := settingsRaw.([]map[string]interface{})[0]
+			writeString(settingsMap, "account_id")
+			writeString(settingsMap, "acknowledged")
+			writeString(settingsMap, "algorithm")
+			writeBool(settingsMap, "autoformat")
+			if badRulesRaw, ok := settingsMap["bad_rules"]; ok {
+				badRulesList := badRulesRaw.([]map[string]interface{})
+				for i := range badRulesList {
+					br := badRulesList[i]
+					writeString(br, "value")
+					writeString(br, "criterion")
+					writeString(br, "color")
+				}
+			}
+			writeString(settingsMap, "body_format")
+			writeString(settingsMap, "caql")
+			writeString(settingsMap, "chart_type")
+			writeString(settingsMap, "check_uuid")
+			writeString(settingsMap, "cleared")
+			writeInt(settingsMap, "cluster_id")
+			writeString(settingsMap, "cluster_name")
+			writeString(settingsMap, "content_type")
+
+			if datapointsRaw, ok := settingsMap["datapoints"]; ok {
+				datapointsListRaw := datapointsRaw.([]map[string]interface{})
+				for i := range datapointsListRaw {
+					if datapointsListRaw[i] == nil {
+						continue
+					}
+					dp := datapointsListRaw[i]
+					writeString(dp, "_metric_type")
+					writeInt(dp, "_check_id")
+					writeString(dp, "label")
+					writeString(dp, "metric")
+				}
+			}
+
+			writeString(settingsMap, "dependents")
+			writeBool(settingsMap, "disable_autoformat")
+			writeString(settingsMap, "display")
+			writeString(settingsMap, "display_markup")
+			writeString(settingsMap, "format")
+			writeString(settingsMap, "formula")
+			writeString(settingsMap, "good_color")
+			writeString(settingsMap, "layout")
+			writeString(settingsMap, "layout_style")
+			writeInt(settingsMap, "limit")
+			writeString(settingsMap, "link_url")
+			writeString(settingsMap, "maintenance")
+			writeString(settingsMap, "markup")
+			writeString(settingsMap, "metric_display_name")
+			writeString(settingsMap, "metric_name")
+			writeString(settingsMap, "metric_type")
+			writeString(settingsMap, "min_age")
+			writeString(settingsMap, "overlay_set_id")
+			writeInt(settingsMap, "range_high")
+			writeInt(settingsMap, "range_low")
+			writeString(settingsMap, "resource_limit")
+			writeString(settingsMap, "resource_usage")
+			writeString(settingsMap, "search")
+			writeString(settingsMap, "severity")
+			writeBool(settingsMap, "show_value")
+			writeString(settingsMap, "size")
+			writeString(settingsMap, "text_align")
+			writeFloat(settingsMap, "threshold")
+
+			if thresholdsRaw, ok := settingsMap["thresholds"]; ok {
+				thresholdsListRaw := thresholdsRaw.([]map[string]interface{})
+				for i := range thresholdsListRaw {
+					if thresholdsListRaw[i] == nil {
+						continue
+					}
+					t := thresholdsListRaw[i]
+					colors := t["colors"].([]string)
+					for c := range colors {
+						if colors[c] != "" {
+							fmt.Fprint(b, strings.TrimSpace(colors[c]))
+						}
+					}
+					values := t["values"].([]string)
+					for v := range values {
+						if values[v] != "" {
+							fmt.Fprint(b, strings.TrimSpace(values[v]))
+						}
+					}
+
+					writeBool(t, "flip")
+				}
+			}
+
+			writeString(settingsMap, "time_window")
+			writeString(settingsMap, "title")
+			writeString(settingsMap, "title_format")
+			writeString(settingsMap, "trend")
+			writeString(settingsMap, "type")
+			writeBool(settingsMap, "use_default")
+			writeString(settingsMap, "value_type")
+			writeString(settingsMap, "date_window")
+			writeString(settingsMap, "graph_uuid")
+			writeBool(settingsMap, "hide_xaxis")
+			writeBool(settingsMap, "hide_yaxis")
+			writeBool(settingsMap, "key_inline")
+			writeString(settingsMap, "key_loc")
+			writeInt(settingsMap, "key_size")
+			writeBool(settingsMap, "key_wrap")
+			writeString(settingsMap, "label")
+			writeInt(settingsMap, "period")
+			writeBool(settingsMap, "real_time")
+			writeBool(settingsMap, "show_flags")
+		}
+	}
+
+	s := b.String()
+	return hashcode.String(s)
 }
 
 func dashboardCreate(d *schema.ResourceData, meta interface{}) error {
@@ -591,6 +782,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["markup"] = widget.Settings.Markup
 		dashWidgetSettingsAttrs["metric_display_name"] = widget.Settings.MetricDisplayName
 		dashWidgetSettingsAttrs["metric_name"] = widget.Settings.MetricName
+		dashWidgetSettingsAttrs["metric_type"] = widget.Settings.MetricType
 		dashWidgetSettingsAttrs["min_age"] = widget.Settings.MinAge
 		dashWidgetSettingsAttrs["off_hours"] = widget.Settings.OffHours
 		dashWidgetSettingsAttrs["overlay_set_id"] = widget.Settings.OverlaySetID
@@ -604,16 +796,20 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["resource_usage"] = widget.Settings.ResourceUsage
 		dashWidgetSettingsAttrs["search"] = widget.Settings.Search
 		dashWidgetSettingsAttrs["severity"] = widget.Settings.Severity
-		dashWidgetSettingsAttrs["show_value"] = widget.Settings.ShowValue
+		if widget.Settings.ShowValue != nil {
+			dashWidgetSettingsAttrs["show_value"] = *widget.Settings.ShowValue
+		}
 		dashWidgetSettingsAttrs["size"] = widget.Settings.Size
 		dashWidgetSettingsAttrs["text_align"] = widget.Settings.TextAlign
 		dashWidgetSettingsAttrs["tag_filter_set"] = widget.Settings.TagFilterSet
 		dashWidgetSettingsAttrs["threshold"] = widget.Settings.Threshold
 		if widget.Settings.Thresholds != nil {
-			t := make(map[string]interface{}, 3)
-			t["colors"] = widget.Settings.Thresholds.Colors
-			t["values"] = widget.Settings.Thresholds.Values
-			t["flip"] = widget.Settings.Thresholds.Flip
+			t := make([]map[string]interface{}, 0, 1)
+			th := make(map[string]interface{}, 3)
+			th["colors"] = widget.Settings.Thresholds.Colors
+			th["values"] = widget.Settings.Thresholds.Values
+			th["flip"] = widget.Settings.Thresholds.Flip
+			t = append(t, th)
 			dashWidgetSettingsAttrs["thresholds"] = t
 		}
 		dashWidgetSettingsAttrs["time_window"] = widget.Settings.TimeWindow
@@ -644,7 +840,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 
 		widgets[i] = dashWidgetAttrs
 	}
-	d.Set("widget", widgets)
+	d.Set("widget", schema.NewSet(hashWidgets, []interface{}{widgets}))
 
 	options := make([]map[string]interface{}, 1)
 	optionsAttrs := make(map[string]interface{}, 6)
@@ -866,6 +1062,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 
 			if mapRaw, found := wAttrs["settings"]; found {
 				listRaw := mapRaw.(*schema.Set).List()
+				w.Settings.ShowValue = nil
 				for _, settingElem := range listRaw {
 					sMap := settingElem.(map[string]interface{})
 
@@ -1024,6 +1221,9 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["metric_name"]; found {
 						w.Settings.MetricName = (v.(string))
 					}
+					if v, found := sMap["metric_type"]; found {
+						w.Settings.MetricType = (v.(string))
+					}
 					if v, found := sMap["min_age"]; found {
 						w.Settings.MinAge = (v.(string))
 					}
@@ -1073,8 +1273,16 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 					if v, found := sMap["show_flags"]; found {
 						w.Settings.ShowFlags = v.(bool)
 					}
-					if v, found := sMap["show_value"]; found {
-						w.Settings.ShowValue = v.(bool)
+					if w.Type == "state" {
+						if v, found := sMap["show_value"]; found {
+							x := v.(bool)
+							w.Settings.ShowValue = &x
+						} else {
+							x := false
+							w.Settings.ShowValue = &x
+						}
+					} else {
+						w.Settings.ShowValue = nil
 					}
 					if v, found := sMap["size"]; found {
 						w.Settings.Size = (v.(string))

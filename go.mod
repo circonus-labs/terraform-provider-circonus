@@ -4,7 +4,7 @@ require (
 	cloud.google.com/go v0.49.0 // indirect
 	cloud.google.com/go/storage v1.4.0 // indirect
 	github.com/aws/aws-sdk-go v1.25.43 // indirect
-	github.com/circonus-labs/go-apiclient v0.7.3
+	github.com/circonus-labs/go-apiclient v0.7.6
 	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-hclog v0.10.0 // indirect
