@@ -29,11 +29,11 @@ func TestAccCirconusCheckMySQL_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.#", "1"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.885029470.name", "binlog`total"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.885029470.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.885029470.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.885029470.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.885029470.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.name", "binlog`total"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.type", "numeric"),
 
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.2087084518", "author:terraform"),

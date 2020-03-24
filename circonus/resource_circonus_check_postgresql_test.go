@@ -29,47 +29,47 @@ func TestAccCirconusCheckPostgreSQL_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.#", "7"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.997634628.name", "tables`inserts"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.997634628.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.997634628.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.997634628.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.997634628.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3.name", "tables`inserts"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3.type", "numeric"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.565883273.name", "tables`updates"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.565883273.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.565883273.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.565883273.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.565883273.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.6.name", "tables`updates"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.6.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.6.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.6.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.6.type", "numeric"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3965415003.name", "tables`deletes"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3965415003.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3965415003.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3965415003.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3965415003.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.name", "tables`deletes"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.0.type", "numeric"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3868690100.name", "tables`index_scans"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3868690100.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3868690100.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3868690100.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3868690100.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.1.name", "tables`index_scans"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.1.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.1.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.1.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.1.type", "numeric"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2772400178.name", "tables`seq_scans"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2772400178.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2772400178.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2772400178.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2772400178.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.4.name", "tables`seq_scans"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.4.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.4.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.4.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.4.type", "numeric"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3278042831.name", "tables`index_tup_fetch"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3278042831.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3278042831.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3278042831.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.3278042831.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2.name", "tables`index_tup_fetch"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2.type", "numeric"),
 
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2685537214.name", "tables`seq_tup_read"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2685537214.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2685537214.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2685537214.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.2685537214.type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.5.name", "tables`seq_tup_read"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.5.tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.5.tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.5.tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.5.type", "numeric"),
 
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.2087084518", "author:terraform"),
@@ -104,18 +104,6 @@ EOF
   }
 
   metric {
-    name = "tables` + "`" + `inserts"
-    tags = "${var.test_tags}"
-    type = "numeric"
-  }
-
-  metric {
-    name = "tables` + "`" + `updates"
-    tags = "${var.test_tags}"
-    type = "numeric"
-  }
-
-  metric {
     name = "tables` + "`" + `deletes"
     tags = "${var.test_tags}"
     type = "numeric"
@@ -128,19 +116,31 @@ EOF
   }
 
   metric {
-    name = "tables` + "`" + `seq_scans"
-    tags = "${var.test_tags}"
-    type = "numeric"
-  }
-
-  metric {
     name = "tables` + "`" + `index_tup_fetch"
     tags = "${var.test_tags}"
     type = "numeric"
   }
 
   metric {
+    name = "tables` + "`" + `inserts"
+    tags = "${var.test_tags}"
+    type = "numeric"
+  }
+
+  metric {
+    name = "tables` + "`" + `seq_scans"
+    tags = "${var.test_tags}"
+    type = "numeric"
+  }
+
+  metric {
     name = "tables` + "`" + `seq_tup_read"
+    tags = "${var.test_tags}"
+    type = "numeric"
+  }
+
+  metric {
+    name = "tables` + "`" + `updates"
     tags = "${var.test_tags}"
     type = "numeric"
   }
