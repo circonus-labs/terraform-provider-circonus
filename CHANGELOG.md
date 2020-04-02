@@ -9,7 +9,8 @@ IMPROVEMENTS:
 * Add validation for a ruleset to prevent metric_type -> Rule.Criteria mismatches
 * Prevent unnecessary updates to dashboards
 * Do exponential backoff when API returns 503's
-* Fix slack contact groups to have reasonable slack default text 
+* Fix slack contact groups to have reasonable slack default text
+* Fix external check output extract: JSON, NAGIOS, otherwise treated as regexp
 
 
 ## 0.8.0 (February 24, 2020)
