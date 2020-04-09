@@ -17,7 +17,8 @@ The ``circonus_contact_group`` resource creates and manages a
 ```hcl
 resource "circonus_contact_group" "myteam-alerts" {
   name = "MyTeam Alerts"
-
+  group_type = "normal"
+  
   email {
     user = "/user/1234"
   }
@@ -38,6 +39,12 @@ resource "circonus_contact_group" "myteam-alerts" {
 
   irc {
     user = "/user/6331"
+  }
+
+  pager_duty {
+    account = "foo"
+    service_key = "39328423094283402984204823094"
+    webhook_url = "https://foo.circonus.com/pagerduty/webhook"
   }
 
   slack {
@@ -199,6 +206,10 @@ mechanisms).
 
 * `webhook_url` - (Required) The PagerDuty webhook URL that PagerDuty uses to
   notify Circonus of acknowledged actions.
+  
+* `account` - (Required) The PagerDuty account.  This is the prefix to your pagerduty
+  url.  The "foo" in "foo.pagerduty.com".
+  
 
 ## Supported Contact Group `slack` Attributes
 
