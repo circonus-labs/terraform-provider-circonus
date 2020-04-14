@@ -417,6 +417,9 @@ func checkConfigToAPISNMP(c *circonusCheck, l interfaceList) error {
 		if v, found := snmpConfig[checkSNMPOID]; found {
 			m := v.([]interface{})
 			for _, ll := range m {
+				if ll == nil {
+					continue
+				}
 				n := ll.(map[string]interface{})
 				c.Config[config.Key(fmt.Sprintf("oid_%s", n[string(checkSNMPOIDName)].(string)))] = n[string(checkSNMPOIDPath)].(string)
 				c.Config[config.Key(fmt.Sprintf("type_%s", n[string(checkSNMPOIDName)].(string)))] = n[string(checkSNMPOIDType)].(string)
