@@ -1,13 +1,11 @@
 package circonus
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -25,6 +23,7 @@ const (
 	checkArg8Attr          = "arg8"
 	checkArg9Attr          = "arg9"
 	checkArg10Attr         = "arg10"
+	checkExternalEnvAttr   = "env"
 )
 
 var checkExternalDescriptions = attrDescrs{
@@ -40,14 +39,13 @@ var checkExternalDescriptions = attrDescrs{
 	checkArg8Attr:          "The 8th argument to the command",
 	checkArg9Attr:          "The 9th argument to the command",
 	checkArg10Attr:         "The 10th argument to the command",
+	checkExternalEnvAttr:   "The map of environment vars",
 }
 
 var schemaCheckExternal = &schema.Schema{
-	Type:     schema.TypeSet,
+	Type:     schema.TypeList,
 	Optional: true,
 	MaxItems: 1,
-	MinItems: 1,
-	Set:      hashCheckExternal,
 	Elem: &schema.Resource{
 		Schema: convertToHelperSchema(checkExternalDescriptions, map[schemaAttr]*schema.Schema{
 			checkOutputExtractAttr: {
@@ -99,6 +97,11 @@ var schemaCheckExternal = &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			checkExternalEnvAttr: {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     schema.TypeString,
+			},
 		}),
 	},
 }
@@ -107,6 +110,7 @@ var schemaCheckExternal = &schema.Schema{
 // statefile.
 func checkAPIToStateExternal(c *circonusCheck, d *schema.ResourceData) error {
 	externalConfig := make(map[string]interface{}, len(c.Config))
+	envs := make(map[string]interface{}, 0)
 
 	// swamp is a sanity check: it must be empty by the time this method returns
 	swamp := make(map[config.Key]string, len(c.Config))
@@ -134,6 +138,23 @@ func checkAPIToStateExternal(c *circonusCheck, d *schema.ResourceData) error {
 	saveStringConfigToState("arg8", checkArg8Attr)
 	saveStringConfigToState("arg9", checkArg9Attr)
 	saveStringConfigToState("arg10", checkArg10Attr)
+	saveStringConfigToState("arg10", checkArg10Attr)
+
+	// env vars
+	for k, v := range c.Config {
+		if len(k) <= 4 {
+			continue
+		}
+
+		// Handle all of the prefix variable headers, like `header_`
+		if strings.Compare(string(k[:3]), "env_") == 0 {
+			key := k[4:]
+			envs[string(key)] = v
+			delete(swamp, k)
+		}
+	}
+
+	externalConfig[string(checkExternalEnvAttr)] = envs
 
 	whitelistedConfigKeys := map[config.Key]struct{}{
 		config.ReverseSecretKey: {},
@@ -150,42 +171,11 @@ func checkAPIToStateExternal(c *circonusCheck, d *schema.ResourceData) error {
 		}
 	}
 
-	if err := d.Set(checkExternalAttr, schema.NewSet(hashCheckExternal, []interface{}{externalConfig})); err != nil {
+	if err := d.Set(checkExternalAttr, []interface{}{externalConfig}); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkExternalAttr), err)
 	}
 
 	return nil
-}
-
-// hashCheckHTTP creates a stable hash of the normalized values
-func hashCheckExternal(v interface{}) int {
-	m := v.(map[string]interface{})
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
-
-	writeString := func(attrName schemaAttr) {
-		if v, ok := m[string(attrName)]; ok && v.(string) != "" {
-			fmt.Fprint(b, strings.TrimSpace(v.(string)))
-		}
-	}
-
-	// Order writes to the buffer using lexically sorted list for easy visual
-	// reconciliation with other lists.
-	writeString(checkCommandAttr)
-	writeString(checkOutputExtractAttr)
-	writeString(checkArg1Attr)
-	writeString(checkArg2Attr)
-	writeString(checkArg3Attr)
-	writeString(checkArg4Attr)
-	writeString(checkArg5Attr)
-	writeString(checkArg6Attr)
-	writeString(checkArg7Attr)
-	writeString(checkArg8Attr)
-	writeString(checkArg9Attr)
-	writeString(checkArg10Attr)
-
-	s := b.String()
-	return hashcode.String(s)
 }
 
 func checkConfigToAPIExternal(c *circonusCheck, l interfaceList) error {
@@ -242,6 +232,11 @@ func checkConfigToAPIExternal(c *circonusCheck, l interfaceList) error {
 
 		if v, found := externalConfig[checkArg10Attr]; found {
 			c.Config["arg10"] = v.(string)
+		}
+
+		for k, v := range externalConfig.CollectMap(checkExternalEnvAttr) {
+			h := config.Key("env_") + config.Key(k)
+			c.Config[h] = v
 		}
 	}
 
