@@ -147,7 +147,7 @@ func checkAPIToStateExternal(c *circonusCheck, d *schema.ResourceData) error {
 		}
 
 		// Handle all of the prefix variable headers, like `header_`
-		if strings.Compare(string(k[:3]), "env_") == 0 {
+		if strings.Compare(string(k[:4]), "env_") == 0 {
 			key := k[4:]
 			envs[string(key)] = v
 			delete(swamp, k)
