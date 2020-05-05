@@ -59,6 +59,7 @@ const (
 	//contactContactGroupFallbackAttr
 	contactPagerDutyServiceKeyAttr schemaAttr = "service_key"
 	contactPagerDutyWebhookURLAttr schemaAttr = "webhook_url"
+	contactPagerDutyAccountAttr    schemaAttr = "account"
 
 	// circonus_contact.slack attributes
 	//contactContactGroupFallbackAttr
@@ -114,6 +115,7 @@ type contactPagerDutyInfo struct {
 	FallbackGroupCID int    `json:"failover_group,string"`
 	ServiceKey       string `json:"service_key"`
 	WebhookURL       string `json:"webhook_url"`
+	Account          string `json:"account"`
 }
 
 type contactSlackInfo struct {
@@ -180,6 +182,7 @@ var contactPagerDutyDescriptions = attrDescrs{
 	contactContactGroupFallbackAttr: "",
 	contactPagerDutyServiceKeyAttr:  "",
 	contactPagerDutyWebhookURLAttr:  "",
+	contactPagerDutyAccountAttr:     "",
 }
 
 var contactSlackDescriptions = attrDescrs{
@@ -375,6 +378,10 @@ func resourceContactGroup() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validateHTTPURL(contactPagerDutyWebhookURLAttr, urlIsAbs),
+						},
+						contactPagerDutyAccountAttr: {
+							Type:     schema.TypeString,
+							Required: true,
 						},
 					}),
 				},
@@ -954,6 +961,10 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 				pagerDutyInfo.WebhookURL = v.(string)
 			}
 
+			if v, ok := pagerDutyMap[string(contactPagerDutyAccountAttr)]; ok {
+				pagerDutyInfo.Account = v.(string)
+			}
+
 			js, err := json.Marshal(pagerDutyInfo)
 			if err != nil {
 				return nil, errwrap.Wrapf(fmt.Sprintf("error marshalling %s JSON config string: {{err}}", contactPagerDutyAttr), err)
@@ -1200,6 +1211,7 @@ func contactGroupPagerDutyToState(cg *api.ContactGroup) ([]interface{}, error) {
 				string(contactContactGroupFallbackAttr): failoverGroupIDToCID(pdInfo.FallbackGroupCID),
 				string(contactPagerDutyServiceKeyAttr):  pdInfo.ServiceKey,
 				string(contactPagerDutyWebhookURLAttr):  pdInfo.WebhookURL,
+				string(contactPagerDutyAccountAttr):     pdInfo.Account,
 			})
 		}
 	}
