@@ -101,7 +101,6 @@ resource "circonus_check" "api_latency" {
   metric {
     name = "maximum"
     type = "numeric"
-    unit = "seconds"
   }
 
   target = "api.circonus.com"

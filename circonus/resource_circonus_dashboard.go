@@ -23,43 +23,43 @@ func resourceDashboard() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"title": &schema.Schema{
+			"title": {
 				Type:        schema.TypeString,
 				Required:    true,
 				StateFunc:   suppressWhitespace,
 				Description: "The title of the dashboard.",
 			},
-			"uuid": &schema.Schema{
+			"uuid": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The uuid of the dashboard.",
 			},
-			"shared": &schema.Schema{
+			"shared": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"account_default": &schema.Schema{
+			"account_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"grid_layout": &schema.Schema{
+			"grid_layout": {
 				Type:     schema.TypeMap,
 				Required: true,
 				Elem:     schema.TypeInt,
 			},
-			"options": &schema.Schema{
+			"options": {
 				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"full_screen_hide_title": &schema.Schema{
+						"full_screen_hide_title": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
 						},
-						"hide_grid": &schema.Schema{
+						"hide_grid": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
@@ -75,56 +75,56 @@ func resourceDashboard() *schema.Resource {
 						// 		},
 						// 	},
 						// },
-						"scale_text": &schema.Schema{
+						"scale_text": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  true,
 						},
-						"text_size": &schema.Schema{
+						"text_size": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  12,
 						},
-						"access_configs": &schema.Schema{
+						"access_configs": {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"black_dash": &schema.Schema{
+									"black_dash": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  true,
 									},
-									"enabled": &schema.Schema{
+									"enabled": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  true,
 									},
-									"full_screen": &schema.Schema{
+									"full_screen": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  true,
 									},
-									"full_screen_hide_title": &schema.Schema{
+									"full_screen_hide_title": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  true,
 									},
-									"nick_name": &schema.Schema{
+									"nick_name": {
 										Type:     schema.TypeString,
 										Optional: true,
 										Default:  "",
 									},
-									"scale_text": &schema.Schema{
+									"scale_text": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  true,
 									},
-									"shared_id": &schema.Schema{
+									"shared_id": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"text_size": &schema.Schema{
+									"text_size": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Default:  16,
@@ -135,349 +135,349 @@ func resourceDashboard() *schema.Resource {
 					},
 				},
 			},
-			"widget": &schema.Schema{
+			"widget": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"active": &schema.Schema{
+						"active": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  true,
 						},
-						"height": &schema.Schema{
+						"height": {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"origin": &schema.Schema{
+						"origin": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"settings": &schema.Schema{
+						"settings": {
 							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"account_id": &schema.Schema{
+									"account_id": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"acknowledged": &schema.Schema{
+									"acknowledged": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"algorithm": &schema.Schema{
+									"algorithm": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"autoformat": &schema.Schema{
+									"autoformat": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"bad_rules": &schema.Schema{
+									"bad_rules": {
 										Type:     schema.TypeList,
 										Optional: true,
 										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"value": &schema.Schema{
+												"value": {
 													Type:     schema.TypeString,
 													Required: true,
 												},
-												"criterion": &schema.Schema{
+												"criterion": {
 													Type:     schema.TypeString,
 													Required: true,
 												},
-												"color": &schema.Schema{
+												"color": {
 													Type:     schema.TypeString,
 													Required: true,
 												},
 											},
 										},
 									},
-									"body_format": &schema.Schema{
+									"body_format": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"caql": &schema.Schema{
+									"caql": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"chart_type": &schema.Schema{
+									"chart_type": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"check_uuid": &schema.Schema{
+									"check_uuid": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"cleared": &schema.Schema{
+									"cleared": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"cluster_id": &schema.Schema{
+									"cluster_id": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Default:  0,
 									},
-									"cluster_name": &schema.Schema{
+									"cluster_name": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"content_type": &schema.Schema{
+									"content_type": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"datapoints": &schema.Schema{
+									"datapoints": {
 										Type:     schema.TypeSet,
 										Optional: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"_metric_type": &schema.Schema{
+												"_metric_type": {
 													Type:     schema.TypeString,
 													Required: true,
 												},
-												"_check_id": &schema.Schema{
+												"_check_id": {
 													Type:     schema.TypeInt,
 													Required: true,
 												},
-												"label": &schema.Schema{
+												"label": {
 													Type:     schema.TypeString,
 													Required: true,
 												},
-												"metric": &schema.Schema{
+												"metric": {
 													Type:     schema.TypeString,
 													Required: true,
 												},
 											},
 										},
 									},
-									"dependents": &schema.Schema{
+									"dependents": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"disable_autoformat": &schema.Schema{
+									"disable_autoformat": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"display": &schema.Schema{
+									"display": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"display_markup": &schema.Schema{
+									"display_markup": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"format": &schema.Schema{
+									"format": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"formula": &schema.Schema{
+									"formula": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"good_color": &schema.Schema{
+									"good_color": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"layout": &schema.Schema{
+									"layout": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"layout_style": &schema.Schema{
+									"layout_style": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"limit": &schema.Schema{
+									"limit": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Default:  0,
 									},
-									"link_url": &schema.Schema{
+									"link_url": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"maintenance": &schema.Schema{
+									"maintenance": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"markup": &schema.Schema{
+									"markup": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"metric_display_name": &schema.Schema{
+									"metric_display_name": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"metric_name": &schema.Schema{
+									"metric_name": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"metric_type": &schema.Schema{
+									"metric_type": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"min_age": &schema.Schema{
+									"min_age": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"overlay_set_id": &schema.Schema{
+									"overlay_set_id": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"range_high": &schema.Schema{
+									"range_high": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Default:  0,
 									},
-									"range_low": &schema.Schema{
+									"range_low": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Default:  0,
 									},
-									"resource_limit": &schema.Schema{
+									"resource_limit": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"resource_usage": &schema.Schema{
+									"resource_usage": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"search": &schema.Schema{
+									"search": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"severity": &schema.Schema{
+									"severity": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"show_value": &schema.Schema{
+									"show_value": {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
-									"size": &schema.Schema{
+									"size": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"text_align": &schema.Schema{
+									"text_align": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"threshold": &schema.Schema{
+									"threshold": {
 										Type:     schema.TypeFloat,
 										Optional: true,
 										Default:  0,
 									},
-									"thresholds": &schema.Schema{
+									"thresholds": {
 										Type:     schema.TypeSet,
 										Optional: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"colors": &schema.Schema{
+												"colors": {
 													Type:     schema.TypeList,
 													Required: true,
 													Elem:     &schema.Schema{Type: schema.TypeString},
 												},
-												"values": &schema.Schema{
+												"values": {
 													Type:     schema.TypeList,
 													Required: true,
 													Elem:     &schema.Schema{Type: schema.TypeString},
 												},
-												"flip": &schema.Schema{
+												"flip": {
 													Type:     schema.TypeBool,
 													Required: true,
 												},
 											},
 										},
 									},
-									"time_window": &schema.Schema{
+									"time_window": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"title": &schema.Schema{
+									"title": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"title_format": &schema.Schema{
+									"title_format": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"trend": &schema.Schema{
+									"trend": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"type": &schema.Schema{
+									"type": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"use_default": &schema.Schema{
+									"use_default": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"value_type": &schema.Schema{
+									"value_type": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"date_window": &schema.Schema{
+									"date_window": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"graph_uuid": &schema.Schema{
+									"graph_uuid": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"hide_xaxis": &schema.Schema{
+									"hide_xaxis": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"hide_yaxis": &schema.Schema{
+									"hide_yaxis": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"key_inline": &schema.Schema{
+									"key_inline": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"key_loc": &schema.Schema{
+									"key_loc": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"key_size": &schema.Schema{
+									"key_size": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Default:  0,
 									},
-									"key_wrap": &schema.Schema{
+									"key_wrap": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"label": &schema.Schema{
+									"label": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"period": &schema.Schema{
+									"period": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Default:  0,
 									},
-									"real_time": &schema.Schema{
+									"real_time": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"show_flags": &schema.Schema{
+									"show_flags": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
@@ -485,15 +485,15 @@ func resourceDashboard() *schema.Resource {
 								},
 							},
 						},
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"widget_id": &schema.Schema{
+						"widget_id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"width": &schema.Schema{
+						"width": {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
@@ -739,7 +739,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["acknowledged"] = widget.Settings.Acknowledged
 		dashWidgetSettingsAttrs["algorithm"] = widget.Settings.Algorithm
 		dashWidgetSettingsAttrs["autoformat"] = widget.Settings.Autoformat
-		brs := make([]map[string]interface{}, 0, 0)
+		brs := make([]map[string]interface{}, 0)
 		for _, br := range widget.Settings.BadRules {
 			brAttrs := make(map[string]interface{}, 3)
 			brAttrs["value"] = br.Value
@@ -840,7 +840,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 
 		widgets[i] = dashWidgetAttrs
 	}
-	d.Set("widget", schema.NewSet(hashWidgets, []interface{}{widgets}))
+	_ = d.Set("widget", schema.NewSet(hashWidgets, []interface{}{widgets}))
 
 	options := make([]map[string]interface{}, 1)
 	optionsAttrs := make(map[string]interface{}, 6)
@@ -864,16 +864,16 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	optionsAttrs["access_configs"] = accessConfigs
 	options[0] = optionsAttrs
-	d.Set("options", options)
+	_ = d.Set("options", options)
 
 	gridLayoutAttrs := make(map[string]interface{}, 2)
 	gridLayoutAttrs["width"] = dash.GridLayout.Width
 	gridLayoutAttrs["height"] = dash.GridLayout.Height
-	d.Set("grid_layout", gridLayoutAttrs)
-	d.Set("account_default", dash.AccountDefault)
-	d.Set("shared", dash.Shared)
-	d.Set("title", dash.Title)
-	d.Set("uuid", dash.UUID)
+	_ = d.Set("grid_layout", gridLayoutAttrs)
+	_ = d.Set("account_default", dash.AccountDefault)
+	_ = d.Set("shared", dash.Shared)
+	_ = d.Set("title", dash.Title)
+	_ = d.Set("uuid", dash.UUID)
 
 	return nil
 }
@@ -902,7 +902,7 @@ func dashboardDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
-	d.Set("uuid", "")
+	_ = d.Set("uuid", "")
 
 	return nil
 }

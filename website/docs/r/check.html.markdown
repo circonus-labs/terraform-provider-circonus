@@ -157,9 +157,7 @@ The following attributes are available within a `metric`.
 
 * `active` - (Optional) Whether or not the metric is active or not.  Defaults to `true`.
 * `name` - (Optional) The name of the metric.  A string containing freeform text.
-* `tags` - (Optional) A list of tags assigned to the metric.
 * `type` - (Required) A string containing either `numeric`, `text`, `histogram`, `composite`, or `caql`.
-* `units` - (Optional) The unit of measurement the metric represents (e.g., bytes, seconds, milliseconds). A string containing freeform text.
 
 ## Supported Check Types
 
@@ -244,17 +242,15 @@ resource "circonus_check" "rds_metrics" {
 
   metric {
     name = "CPUUtilization"
-    tags = [ "${var.cloudwatch_rds_tags}" ]
     type = "numeric"
-    unit = "%"
   }
 
   metric {
     name = "DatabaseConnections"
-    tags = [ "${var.cloudwatch_rds_tags}" ]
     type = "numeric"
-    unit = "connections"
   }
+
+  tags = "$cloudwatch_rds_tags"
 }
 ```
 
@@ -364,27 +360,21 @@ resource "circonus_check" "consul_server" {
 
   metric {
     name = "NumNodes"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "numeric"
   }
 
   metric {
     name = "LastContact"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "numeric"
-    unit = "seconds"
   }
 
   metric {
     name = "Index"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "numeric"
-    unit = "transactions"
   }
 
   metric {
     name = "KnownLeader"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "text"
   }
 
@@ -428,13 +418,11 @@ resource "circonus_check" "dns_google_mx" {
   metric {
     name = "rtt"
     type = "numeric"
-    unit = "milliseconds"
   }
 
   metric {
     name = "ttl"
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = [ "source:consul", "lifecycle:unittest" ]
@@ -666,19 +654,15 @@ resource "circonus_check" "tcp_check" {
 
   metric {
     name = "cert_end_in"
-    tags = [ "${var.tcp_check_tags}" ]
     type = "numeric"
-    unit = "seconds"
   }
 
   metric {
     name = "tt_connect"
-    tags = [ "${var.tcp_check_tags}" ]
     type = "numeric"
-    unit = "miliseconds"
   }
 
-  tags = [ "${var.tcp_check_tags}" ]
+  tags = "${var.tcp_check_tags}"
 }
 ```
 

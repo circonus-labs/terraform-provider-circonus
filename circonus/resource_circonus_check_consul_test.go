@@ -39,10 +39,6 @@ func TestAccCirconusCheckConsul_node(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.#", "1"),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ca_chain", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.certificate_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ciphers", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.key_file", ""),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.dc", "dc2"),
 					resource.TestCheckNoResourceAttr("circonus_check.consul_server", "consul.0.headers"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.http_addr", "http://consul.service.consul:8501"),
@@ -56,17 +52,10 @@ func TestAccCirconusCheckConsul_node(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.name", "KnownLeader"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.type", "text"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.name", "LastContact"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.unit", "seconds"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.2058715988", "source:consul"),
@@ -99,10 +88,6 @@ func TestAccCirconusCheckConsul_service(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.#", "1"),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ca_chain", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.certificate_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ciphers", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.key_file", ""),
 					resource.TestCheckNoResourceAttr("circonus_check.consul_server", "consul.0.headers"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.http_addr", "http://consul.service.consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.service", "consul"),
@@ -116,17 +101,10 @@ func TestAccCirconusCheckConsul_service(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.name", "KnownLeader"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.type", "text"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.name", "LastContact"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.unit", "seconds"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.2058715988", "source:consul"),
@@ -160,10 +138,6 @@ func TestAccCirconusCheckConsul_state(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "collector.2084916526.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.#", "1"),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ca_chain", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.certificate_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.ciphers", ""),
-					// resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.key_file", ""),
 					resource.TestCheckNoResourceAttr("circonus_check.consul_server", "consul.0.headers"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.http_addr", "http://consul.service.consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "consul.0.state", checkState),
@@ -176,17 +150,10 @@ func TestAccCirconusCheckConsul_state(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.name", "KnownLeader"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.0.type", "text"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.name", "LastContact"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.consul_server", "metric.1.unit", "seconds"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.consul_server", "tags.2058715988", "source:consul"),
@@ -217,15 +184,12 @@ resource "circonus_check" "consul_server" {
 
   metric {
     name = "KnownLeader"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "text"
   }
 
   metric {
     name = "LastContact"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = [ "source:consul", "lifecycle:unittest" ]
@@ -251,15 +215,12 @@ resource "circonus_check" "consul_server" {
 
   metric {
     name = "KnownLeader"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "text"
   }
 
   metric {
     name = "LastContact"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = [ "source:consul", "lifecycle:unittest" ]
@@ -285,15 +246,12 @@ resource "circonus_check" "consul_server" {
 
   metric {
     name = "KnownLeader"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "text"
   }
 
   metric {
     name = "LastContact"
-    tags = [ "source:consul", "lifecycle:unittest" ]
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = [ "source:consul", "lifecycle:unittest" ]

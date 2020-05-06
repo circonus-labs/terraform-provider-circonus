@@ -13,7 +13,6 @@ import (
 
 func TestAccCirconusRuleSet_basic(t *testing.T) {
 	checkName := fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
-	contactGroupName := fmt.Sprintf("ops-staging-sev3 - %s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -21,7 +20,7 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusRuleSet,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusRuleSetConfigFmt, contactGroupName, checkName),
+				Config: fmt.Sprintf(testAccCirconusRuleSetConfigFmt, checkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "check"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "metric_name", "maximum"),
@@ -119,11 +118,6 @@ variable "test_tags" {
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 
-#resource "circonus_contact_group" "test-trigger" {
-#  name = "%s"
-#  tags = [ "${var.test_tags}" ]
-#}
-
 resource "circonus_check" "api_latency" {
   active = true
   name = "%s"
@@ -139,9 +133,7 @@ resource "circonus_check" "api_latency" {
 
   metric {
     name = "maximum"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = "${var.test_tags}"
@@ -151,13 +143,10 @@ resource "circonus_check" "api_latency" {
 resource "circonus_rule_set" "icmp-latency-alarm" {
   check = "${circonus_check.api_latency.checks[0]}"
   metric_name = "maximum"
-  // metric_name = "${circonus_check.api_latency.metric["maximum"].name}"
-  // metric_type = "${circonus_check.api_latency.metric["maximum"].type}"
   notes = <<-EOF
 Simple check to create notifications based on ICMP performance.
 EOF
   link = "https://wiki.example.org/playbook/what-to-do-when-high-latency-strikes"
-#  parent = "${check cid}"
 
   if {
     value {
@@ -165,7 +154,6 @@ EOF
     }
 
     then {
-#      notify = [ "${circonus_contact_group.test-trigger.id}" ]
       notify = [ "/contact_group/4679" ]
       severity = 1
     }
@@ -182,7 +170,6 @@ EOF
     }
 
     then {
-#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
 	  notify = [ "/contact_group/4679" ]
       severity = 2
     }
@@ -199,7 +186,6 @@ EOF
     }
 
     then {
-#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
 	  notify = [ "/contact_group/4679" ]
       severity = 3
     }
@@ -211,7 +197,6 @@ EOF
     }
 
     then {
-#	  notify = [ "${circonus_contact_group.test-trigger.id}" ]
 	  notify = [ "/contact_group/4679" ]
       after = "2400"
       severity = 4

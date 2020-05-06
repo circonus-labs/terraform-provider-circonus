@@ -92,16 +92,12 @@ resource "circonus_check" "api_latency_2" {
 
   metric {
     name = "maximum"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   metric {
     name = "minimum"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = "${var.test_tags}"

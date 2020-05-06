@@ -23,17 +23,8 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.2388330941.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.#", "1"),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.auth_method", ""),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.auth_password", ""),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.auth_user", ""),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.body_regexp", ""),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.ca_chain", ""),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.certificate_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.ciphers", ""),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.code", `^200$`),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.extract", `HTTP/1.1 200 OK`),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.key_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.payload", ""),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.headers.%", "1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.headers.Host", "127.0.0.1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.4213422905.version", "1.1"),
@@ -47,42 +38,19 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.name", "code"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.tags.#", "4"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.tags.30226350", "app:circonus"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.tags.3219687752", "app:jezebel"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.type", "text"),
 
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.name", "duration"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.tags.#", "4"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.tags.30226350", "app:circonus"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.tags.3219687752", "app:jezebel"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.unit", "seconds"),
 
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.name", "tt_connect"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.tags.#", "4"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.tags.30226350", "app:circonus"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.tags.3219687752", "app:jezebel"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.unit", "milliseconds"),
 
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.name", "tt_firstbyte"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.tags.#", "4"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.tags.30226350", "app:circonus"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.tags.3219687752", "app:jezebel"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.unit", "milliseconds"),
 
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "tags.#", "4"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "tags.30226350", "app:circonus"),
@@ -105,29 +73,22 @@ variable "http_check_tags" {
 
 resource "circonus_metric" "status_code" {
   name = "code"
-  tags = "${var.http_check_tags}"
   type = "text"
 }
 
 resource "circonus_metric" "request_duration" {
   name = "duration"
-  tags = "${var.http_check_tags}"
   type = "numeric"
-  unit = "seconds"
 }
 
 resource "circonus_metric" "request_ttconnect" {
   name = "tt_connect"
-  tags = "${var.http_check_tags}"
   type = "numeric"
-  unit = "milliseconds"
 }
 
 resource "circonus_metric" "request_ttfb" {
   name = "tt_firstbyte"
-  tags = "${var.http_check_tags}"
   type = "numeric"
-  unit = "milliseconds"
 }
 
 resource "circonus_check" "jezebel" {
@@ -154,29 +115,22 @@ resource "circonus_check" "jezebel" {
 
   metric {
     name = "${circonus_metric.status_code.name}"
-    tags = "${circonus_metric.status_code.tags}"
     type = "${circonus_metric.status_code.type}"
   }
 
   metric {
     name = "${circonus_metric.request_duration.name}"
-    tags = "${circonus_metric.request_duration.tags}"
     type = "${circonus_metric.request_duration.type}"
-    unit = "${circonus_metric.request_duration.unit}"
   }
 
   metric {
     name = "${circonus_metric.request_ttconnect.name}"
-    tags = "${circonus_metric.request_ttconnect.tags}"
     type = "${circonus_metric.request_ttconnect.type}"
-    unit = "${circonus_metric.request_ttconnect.unit}"
   }
 
   metric {
     name = "${circonus_metric.request_ttfb.name}"
-    tags = "${circonus_metric.request_ttfb.tags}"
     type = "${circonus_metric.request_ttfb.type}"
-    unit = "${circonus_metric.request_ttfb.unit}"
   }
 
   tags = "${var.http_check_tags}"

@@ -1,7 +1,6 @@
 package circonus
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -32,37 +31,37 @@ func resourceOverlaySet() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"graph_cid": &schema.Schema{
+			"graph_cid": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"title": &schema.Schema{
+			"title": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"overlays": &schema.Schema{
+			"overlays": {
 				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"data_opts": &schema.Schema{
+						"data_opts": {
 							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"graph_title": &schema.Schema{
+									"graph_title": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"graph_uuid": &schema.Schema{
+									"graph_uuid": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"x_shift": &schema.Schema{
+									"x_shift": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
@@ -74,24 +73,24 @@ func resourceOverlaySet() *schema.Resource {
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"id": &schema.Schema{
+									"id": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"decouple": &schema.Schema{
+									"decouple": {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
 									},
-									"label": &schema.Schema{
+									"label": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"type": &schema.Schema{
+									"type": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"z": &schema.Schema{
+									"z": {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
@@ -165,8 +164,8 @@ func overlaySetRead(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 
-		d.Set("graph_cid", graph_cid)
-		d.Set("title", g.GraphOverlaySet.Title)
+		_ = d.Set("graph_cid", graph_cid)
+		_ = d.Set("title", g.GraphOverlaySet.Title)
 
 		dOverlays := make([]map[string]interface{}, len(g.GraphOverlaySet.Overlays))
 		for _, overlay := range g.GraphOverlaySet.Overlays {
@@ -197,10 +196,10 @@ func overlaySetRead(d *schema.ResourceData, meta interface{}) error {
 
 			dOverlays = append(dOverlays, this_overlay)
 		}
-		d.Set("overlays", dOverlays)
+		_ = d.Set("overlays", dOverlays)
 		return nil
 	}
-	return errors.New(fmt.Sprintf("graph_cid field is required for %q", d.Id()))
+	return fmt.Errorf("graph_cid field is required for %q", d.Id())
 }
 
 func overlaySetUpdate(d *schema.ResourceData, meta interface{}) error {

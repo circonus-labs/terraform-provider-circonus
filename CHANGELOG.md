@@ -2,6 +2,7 @@
 
 FIXES:
 
+* remove support for deprecated metric.tags and metric.units (use streamtags)
 * remove support for deprecated metric_cluster
 
 ## 0.9.0 (April 03, 2020)
