@@ -82,9 +82,7 @@ resource "circonus_check" "something" {
 
   metric {
     name = "Foo"
-    tags = var.jmx_check_tags
     type = "numeric"
-    unit = "foos"
   }
 
   tags = var.jmx_check_tags

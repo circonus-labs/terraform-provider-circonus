@@ -214,17 +214,10 @@ func resourceCheck() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validateRegexp(metricNameAttr, `[\S]+`),
 						},
-						metricTagsAttr: tagMakeConfigSchema(metricTagsAttr),
 						metricTypeAttr: {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validateMetricType,
-						},
-						metricUnitAttr: {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      metricUnit,
-							ValidateFunc: validateRegexp(metricUnitAttr, metricUnitRegexp),
 						},
 					}),
 				},
@@ -430,9 +423,7 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 		metricAttrs := map[string]interface{}{
 			string(metricActiveAttr): metricAPIStatusToBool(m.Status),
 			string(metricNameAttr):   m.Name,
-			string(metricTagsAttr):   tagsToState(apiToTags(m.Tags)),
 			string(metricTypeAttr):   m.Type,
-			string(metricUnitAttr):   indirect(m.Units),
 		}
 
 		metrics = append(metrics, metricAttrs)
@@ -618,7 +609,7 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 			c.Metrics = append(c.Metrics, m.CheckBundleMetric)
 		}
 	} else {
-		c.Metrics = make([]api.CheckBundleMetric, 0, 0)
+		c.Metrics = make([]api.CheckBundleMetric, 0)
 	}
 
 	if v, found := d.GetOk(checkMetricFilterAttr); found {

@@ -70,7 +70,6 @@ resource "circonus_check" "statsd_dump" {
 
   metric {
     name = "rando_metric"
-    tags = "${var.test_tags}"
     type = "histogram"
   }
 

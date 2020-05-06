@@ -1,18 +1,15 @@
 package circonus
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"reflect"
 	"sort"
 	"strconv"
-	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -27,40 +24,40 @@ func resourceRuleSetGroup() *schema.Resource {
 			State: importStatePassthroughUnescape,
 		},
 		Schema: map[string]*schema.Schema{
-			"notify": &schema.Schema{
+			"notify": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"sev1": &schema.Schema{
+						"sev1": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"sev2": &schema.Schema{
+						"sev2": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"sev3": &schema.Schema{
+						"sev3": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"sev4": &schema.Schema{
+						"sev4": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"sev5": &schema.Schema{
+						"sev5": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
@@ -70,17 +67,17 @@ func resourceRuleSetGroup() *schema.Resource {
 					},
 				},
 			},
-			"formula": &schema.Schema{
+			"formula": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"expression": &schema.Schema{
+						"expression": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"raise_severity": &schema.Schema{
+						"raise_severity": {
 							Type:     schema.TypeInt,
 							Required: true,
 							ValidateFunc: validateFuncs(
@@ -88,7 +85,7 @@ func resourceRuleSetGroup() *schema.Resource {
 								validateIntMin("raise_severity", 1),
 							),
 						},
-						"wait": &schema.Schema{
+						"wait": {
 							Type:     schema.TypeInt,
 							Required: true,
 							ValidateFunc: validateFuncs(
@@ -98,25 +95,25 @@ func resourceRuleSetGroup() *schema.Resource {
 					},
 				},
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"condition": &schema.Schema{
+			"condition": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"index": &schema.Schema{
+						"index": {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
-						"rule_set": &schema.Schema{
+						"rule_set": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"matching_severities": &schema.Schema{
+						"matching_severities": {
 							Type:     schema.TypeList,
 							Required: true,
 							MinItems: 1,
@@ -127,7 +124,7 @@ func resourceRuleSetGroup() *schema.Resource {
 					},
 				},
 			},
-			"tags": &schema.Schema{
+			"tags": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -200,8 +197,8 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 		f["wait"] = int(formula.Wait)
 		formulas = append(formulas, f)
 	}
-	d.Set("formula", formulas)
-	d.Set("name", rsg.Name)
+	_ = d.Set("formula", formulas)
+	_ = d.Set("name", rsg.Name)
 	n := make([]interface{}, 0)
 	notify := make(map[string]interface{})
 	notify["sev1"] = rsg.ContactGroups[1]
@@ -211,7 +208,7 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 	notify["sev5"] = rsg.ContactGroups[5]
 	n = append(n, notify)
 
-	d.Set("notify", n)
+	_ = d.Set("notify", n)
 	conditions := make([]interface{}, 0, len(rsg.RuleSetConditions))
 	for idx, c := range rsg.RuleSetConditions {
 		cond := make(map[string]interface{}, 2)
@@ -220,7 +217,7 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 		cond["matching_severities"] = c.MatchingSeverities
 		conditions = append(conditions, cond)
 	}
-	d.Set("condition", conditions)
+	_ = d.Set("condition", conditions)
 
 	tags := make([]interface{}, 0)
 	if len(rsg.Tags) > 0 {
@@ -228,7 +225,7 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 			tags = append(tags, t)
 		}
 	}
-	d.Set("tags", tags)
+	_ = d.Set("tags", tags)
 
 	return nil
 }
@@ -293,111 +290,111 @@ func loadRuleSetGroup(ctxt *providerContext, cid api.CIDType) (circonusRuleSetGr
 	return rs, nil
 }
 
-func ruleSetGroupNotifyChecksum(v interface{}) int {
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
+// func ruleSetGroupNotifyChecksum(v interface{}) int {
+// 	b := &bytes.Buffer{}
+// 	b.Grow(defaultHashBufSize)
 
-	writeStringArray := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			a := v.([]string)
-			if a != nil {
-				sort.Strings(a)
-				for _, s := range a {
-					fmt.Fprint(b, strings.TrimSpace(s))
-				}
-			}
-		}
-	}
+// 	writeStringArray := func(m map[string]interface{}, attrName string) {
+// 		if v, found := m[attrName]; found {
+// 			a := v.([]string)
+// 			if a != nil {
+// 				sort.Strings(a)
+// 				for _, s := range a {
+// 					fmt.Fprint(b, strings.TrimSpace(s))
+// 				}
+// 			}
+// 		}
+// 	}
 
-	m := v.(map[string]interface{})
+// 	m := v.(map[string]interface{})
 
-	writeStringArray(m, "sev1")
-	writeStringArray(m, "sev2")
-	writeStringArray(m, "sev3")
-	writeStringArray(m, "sev4")
-	writeStringArray(m, "sev5")
+// 	writeStringArray(m, "sev1")
+// 	writeStringArray(m, "sev2")
+// 	writeStringArray(m, "sev3")
+// 	writeStringArray(m, "sev4")
+// 	writeStringArray(m, "sev5")
 
-	s := b.String()
-	return hashcode.String(s)
-}
+// 	s := b.String()
+// 	return hashcode.String(s)
+// }
 
-func ruleSetGroupFormulasChecksum(v interface{}) int {
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
+// func ruleSetGroupFormulasChecksum(v interface{}) int {
+// 	b := &bytes.Buffer{}
+// 	b.Grow(defaultHashBufSize)
 
-	writeInt := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			i := v.(int)
-			if i != 0 {
-				fmt.Fprintf(b, "%x", i)
-			}
-		}
-	}
+// 	writeInt := func(m map[string]interface{}, attrName string) {
+// 		if v, found := m[attrName]; found {
+// 			i := v.(int)
+// 			if i != 0 {
+// 				fmt.Fprintf(b, "%x", i)
+// 			}
+// 		}
+// 	}
 
-	writeString := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			s := strings.TrimSpace(v.(string))
-			if s != "" {
-				fmt.Fprint(b, s)
-			}
-		}
-	}
+// 	writeString := func(m map[string]interface{}, attrName string) {
+// 		if v, found := m[attrName]; found {
+// 			s := strings.TrimSpace(v.(string))
+// 			if s != "" {
+// 				fmt.Fprint(b, s)
+// 			}
+// 		}
+// 	}
 
-	m := v.([]map[string]interface{})
-	for _, f := range m {
-		writeString(f, "expression")
-		writeInt(f, "raise_severity")
-		writeInt(f, "wait")
-	}
+// 	m := v.([]map[string]interface{})
+// 	for _, f := range m {
+// 		writeString(f, "expression")
+// 		writeInt(f, "raise_severity")
+// 		writeInt(f, "wait")
+// 	}
 
-	s := b.String()
-	return hashcode.String(s)
-}
+// 	s := b.String()
+// 	return hashcode.String(s)
+// }
 
-func ruleSetGroupConditionsChecksum(v interface{}) int {
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
+// func ruleSetGroupConditionsChecksum(v interface{}) int {
+// 	b := &bytes.Buffer{}
+// 	b.Grow(defaultHashBufSize)
 
-	writeInt := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			i := v.(int)
-			if i != 0 {
-				fmt.Fprintf(b, "%x", i)
-			}
-		}
-	}
+// 	writeInt := func(m map[string]interface{}, attrName string) {
+// 		if v, found := m[attrName]; found {
+// 			i := v.(int)
+// 			if i != 0 {
+// 				fmt.Fprintf(b, "%x", i)
+// 			}
+// 		}
+// 	}
 
-	writeString := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			s := strings.TrimSpace(v.(string))
-			if s != "" {
-				fmt.Fprint(b, s)
-			}
-		}
-	}
+// 	writeString := func(m map[string]interface{}, attrName string) {
+// 		if v, found := m[attrName]; found {
+// 			s := strings.TrimSpace(v.(string))
+// 			if s != "" {
+// 				fmt.Fprint(b, s)
+// 			}
+// 		}
+// 	}
 
-	writeStringArray := func(m map[string]interface{}, attrName string) {
-		if v, found := m[attrName]; found {
-			a := v.([]string)
-			if a != nil {
-				sort.Strings(a)
-				for _, s := range a {
-					fmt.Fprint(b, strings.TrimSpace(s))
-				}
-			}
-		}
-	}
+// 	writeStringArray := func(m map[string]interface{}, attrName string) {
+// 		if v, found := m[attrName]; found {
+// 			a := v.([]string)
+// 			if a != nil {
+// 				sort.Strings(a)
+// 				for _, s := range a {
+// 					fmt.Fprint(b, strings.TrimSpace(s))
+// 				}
+// 			}
+// 		}
+// 	}
 
-	m := v.([]interface{})
-	for _, c := range m {
-		writeInt(c.(map[string]interface{}), "index")
-		writeString(c.(map[string]interface{}), "rule_set")
-		writeStringArray(c.(map[string]interface{}), "matching_severities")
-	}
+// 	m := v.([]interface{})
+// 	for _, c := range m {
+// 		writeInt(c.(map[string]interface{}), "index")
+// 		writeString(c.(map[string]interface{}), "rule_set")
+// 		writeStringArray(c.(map[string]interface{}), "matching_severities")
+// 	}
 
-	s := b.String()
-	return hashcode.String(s)
-}
+// 	s := b.String()
+// 	return hashcode.String(s)
+// }
 
 type conditionSorter struct {
 	conditions []interface{}

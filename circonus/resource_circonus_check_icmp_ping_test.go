@@ -39,39 +39,19 @@ func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.#", "5"),
 
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.0.name", "available"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.0.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.0.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.0.tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.0.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.0.unit", "%"),
 
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.1.name", "average"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.1.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.1.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.1.tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.1.unit", "seconds"),
 
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.2.name", "count"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.2.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.2.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.2.tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.2.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.2.unit", "packets"),
 
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.3.name", "maximum"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.3.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.3.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.3.tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.3.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.3.unit", "seconds"),
 
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.4.name", "minimum"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.4.tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.4.tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.4.tags.1401442048", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.4.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.4.unit", "seconds"),
 
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "tags.2087084518", "author:terraform"),
@@ -110,37 +90,27 @@ resource "circonus_check" "loopback_latency" {
 
   metric {
     name = "available"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "%%"
   }
 
   metric {
     name = "average"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   metric {
     name = "count"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "packets"
   }
 
   metric {
     name = "maximum"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   metric {
     name = "minimum"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = "${var.test_tags}"

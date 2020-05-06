@@ -55,15 +55,15 @@ var schemaCheckJMX = &schema.Schema{
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"index": &schema.Schema{
+						"index": {
 							Type:     schema.TypeString,
 							Required: true,
 						},

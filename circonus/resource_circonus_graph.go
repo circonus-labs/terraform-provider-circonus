@@ -63,9 +63,9 @@ const (
 	graphGuideHumanNameAttr     = "name"
 )
 
-const (
-	apiGraphStyleLine = "line"
-)
+// const (
+// 	apiGraphStyleLine = "line"
+// )
 
 var graphDescriptions = attrDescrs{
 	// circonus_graph.* resource attribute names
@@ -592,7 +592,7 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 
 		guides = append(guides, guideAttrs)
 	}
-	d.Set(graphGuidesAttr, guides)
+	_ = d.Set(graphGuidesAttr, guides)
 
 	return nil
 }

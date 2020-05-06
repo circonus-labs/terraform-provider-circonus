@@ -120,29 +120,29 @@ func maintenanceRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(m.CID)
 	if m.Type == "account" {
-		d.Set("account", m.Item)
+		_ = d.Set("account", m.Item)
 	} else if m.Type == "rule_set" {
-		d.Set("rule_set", m.Item)
+		_ = d.Set("rule_set", m.Item)
 	} else if m.Type == "check" {
-		d.Set("check", m.Item)
+		_ = d.Set("check", m.Item)
 	} else if m.Type == "host" {
-		d.Set("target", m.Item)
+		_ = d.Set("target", m.Item)
 	}
 
-	d.Set("notes", m.Notes)
-	d.Set("severities", m.Severities.([]interface{}))
+	_ = d.Set("notes", m.Notes)
+	_ = d.Set("severities", m.Severities.([]interface{}))
 	start := time.Unix(int64(m.Start), 0)
 	stop := time.Unix(int64(m.Stop), 0)
 
-	d.Set("start", start.Format(time.RFC3339))
-	d.Set("stop", stop.Format(time.RFC3339))
+	_ = d.Set("start", start.Format(time.RFC3339))
+	_ = d.Set("stop", stop.Format(time.RFC3339))
 	tags := make([]interface{}, 0)
 	if len(m.Tags) > 0 {
 		for _, t := range m.Tags {
 			tags = append(tags, t)
 		}
 	}
-	d.Set("tags", tags)
+	_ = d.Set("tags", tags)
 	return nil
 }
 

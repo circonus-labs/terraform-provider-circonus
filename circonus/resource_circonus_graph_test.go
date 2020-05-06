@@ -128,16 +128,12 @@ resource "circonus_check" "api_latency" {
 
   metric {
     name = "maximum"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   metric {
     name = "minimum"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = "${var.test_tags}"
@@ -162,7 +158,6 @@ resource "circonus_graph" "mixed-points" {
   }
 
   metric {
-    # caql = "" # conflicts with metric_name/check
     check = "${circonus_check.api_latency.checks[0]}"
     metric_name = "maximum"
     metric_type = "numeric"
@@ -174,7 +169,6 @@ resource "circonus_graph" "mixed-points" {
   }
 
   metric {
-    # caql = "" # conflicts with metric_name/check
     check = "${circonus_check.api_latency.checks[0]}"
     metric_name = "minimum"
     metric_type = "numeric"
@@ -184,15 +178,6 @@ resource "circonus_graph" "mixed-points" {
     function = "gauge"
     active = true
   }
-
-  // metric_cluster {
-  //   active = true
-  //   aggregate = "average"
-  //   axis = "left" # right
-  //   color = "#657aa6"
-  //   group = "${circonus_check.api_latency.checks[0]}"
-  //   name = "Metrics Used"
-  // }
 
   tags = "${var.test_tags}"
 }
