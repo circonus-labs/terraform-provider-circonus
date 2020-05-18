@@ -15,7 +15,7 @@ import (
 func TestAccCirconusMaintenance_basic(t *testing.T) {
 	checkName := fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
 
-	st := time.Now()
+	st := time.Now().Add(10 * time.Minute)
 	et := st.Add(1 * time.Hour)
 	startTime := st.Format(time.RFC3339)
 	stopTime := et.Format(time.RFC3339)
