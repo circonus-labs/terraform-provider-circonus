@@ -103,10 +103,12 @@ resource "circonus_rule_set" "myapp-healthy-alert" {
   if {
     value {
       # SEV3 if the average response time is more than 500ms using a moving
-      # average over the last 10min.  Any transient problems should have
-      # resolved themselves by now.  Something's wrong, need to page someone.
+      # average over the last 10min using at least 5min of data.  Any transient 
+      # problems should have resolved themselves by now.  Something's wrong, 
+      # need to page someone.
       over {
-        last  = "10m"
+        last  = "600"
+        atleast = "300"
         using = "average"
       }
       max_value = "500"
@@ -280,7 +282,9 @@ a rule evaluate on derived value from a window, include a nested `over`
 attribute inside of the `value` configuration block.  An `over` attribute needs
 two attributes:
 
-* `last` - (Optional) A duration for the sliding window.  Default `300s`.
+* `last` - (Optional) A duration for the sliding window.  Default `300`.
+* `atleast` - (Optional) A duration for the minimum amount of data to consider in the 
+  sliding window.  Default `0`.
 
 * `using` - (Optional) The window function to use over the `last` interval.
   Valid window functions include: `average` (the default), `stddev`, `derive`,
@@ -338,7 +342,7 @@ resource "circonus_rule_set" "icmp-latency-alert" {
 
   if {
     value {
-      absent = "600s"
+      absent = "600"
     }
 
     then {
@@ -350,7 +354,8 @@ resource "circonus_rule_set" "icmp-latency-alert" {
   if {
     value {
       over {
-        last = "120s"
+        last = "120"
+        atleast = "60"
         using = "average"
       }
 
