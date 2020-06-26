@@ -226,7 +226,7 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 
 	// count the number of oids in the config so we can make our list
 	var oid_count = 0
-	for k, _ := range c.Config {
+	for k := range c.Config {
 		key := string(k)
 		if strings.HasPrefix(key, string(config.OIDPrefix)) {
 			oid_count++

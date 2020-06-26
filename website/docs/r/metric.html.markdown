@@ -19,7 +19,6 @@ created.
 resource "circonus_metric" "used" {
   name  = "_usage`0`_used"
   type  = "numeric"
-  units = "qty"
 
   tags = {
     author = "terraform"
@@ -36,13 +35,9 @@ resource "circonus_metric" "used" {
 * `name` - (Required) The name of the metric.  A `name` must be unique within a
   `circonus_check` and its meaning is `circonus_check.type` specific.
 
-* `tags` - (Optional) A list of tags assigned to the metric.
-
 * `type` - (Required) The type of metric.  This value must be present and can be
   one of the following values: `numeric`, `text`, `histogram`, `composite`, or
   `caql`.
-
-* `unit` - (Optional) The unit of measurement for this `circonus_metric`.
 
 ## Import Example
 
@@ -57,8 +52,6 @@ provider "circonus" {
 resource "circonus_metric" "usage" {
   name = "_usage`0`_used"
   type = "numeric"
-  unit = "qty"
-  tags = { source = "circonus" }
 }
 ```
 

@@ -28,7 +28,7 @@ const (
 
 var checkExternalDescriptions = attrDescrs{
 	checkCommandAttr:       "The full path to the command to run",
-	checkOutputExtractAttr: "The output extraction method: JSON or NAGIOS",
+	checkOutputExtractAttr: "The output extraction method: JSON or NAGIOS, otherwise treated as regexp",
 	checkArg1Attr:          "The 1st argument to the command",
 	checkArg2Attr:          "The 2nd argument to the command",
 	checkArg3Attr:          "The 3rd argument to the command",
@@ -49,9 +49,10 @@ var schemaCheckExternal = &schema.Schema{
 	Elem: &schema.Resource{
 		Schema: convertToHelperSchema(checkExternalDescriptions, map[schemaAttr]*schema.Schema{
 			checkOutputExtractAttr: {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validateRegexp(checkOutputExtractAttr, `^(?:JSON|NAGIOS)$`),
+				Type:     schema.TypeString,
+				Required: true,
+				// anything other than JSON or NAGIOS treated as regexp
+				// ValidateFunc: validateRegexp(checkOutputExtractAttr, `^(?:JSON|NAGIOS)$`),
 			},
 			checkCommandAttr: {
 				Type:     schema.TypeString,

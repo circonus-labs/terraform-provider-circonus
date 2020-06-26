@@ -18,11 +18,6 @@ var knownContactMethods map[contactMethods]struct{}
 var userContactMethods map[contactMethods]struct{}
 var externalContactMethods map[contactMethods]struct{}
 var supportedHTTPVersions = validStringValues{"0.9", "1.0", "1.1", "2.0"}
-var supportedMetricClusterTypes = validStringValues{
-	"average", "count", "counter", "counter2", "counter2_stddev",
-	"counter_stddev", "derive", "derive2", "derive2_stddev", "derive_stddev",
-	"histogram", "stddev", "text",
-}
 
 func init() {
 	checkTypes := []circonusCheckType{

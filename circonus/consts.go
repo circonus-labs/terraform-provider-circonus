@@ -56,15 +56,12 @@ const (
 
 	defaultDashboardWidgets = 1
 
-	metricUnit       = ""
-	metricUnitRegexp = `^.*$`
-
-	defaultRuleSetLast       = "300s"
+	// defaultRuleSetLast       = "300s"
 	defaultRuleSetMetricType = "numeric"
 	defaultRuleSetRuleLen    = 4
 	defaultAlertSeverity     = 1
-	defaultRuleSetWindowFunc = "average"
-	ruleSetAbsentMin         = "70s"
+	// defaultRuleSetWindowFunc = "average"
+	// ruleSetAbsentMin         = "70s"
 
 	defaultWorkspaceFavourite = false
 )

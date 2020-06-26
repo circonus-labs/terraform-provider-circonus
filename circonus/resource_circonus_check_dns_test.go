@@ -69,22 +69,17 @@ resource "circonus_check" "google" {
 
   metric {
     name = "answer"
-    tags = "${var.test_tags}"
     type = "text"
   }
 
   metric {
     name = "rtt"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "milliseconds"
   }
 
   metric {
     name = "ttl"
-    tags = "${var.test_tags}"
     type = "numeric"
-    unit = "seconds"
   }
 
   tags = "${var.test_tags}"

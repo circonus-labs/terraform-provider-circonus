@@ -64,9 +64,7 @@ EOF
 
   metric {
     name = "output[1]"
-    tags = "${var.test_tags}"
     type = "histogram"
-    unit = "seconds"
   }
 
   tags = "${var.test_tags}"

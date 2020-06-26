@@ -4,8 +4,7 @@ package circonus
 // actually exist within Circonus.  The `circonus_check` resource uses
 // `circonus_metric` as input to its `metric` attribute.  The `circonus_check`
 // resource can, if configured, override various parameters in the
-// `circonus_metric` resource if no value was set (e.g. the `icmp_ping` will
-// implicitly set the `unit` metric to `seconds`).
+// `circonus_metric` resource if no value was set.
 
 import (
 	"github.com/hashicorp/errwrap"
@@ -18,8 +17,6 @@ const (
 	metricIDAttr     = "id"
 	metricNameAttr   = "name"
 	metricTypeAttr   = "type"
-	metricTagsAttr   = "tags"
-	metricUnitAttr   = "unit"
 
 	// CheckBundle.Metric.Status can be one of these values
 	metricStatusActive    = "active"
@@ -30,8 +27,6 @@ var metricDescriptions = attrDescrs{
 	metricActiveAttr: "Enables or disables the metric",
 	metricNameAttr:   "Name of the metric",
 	metricTypeAttr:   "Type of metric (e.g. numeric, histogram, text)",
-	metricTagsAttr:   "Tags assigned to the metric",
-	metricUnitAttr:   "The unit of measurement for a metric",
 }
 
 func resourceMetric() *schema.Resource {
@@ -60,13 +55,6 @@ func resourceMetric() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateStringIn(metricTypeAttr, validMetricTypes),
-			},
-			metricTagsAttr: tagMakeConfigSchema(metricTagsAttr),
-			metricUnitAttr: {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      metricUnit,
-				ValidateFunc: validateRegexp(metricUnitAttr, metricUnitRegexp),
 			},
 		}),
 	}

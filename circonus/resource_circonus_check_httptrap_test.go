@@ -32,29 +32,15 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.0.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.0.name", "consul`consul-server-10-151-2-8`consul`session_ttl`active"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.0.tags.#", "3"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.0.tags.3728194417", "app:consul"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.0.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.0.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.0.type", "numeric"),
 
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.name", "consul`consul-server-10-151-2-8`runtime`alloc_bytes"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.tags.#", "3"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.tags.3728194417", "app:consul"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.1.unit", "bytes"),
 
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.name", "consul`consul`http`GET`v1`kv`_"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.tags.#", "3"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.tags.3728194417", "app:consul"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.tags.2058715988", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.type", "histogram"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.unit", "nanoseconds"),
 
 					resource.TestCheckResourceAttr("circonus_check.consul", "tags.#", "3"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "tags.3728194417", "app:consul"),
@@ -96,22 +82,17 @@ resource "circonus_check" "consul" {
 
   metric {
     name = "consul` + "`" + `${var.consul_hostname}` + "`" + `consul` + "`" + `session_ttl` + "`" + `active"
-    tags = "${var.httptrap_check_tags}"
     type = "numeric"
   }
 
   metric {
     name = "consul` + "`" + `${var.consul_hostname}` + "`" + `runtime` + "`" + `alloc_bytes"
-    tags = "${var.httptrap_check_tags}"
     type = "numeric"
-    unit = "bytes"
   }
 
   metric {
     name = "consul` + "`" + `consul` + "`" + `http` + "`" + `GET` + "`" + `v1` + "`" + `kv` + "`" + `_"
-    tags = "${var.httptrap_check_tags}"
     type = "histogram"
-    unit = "nanoseconds"
   }
 
   tags = "${var.httptrap_check_tags}"

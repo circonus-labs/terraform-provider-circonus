@@ -358,7 +358,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(rs.CID)
-	d.Set(ruleSetIdAttr, rs.CID)
+	_ = d.Set(ruleSetIdAttr, rs.CID)
 
 	ifRules := make([]interface{}, 0, defaultRuleSetRuleLen)
 	for _, rule := range rs.Rules {
@@ -399,7 +399,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 
 			// NOTE: Only save the window duration if a function was specified
 			valueOverAttrs[string(ruleSetLastAttr)] = fmt.Sprintf("%d", rule.WindowingDuration)
-			valueOverSet := make([]interface{}, 0, 0)
+			valueOverSet := make([]interface{}, 0)
 			valueOverSet = append(valueOverSet, valueOverAttrs)
 			valueAttrs[string(ruleSetOverAttr)] = valueOverSet
 		}
@@ -408,10 +408,10 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			sort.Strings(contactGroups)
 			thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
 		}
-		thenSet := make([]interface{}, 0, 0)
+		thenSet := make([]interface{}, 0)
 		thenSet = append(thenSet, thenAttrs)
 
-		valueSet := make([]interface{}, 0, 0)
+		valueSet := make([]interface{}, 0)
 		valueSet = append(valueSet, valueAttrs)
 		ifAttrs[string(ruleSetThenAttr)] = thenSet
 		ifAttrs[string(ruleSetValueAttr)] = valueSet
@@ -429,13 +429,13 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetIfAttr), err)
 	}
 
-	d.Set(ruleSetLinkAttr, indirect(rs.Link))
-	d.Set(ruleSetMetricNameAttr, rs.MetricName)
-	d.Set(ruleSetMetricPatternAttr, rs.MetricPattern)
-	d.Set(ruleSetMetricFilterAttr, rs.Filter)
-	d.Set(ruleSetMetricTypeAttr, rs.MetricType)
-	d.Set(ruleSetNotesAttr, indirect(rs.Notes))
-	d.Set(ruleSetParentAttr, indirect(rs.Parent))
+	_ = d.Set(ruleSetLinkAttr, indirect(rs.Link))
+	_ = d.Set(ruleSetMetricNameAttr, rs.MetricName)
+	_ = d.Set(ruleSetMetricPatternAttr, rs.MetricPattern)
+	_ = d.Set(ruleSetMetricFilterAttr, rs.Filter)
+	_ = d.Set(ruleSetMetricTypeAttr, rs.MetricType)
+	_ = d.Set(ruleSetNotesAttr, indirect(rs.Notes))
+	_ = d.Set(ruleSetParentAttr, indirect(rs.Parent))
 
 	if err := d.Set(ruleSetTagsAttr, tagsToState(apiToTags(rs.Tags))); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetTagsAttr), err)
@@ -470,7 +470,7 @@ func ruleSetDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
-	d.Set(ruleSetIdAttr, "")
+	_ = d.Set(ruleSetIdAttr, "")
 
 	return nil
 }
@@ -489,7 +489,7 @@ func newRuleSet() circonusRuleSet {
 		rs.ContactGroups[i+1] = make([]string, 0, 1)
 	}
 
-	rs.Rules = make([]api.RuleSetRule, 0, 0)
+	rs.Rules = make([]api.RuleSetRule, 0)
 
 	return rs
 }
@@ -545,7 +545,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.Filter = v.(string)
 	}
 
-	rs.Rules = make([]api.RuleSetRule, 0, 0)
+	rs.Rules = make([]api.RuleSetRule, 0)
 	if ifListRaw, found := d.GetOk(ruleSetIfAttr); found {
 		ifList := ifListRaw.([]interface{})
 		for _, ifListElem := range ifList {

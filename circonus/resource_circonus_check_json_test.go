@@ -22,14 +22,6 @@ func TestAccCirconusCheckJSON_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.usage", "collector.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "collector.2388330941.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.#", "1"),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.auth_method", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.auth_password", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.auth_user", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.ca_chain", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.certificate_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.ciphers", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.key_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.payload", ""),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.headers.%", "3"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.headers.Accept", "application/json"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.2626248092.headers.X-Circonus-App-Name", "TerraformCheck"),
@@ -45,16 +37,10 @@ func TestAccCirconusCheckJSON_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.name", "_usage`0`_limit"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.tags.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.unit", "qty"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.name", "_usage`0`_used"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.tags.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.unit", "qty"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "tags.1401442048", "lifecycle:unittest"),
@@ -69,14 +55,6 @@ func TestAccCirconusCheckJSON_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.usage", "collector.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "collector.2388330941.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.#", "1"),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.auth_method", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.auth_password", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.auth_user", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.ca_chain", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.certificate_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.ciphers", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.key_file", ""),
-					// resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.payload", ""),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.headers.%", "3"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.headers.Accept", "application/json"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.3951979786.headers.X-Circonus-App-Name", "TerraformCheck"),
@@ -92,16 +70,10 @@ func TestAccCirconusCheckJSON_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.name", "_usage`0`_limit"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.tags.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.0.unit", "qty"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.name", "_usage`0`_used"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.tags.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.type", "numeric"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "metric.1.unit", "qty"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "tags.3241999189", "source:circonus"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "tags.1401442048", "lifecycle:unittest"),
@@ -114,22 +86,15 @@ func TestAccCirconusCheckJSON_basic(t *testing.T) {
 }
 
 const testAccCirconusCheckJSONConfig1 = `
-variable "usage_default_unit" {
-  default = "qty"
-}
 
 resource "circonus_metric" "limit" {
   name = "_usage` + "`0`" + `_limit"
-  tags = [ "source:circonus" ]
   type = "numeric"
-  unit = "${var.usage_default_unit}"
 }
 
 resource "circonus_metric" "used" {
   name = "_usage` + "`0`" + `_used"
-  tags = [ "source:circonus" ]
   type = "numeric"
-  unit = "${var.usage_default_unit}"
 }
 
 resource "circonus_check" "usage" {
@@ -156,16 +121,12 @@ resource "circonus_check" "usage" {
 
   metric {
     name = "${circonus_metric.limit.name}"
-    tags = "${circonus_metric.limit.tags}"
     type = "${circonus_metric.limit.type}"
-    unit = "${coalesce(circonus_metric.limit.unit, var.usage_default_unit)}"
   }
 
   metric {
     name = "${circonus_metric.used.name}"
-    tags = "${circonus_metric.used.tags}"
     type = "${circonus_metric.used.type}"
-    unit = "${coalesce(circonus_metric.used.unit, var.usage_default_unit)}"
   }
 
   tags = [ "source:circonus", "lifecycle:unittest" ]
@@ -173,22 +134,15 @@ resource "circonus_check" "usage" {
 `
 
 const testAccCirconusCheckJSONConfig2 = `
-variable "usage_default_unit" {
-  default = "qty"
-}
 
 resource "circonus_metric" "limit" {
   name = "_usage` + "`0`" + `_limit"
-  tags = [ "source:circonus" ]
   type = "numeric"
-  unit = "${var.usage_default_unit}"
 }
 
 resource "circonus_metric" "used" {
   name = "_usage` + "`0`" + `_used"
-  tags = [ "source:circonus" ]
   type = "numeric"
-  unit = "${var.usage_default_unit}"
 }
 
 resource "circonus_check" "usage" {
@@ -216,16 +170,12 @@ resource "circonus_check" "usage" {
 
   metric {
     name = "${circonus_metric.limit.name}"
-    tags = "${circonus_metric.limit.tags}"
     type = "${circonus_metric.limit.type}"
-    unit = "${coalesce(circonus_metric.limit.unit, var.usage_default_unit)}"
   }
 
   metric {
     name = "${circonus_metric.used.name}"
-    tags = "${circonus_metric.used.tags}"
     type = "${circonus_metric.used.type}"
-    unit = "${coalesce(circonus_metric.used.unit, var.usage_default_unit)}"
   }
 
   tags = [ "source:circonus", "lifecycle:unittest" ]

@@ -1,4 +1,11 @@
-## 0.9.0 (Unreleased)
+## 0.10.0 (Unreleased)
+
+FIXES:
+
+* remove support for deprecated metric.tags and metric.units (use streamtags)
+* remove support for deprecated metric_cluster
+
+## 0.9.0 (April 03, 2020)
 
 IMPROVEMENTS:
 
@@ -9,7 +16,8 @@ IMPROVEMENTS:
 * Add validation for a ruleset to prevent metric_type -> Rule.Criteria mismatches
 * Prevent unnecessary updates to dashboards
 * Do exponential backoff when API returns 503's
-* Fix slack contact groups to have reasonable slack default text 
+* Fix slack contact groups to have reasonable slack default text
+* Fix external check output extract: JSON, NAGIOS, otherwise treated as regexp
 
 
 ## 0.8.0 (February 24, 2020)
