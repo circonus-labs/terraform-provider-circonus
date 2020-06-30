@@ -48,8 +48,9 @@ const (
 	ruleSetOverAttr       = "over"
 
 	// circonus_rule_set.if.value.over.* resource attribute names
-	ruleSetLastAttr  = "last"
-	ruleSetUsingAttr = "using"
+	ruleSetLastAttr    = "last"
+	ruleSetUsingAttr   = "using"
+	ruleSetAtLeastAttr = "atleast"
 
 	// out attributes
 	ruleSetIdAttr = "rule_set_id"
@@ -104,8 +105,9 @@ var ruleSetIfValueDescriptions = attrDescrs{
 
 var ruleSetIfValueOverDescriptions = attrDescrs{
 	// circonus_rule_set.if.value.over.* resource attribute names
-	ruleSetLastAttr:  "Duration over which data from the last interval is examined",
-	ruleSetUsingAttr: "Define the window function to use over the last duration",
+	ruleSetLastAttr:    "Duration over which data from the last interval is examined",
+	ruleSetAtLeastAttr: "Wait at least this long (seconds) before evaluating the rule",
+	ruleSetUsingAttr:   "Define the window function to use over the last duration",
 }
 
 var ruleSetIfThenDescriptions = attrDescrs{
@@ -246,6 +248,11 @@ func resourceRuleSet() *schema.Resource {
 													Type:         schema.TypeString,
 													Optional:     true,
 													ValidateFunc: validateRegexp(ruleSetLastAttr, "^[0-9]+$"),
+												},
+												ruleSetAtLeastAttr: {
+													Type:         schema.TypeString,
+													Optional:     true,
+													ValidateFunc: validateRegexp(ruleSetAtLeastAttr, "^[0-9]+$"),
 												},
 												ruleSetUsingAttr: {
 													Type:         schema.TypeString,
@@ -396,9 +403,9 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 
 		if rule.WindowingFunction != nil {
 			valueOverAttrs[string(ruleSetUsingAttr)] = *rule.WindowingFunction
-
 			// NOTE: Only save the window duration if a function was specified
 			valueOverAttrs[string(ruleSetLastAttr)] = fmt.Sprintf("%d", rule.WindowingDuration)
+			valueOverAttrs[string(ruleSetAtLeastAttr)] = fmt.Sprintf("%d", rule.WindowingMinDuration)
 			valueOverSet := make([]interface{}, 0)
 			valueOverSet = append(valueOverSet, valueOverAttrs)
 			valueAttrs[string(ruleSetOverAttr)] = valueOverSet
@@ -679,6 +686,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						overAttrs := overListRaw.(map[string]interface{})
 
 						windowDuration := uint(0)
+						windowMinDuration := uint(0)
 						windowFunction := ""
 
 						if v, found := overAttrs[ruleSetLastAttr]; found {
@@ -688,6 +696,13 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							}
 							windowDuration = uint(i)
 						}
+						if v, found := overAttrs[ruleSetAtLeastAttr]; found {
+							i, err := strconv.Atoi(v.(string))
+							if err != nil {
+								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetAtLeastAttr, v.(string)), err)
+							}
+							windowMinDuration = uint(i)
+						}
 
 						if v, found := overAttrs[ruleSetUsingAttr]; found {
 							windowFunction = v.(string)
@@ -696,6 +711,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						if windowFunction != "" && windowDuration > 0 {
 							rule.WindowingFunction = &windowFunction
 							rule.WindowingDuration = windowDuration
+							rule.WindowingMinDuration = windowMinDuration
 						}
 					}
 				}
@@ -766,6 +782,10 @@ func (rs *circonusRuleSet) Validate() error {
 
 		if rule.Criteria == "" {
 			return fmt.Errorf("rule %d for check ID %s has an empty criteria", i, rs.CheckCID)
+		}
+
+		if rule.WindowingMinDuration > rule.WindowingDuration {
+			return fmt.Errorf("rule %d for check ID %s cannot have a window_min_duration (atleast) greater than the window duration (last)", i, rs.CheckCID)
 		}
 
 		if stringInSlice(rule.Criteria, []string{apiRuleSetMatch, apiRuleSetNotMatch, apiRuleSetContains, apiRuleSetNotContains}) {

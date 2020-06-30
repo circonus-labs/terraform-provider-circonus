@@ -1,3 +1,12 @@
+# v0.7.7
+
+* fix: lint simplifications in tests
+* upd: dependency
+* add: WindowingMinDuration to RuleSetRule
+* fix: remove derive from tests (deprecated)
+* upd: remove RuleSet.Derive (deprecated)
+* upd: remove Tags and Units from metrics (deprecated)
+
 # v0.7.6
 
 * fix: skip backoff for HTTP/400
