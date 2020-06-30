@@ -33,8 +33,9 @@ type Metric struct {
 	MetricName     string   `json:"_metric_name,omitempty"`  // string
 	MetricType     string   `json:"_metric_type,omitempty"`  // string
 	Notes          *string  `json:"notes,omitempty"`         // string or null
-	Tags           []string `json:"tags,omitempty"`          // [] len >= 0
-	Units          *string  `json:"units,omitempty"`         // string or null
+	// DEPRECATED
+	// Tags           []string `json:"tags,omitempty"`          // [] len >= 0
+	// Units          *string  `json:"units,omitempty"`         // string or null
 }
 
 // FetchMetric retrieves metric with passed cid.
