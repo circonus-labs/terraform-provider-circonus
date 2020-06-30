@@ -1,5 +1,11 @@
 ## 0.10.0 (Unreleased)
 
+IMPROVEMENTS:
+
+* go-apiclient v0.7.7
+* Environment vars to external checks 
+* Support for new windowing_min_duration in rulesets
+
 FIXES:
 
 * remove support for deprecated metric.tags and metric.units (use streamtags)
