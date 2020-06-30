@@ -111,7 +111,7 @@ var schemaCheckExternal = &schema.Schema{
 // statefile.
 func checkAPIToStateExternal(c *circonusCheck, d *schema.ResourceData) error {
 	externalConfig := make(map[string]interface{}, len(c.Config))
-	envs := make(map[string]interface{}, 0)
+	envs := make(map[string]interface{})
 
 	// swamp is a sanity check: it must be empty by the time this method returns
 	swamp := make(map[config.Key]string, len(c.Config))
