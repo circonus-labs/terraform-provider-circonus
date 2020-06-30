@@ -291,7 +291,7 @@ func resourceRuleSet() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				StateFunc:    suppressWhitespace,
-				ValidateFunc: validateRegexp(ruleSetParentAttr, `^[\d]+_[\d\w]+$`),
+				ValidateFunc: validateRegexp(ruleSetParentAttr, `^[\d]+(_[\d\w]+)?$`),
 			},
 			ruleSetMetricNameAttr: {
 				Type:         schema.TypeString,
@@ -689,14 +689,14 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						windowMinDuration := uint(0)
 						windowFunction := ""
 
-						if v, found := overAttrs[ruleSetLastAttr]; found {
+						if v, found := overAttrs[ruleSetLastAttr]; found && v != "" {
 							i, err := strconv.Atoi(v.(string))
 							if err != nil {
 								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetLastAttr, v.(string)), err)
 							}
 							windowDuration = uint(i)
 						}
-						if v, found := overAttrs[ruleSetAtLeastAttr]; found {
+						if v, found := overAttrs[ruleSetAtLeastAttr]; found && v != "" {
 							i, err := strconv.Atoi(v.(string))
 							if err != nil {
 								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetAtLeastAttr, v.(string)), err)
@@ -711,7 +711,9 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						if windowFunction != "" && windowDuration > 0 {
 							rule.WindowingFunction = &windowFunction
 							rule.WindowingDuration = windowDuration
-							rule.WindowingMinDuration = windowMinDuration
+							if windowMinDuration > 0 {
+								rule.WindowingMinDuration = windowMinDuration
+							}
 						}
 					}
 				}

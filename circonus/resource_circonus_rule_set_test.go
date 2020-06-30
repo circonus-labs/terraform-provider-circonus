@@ -39,6 +39,7 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.#", "1"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.over.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.over.0.atleast", "30"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.over.0.last", "120"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.over.0.using", "average"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.0.min_value", "2"),
@@ -49,6 +50,7 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.#", "1"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.over.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.over.0.atleast", "30"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.over.0.last", "180"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.over.0.using", "average"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.2.value.0.max_value", "300"),
@@ -162,6 +164,7 @@ EOF
   if {
     value {
       over {
+		atleast = "30"
         last = "120"
         using = "average"
       }
@@ -178,6 +181,7 @@ EOF
   if {
     value {
       over {
+		atleast = "30"
         last = "180"
         using = "average"
       }
