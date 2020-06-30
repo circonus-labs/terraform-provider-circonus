@@ -8,6 +8,7 @@ IMPROVEMENTS:
 
 FIXES:
 
+* update ruleset parent pattern
 * remove support for deprecated metric.tags and metric.units (use streamtags)
 * remove support for deprecated metric_cluster
 
