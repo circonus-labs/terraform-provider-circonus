@@ -34,6 +34,7 @@ const (
 	apiCheckTypeMemcached  circonusCheckType = "memcached"
 	apiCheckTypeJSON       circonusCheckType = "json"
 	apiCheckTypeMySQL      circonusCheckType = "mysql"
+	apiCheckTypeNTP        circonusCheckType = "ntp"
 	apiCheckTypeRedis      circonusCheckType = "redis"
 	apiCheckTypeSNMP       circonusCheckType = "snmp"
 	apiCheckTypeStatsd     circonusCheckType = "statsd"

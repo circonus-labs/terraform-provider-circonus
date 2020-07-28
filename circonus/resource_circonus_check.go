@@ -47,6 +47,7 @@ const (
 	checkMetricLimitAttr  = "metric_limit"
 	checkMySQLAttr        = "mysql"
 	checkNameAttr         = "name"
+	checkNTPAttr          = "ntp"
 	checkNotesAttr        = "notes"
 	checkPeriodAttr       = "period"
 	checkPostgreSQLAttr   = "postgresql"
@@ -94,6 +95,7 @@ const (
 	apiCheckTypeICMPPingAttr   apiCheckType = "ping_icmp"
 	apiCheckTypeJSONAttr       apiCheckType = "json"
 	apiCheckTypeMySQLAttr      apiCheckType = "mysql"
+	apiCheckTypeNTPAttr        apiCheckType = "ntp"
 	apiCheckTypePostgreSQLAttr apiCheckType = "postgres"
 	apiCheckTypePromTextAttr   apiCheckType = "promtext"
 	apiCheckTypeRedisAttr      apiCheckType = "redis"
@@ -121,6 +123,7 @@ var checkDescriptions = attrDescrs{
 	checkMetricLimitAttr:  `Setting a metric_limit will enable all (-1), disable (0), or allow up to the specified limit of metrics for this check ("N+", where N is a positive integer)`,
 	checkMySQLAttr:        "MySQL check configuration",
 	checkNameAttr:         "The name of the check bundle that will be displayed in the web interface",
+	checkNTPAttr:          "NTP check configuration",
 	checkNotesAttr:        "Notes about this check bundle",
 	checkPeriodAttr:       "The period between each time the check is made",
 	checkPostgreSQLAttr:   "PostgreSQL check configuration",
@@ -197,6 +200,7 @@ func resourceCheck() *schema.Resource {
 			checkICMPPingAttr:  schemaCheckICMPPing,
 			checkJMXAttr:       schemaCheckJMX,
 			checkMemcachedAttr: schemaCheckMemcached,
+			checkNTPAttr:       schemaCheckNTP,
 			checkJSONAttr:      schemaCheckJSON,
 			checkMetricAttr: {
 				Type:     schema.TypeList,
@@ -688,6 +692,7 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 		checkMemcachedAttr:  checkConfigToAPIMemcached,
 		checkJSONAttr:       checkConfigToAPIJSON,
 		checkMySQLAttr:      checkConfigToAPIMySQL,
+		checkNTPAttr:        checkConfigToAPINTP,
 		checkPostgreSQLAttr: checkConfigToAPIPostgreSQL,
 		checkPromTextAttr:   checkConfigToAPIPromText,
 		checkRedisAttr:      checkConfigToAPIRedis,
@@ -732,6 +737,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 		apiCheckTypeMemcachedAttr:  checkAPIToStateMemcached,
 		apiCheckTypeJSONAttr:       checkAPIToStateJSON,
 		apiCheckTypeMySQLAttr:      checkAPIToStateMySQL,
+		apiCheckTypeNTPAttr:        checkAPIToStateNTP,
 		apiCheckTypePostgreSQLAttr: checkAPIToStatePostgreSQL,
 		apiCheckTypePromTextAttr:   checkAPIToStatePromText,
 		apiCheckTypeRedisAttr:      checkAPIToStateRedis,
