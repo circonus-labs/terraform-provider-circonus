@@ -158,12 +158,13 @@ func resourceRuleSet() *schema.Resource {
 									ruleSetAfterAttr: {
 										Type:         schema.TypeString,
 										Optional:     true,
+										Default:      "0",
 										ValidateFunc: validateRegexp(ruleSetAfterAttr, "^[0-9]+$"),
 									},
 									ruleSetNotifyAttr: {
-										Type:     schema.TypeList,
+										Type:     schema.TypeSet,
 										Optional: true,
-										MinItems: 1,
+										MinItems: 0,
 										Elem: &schema.Schema{
 											Type:         schema.TypeString,
 											ValidateFunc: validateContactGroupCID(ruleSetNotifyAttr),

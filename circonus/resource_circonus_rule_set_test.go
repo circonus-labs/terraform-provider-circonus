@@ -33,8 +33,9 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.0.absent", "70"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.0.over.#", "0"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.#", "1"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.notify.#", "2"),
 					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.notify.0"),
+					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.notify.1"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.then.0.severity", "1"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.1.value.#", "1"),
@@ -156,7 +157,10 @@ EOF
     }
 
     then {
-      notify = [ "/contact_group/4679" ]
+      notify = [
+        "/contact_group/4680",
+        "/contact_group/4679"
+      ]
       severity = 1
     }
   }
@@ -164,7 +168,7 @@ EOF
   if {
     value {
       over {
-		atleast = "30"
+        atleast = "30"
         last = "120"
         using = "average"
       }
@@ -173,7 +177,7 @@ EOF
     }
 
     then {
-	  notify = [ "/contact_group/4679" ]
+      notify = [ "/contact_group/4679" ]
       severity = 2
     }
   }
@@ -181,7 +185,7 @@ EOF
   if {
     value {
       over {
-		atleast = "30"
+        atleast = "30"
         last = "180"
         using = "average"
       }
@@ -190,7 +194,7 @@ EOF
     }
 
     then {
-	  notify = [ "/contact_group/4679" ]
+      notify = [ "/contact_group/4679" ]
       severity = 3
     }
   }
@@ -201,7 +205,7 @@ EOF
     }
 
     then {
-	  notify = [ "/contact_group/4679" ]
+      notify = [ "/contact_group/4679" ]
       after = "2400"
       severity = 4
     }
