@@ -397,9 +397,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("PROVIDER BUG: Unsupported criteria %q", rule.Criteria)
 		}
 
-		if rule.Wait > 0 {
-			thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
-		}
+		thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
 		thenAttrs[string(ruleSetSeverityAttr)] = int(rule.Severity)
 
 		if rule.WindowingFunction != nil {
@@ -415,6 +413,8 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
 			sort.Strings(contactGroups)
 			thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
+		} else {
+			thenAttrs[string(ruleSetNotifyAttr)] = make([]string, 0)
 		}
 		thenSet := make([]interface{}, 0)
 		thenSet = append(thenSet, thenAttrs)
@@ -561,6 +561,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 			rule := api.RuleSetRule{}
 			rule.WindowingFunction = nil
+			rule.Wait = 0
 
 			if thenListRaw, found := ifAttrs[ruleSetThenAttr]; found {
 				thenList := thenListRaw.([]interface{})
