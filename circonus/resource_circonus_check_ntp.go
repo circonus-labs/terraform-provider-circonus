@@ -3,6 +3,7 @@ package circonus
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
@@ -49,11 +50,11 @@ func checkAPIToStateNTP(c *circonusCheck, d *schema.ResourceData) error {
 	ntpConfig := make(map[string]interface{}, len(c.Config))
 
 	if port, ok := c.Config[config.Port]; ok {
-		ntpConfig[string(checkNTPPortAttr)] = port
+		ntpConfig[string(checkNTPPortAttr)], _ = strconv.Atoi(port)
 	}
 
 	if control, ok := c.Config[config.Control]; ok {
-		ntpConfig[string(checkNTPUseControlAttr)] = control
+		ntpConfig[string(checkNTPUseControlAttr)], _ = strconv.ParseBool(control)
 	}
 
 	if err := d.Set(checkNTPAttr, schema.NewSet(hashCheckNTP, []interface{}{ntpConfig})); err != nil {
@@ -94,12 +95,12 @@ func checkConfigToAPINTP(c *circonusCheck, l interfaceList) error {
 	mapRaw := l[0]
 	ntpConfig := newInterfaceMap(mapRaw)
 
-	if v, found := ntpConfig[checkNTPPortAttr]; found && v.(string) != "" {
-		c.Config[config.Port] = v.(string)
+	if v, found := ntpConfig[checkNTPPortAttr]; found && v.(int) != 0 {
+		c.Config[config.Port] = strconv.Itoa(v.(int))
 	}
 
-	if v, found := ntpConfig[checkNTPUseControlAttr]; found && v.(string) != "" {
-		c.Config[config.Control] = v.(string)
+	if v, found := ntpConfig[checkNTPUseControlAttr]; found {
+		c.Config[config.Control] = fmt.Sprintf("%t", v.(bool))
 	}
 
 	return nil
