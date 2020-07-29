@@ -35,7 +35,7 @@ func TestAccCirconusCheckNTP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.clock", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "metric.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.clock", "target", "api.circonus.com"),
+					resource.TestCheckResourceAttr("circonus_check.clock", "target", "10.1.1.1"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "type", "ntp"),
 				),
 			},
