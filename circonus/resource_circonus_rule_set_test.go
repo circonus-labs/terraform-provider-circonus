@@ -67,7 +67,7 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.value.0.over.#", "0"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.value.0.max_value", "500"),
 					resource.TestCheckNoResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.then.0.notify"),
-					resource.TestCheckNoResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.then.0.severity", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.then.0.severity", "0"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.#", "2"),
 				),
 			},

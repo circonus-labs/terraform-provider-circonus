@@ -397,19 +397,19 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("PROVIDER BUG: Unsupported criteria %q", rule.Criteria)
 		}
 
+		thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
+		thenAttrs[string(ruleSetSeverityAttr)] = int(rule.Severity)
 		if int(rule.Severity) > 0 {
-			thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
-			thenAttrs[string(ruleSetSeverityAttr)] = int(rule.Severity)
 			if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
 				sort.Strings(contactGroups)
 				thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
 			} else {
 				thenAttrs[string(ruleSetNotifyAttr)] = make([]string, 0)
 			}
-			thenSet := make([]interface{}, 0)
-			thenSet = append(thenSet, thenAttrs)
-			ifAttrs[string(ruleSetThenAttr)] = thenSet
 		}
+		thenSet := make([]interface{}, 0)
+		thenSet = append(thenSet, thenAttrs)
+		ifAttrs[string(ruleSetThenAttr)] = thenSet
 
 		if rule.WindowingFunction != nil {
 			valueOverAttrs[string(ruleSetUsingAttr)] = *rule.WindowingFunction
