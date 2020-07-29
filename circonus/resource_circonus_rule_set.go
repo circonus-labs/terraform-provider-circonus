@@ -397,8 +397,19 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("PROVIDER BUG: Unsupported criteria %q", rule.Criteria)
 		}
 
-		thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
-		thenAttrs[string(ruleSetSeverityAttr)] = int(rule.Severity)
+		if int(rule.Severity) > 0 {
+			thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
+			thenAttrs[string(ruleSetSeverityAttr)] = int(rule.Severity)
+			if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
+				sort.Strings(contactGroups)
+				thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
+			} else {
+				thenAttrs[string(ruleSetNotifyAttr)] = make([]string, 0)
+			}
+			thenSet := make([]interface{}, 0)
+			thenSet = append(thenSet, thenAttrs)
+			ifAttrs[string(ruleSetThenAttr)] = thenSet
+		}
 
 		if rule.WindowingFunction != nil {
 			valueOverAttrs[string(ruleSetUsingAttr)] = *rule.WindowingFunction
@@ -410,18 +421,8 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			valueAttrs[string(ruleSetOverAttr)] = valueOverSet
 		}
 
-		if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
-			sort.Strings(contactGroups)
-			thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
-		} else {
-			thenAttrs[string(ruleSetNotifyAttr)] = make([]string, 0)
-		}
-		thenSet := make([]interface{}, 0)
-		thenSet = append(thenSet, thenAttrs)
-
 		valueSet := make([]interface{}, 0)
 		valueSet = append(valueSet, valueAttrs)
-		ifAttrs[string(ruleSetThenAttr)] = thenSet
 		ifAttrs[string(ruleSetValueAttr)] = valueSet
 
 		ifRules = append(ifRules, ifAttrs)
@@ -587,10 +588,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					}
 
 					if notifyListRaw, found := thenAttrs[ruleSetNotifyAttr]; found {
-						notifyList := interfaceList(notifyListRaw.([]interface{}))
+						notifyList := notifyListRaw.(*schema.Set).List()
 
 						sev := uint8(rule.Severity)
-						for _, contactGroupCID := range notifyList.List() {
+						for _, contactGroupCID := range notifyList {
 							var found bool
 							if contactGroups, ok := rs.ContactGroups[sev]; ok {
 								for _, contactGroup := range contactGroups {
@@ -601,7 +602,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 								}
 							}
 							if !found {
-								rs.ContactGroups[sev] = append(rs.ContactGroups[sev], contactGroupCID)
+								rs.ContactGroups[sev] = append(rs.ContactGroups[sev], contactGroupCID.(string))
 							}
 						}
 					}
