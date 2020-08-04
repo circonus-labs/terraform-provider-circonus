@@ -204,7 +204,6 @@ func resourceCheck() *schema.Resource {
 			checkJMXAttr:       schemaCheckJMX,
 			checkMemcachedAttr: schemaCheckMemcached,
 			checkNTPAttr:       schemaCheckNTP,
-			checkSMTPAttr:      schemaCheckSMTP,
 			checkJSONAttr:      schemaCheckJSON,
 			checkMetricAttr: {
 				Type:     schema.TypeList,
@@ -291,6 +290,7 @@ func resourceCheck() *schema.Resource {
 			checkPostgreSQLAttr: schemaCheckPostgreSQL,
 			checkPromTextAttr:   schemaCheckPromText,
 			checkRedisAttr:      schemaCheckRedis,
+			checkSMTPAttr:       schemaCheckSMTP,
 			checkSNMPAttr:       schemaCheckSNMP,
 			checkStatsdAttr:     schemaCheckStatsd,
 			checkTagsAttr:       tagMakeConfigSchema(checkTagsAttr),

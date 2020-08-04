@@ -138,8 +138,7 @@ var schemaCheckSMTP = &schema.Schema{
 			},
 			checkSMTPToAttr: {
 				Type:     schema.TypeString,
-				Optional: false,
-				Default:  "",
+				Required: true,
 			},
 		}),
 	},
