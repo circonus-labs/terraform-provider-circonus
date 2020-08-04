@@ -53,6 +53,7 @@ const (
 	checkPostgreSQLAttr   = "postgresql"
 	checkPromTextAttr     = "promtext"
 	checkRedisAttr        = "redis"
+	checkSMTPAttr         = "smtp"
 	checkSNMPAttr         = "snmp"
 	checkStatsdAttr       = "statsd"
 	checkTCPAttr          = "tcp"
@@ -99,6 +100,7 @@ const (
 	apiCheckTypePostgreSQLAttr apiCheckType = "postgres"
 	apiCheckTypePromTextAttr   apiCheckType = "promtext"
 	apiCheckTypeRedisAttr      apiCheckType = "redis"
+	apiCheckTypeSMTPAttr       apiCheckType = "smtp"
 	apiCheckTypeSNMPAttr       apiCheckType = "snmp"
 	apiCheckTypeStatsdAttr     apiCheckType = "statsd"
 	apiCheckTypeTCPAttr        apiCheckType = "tcp"
@@ -128,6 +130,7 @@ var checkDescriptions = attrDescrs{
 	checkPeriodAttr:       "The period between each time the check is made",
 	checkPostgreSQLAttr:   "PostgreSQL check configuration",
 	checkPromTextAttr:     "Prometheus URL scraper check configuration",
+	checkSMTPAttr:         "SMTP check configuration",
 	checkRedisAttr:        "Redis check configuration",
 	checkSNMPAttr:         "SNMP check configuration",
 	checkStatsdAttr:       "statsd check configuration",
@@ -201,6 +204,7 @@ func resourceCheck() *schema.Resource {
 			checkJMXAttr:       schemaCheckJMX,
 			checkMemcachedAttr: schemaCheckMemcached,
 			checkNTPAttr:       schemaCheckNTP,
+			checkSMTPAttr:      schemaCheckSMTP,
 			checkJSONAttr:      schemaCheckJSON,
 			checkMetricAttr: {
 				Type:     schema.TypeList,
@@ -696,6 +700,7 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 		checkPostgreSQLAttr: checkConfigToAPIPostgreSQL,
 		checkPromTextAttr:   checkConfigToAPIPromText,
 		checkRedisAttr:      checkConfigToAPIRedis,
+		checkSMTPAttr:       checkConfigToAPISMTP,
 		checkSNMPAttr:       checkConfigToAPISNMP,
 		checkStatsdAttr:     checkConfigToAPIStatsd,
 		checkTCPAttr:        checkConfigToAPITCP,
@@ -741,6 +746,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 		apiCheckTypePostgreSQLAttr: checkAPIToStatePostgreSQL,
 		apiCheckTypePromTextAttr:   checkAPIToStatePromText,
 		apiCheckTypeRedisAttr:      checkAPIToStateRedis,
+		apiCheckTypeSMTPAttr:       checkAPIToStateSMTP,
 		apiCheckTypeSNMPAttr:       checkAPIToStateSNMP,
 		apiCheckTypeStatsdAttr:     checkAPIToStateStatsd,
 		apiCheckTypeTCPAttr:        checkAPIToStateTCP,
