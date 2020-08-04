@@ -37,6 +37,7 @@ type RuleSet struct {
 	ContactGroups map[uint8][]string `json:"contact_groups"`           // [] len 5
 	Filter        string             `json:"filter,omitempty"`         // string
 	Link          *string            `json:"link"`                     // string or null
+	LookupKey     *string            `json:"lookup_key"`               // string or null
 	MetricName    string             `json:"metric_name,omitempty"`    // string (name or pattern)
 	MetricPattern string             `json:"metric_pattern,omitempty"` // string (name or pattern)
 	MetricTags    []string           `json:"metric_tags"`              // [] len >= 0

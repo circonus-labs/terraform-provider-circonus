@@ -46,6 +46,8 @@ github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA
 github.com/cheggaaa/pb v1.0.27/go.mod h1:pQciLPpbU0oxA0h+VJYYLxO+XeDQb5pZijXscXHm81s=
 github.com/circonus-labs/go-apiclient v0.7.7 h1:KlVGUcrdeQREsKNgKgXPaX3QXSVScqix8ZyS7/aEfj8=
 github.com/circonus-labs/go-apiclient v0.7.7/go.mod h1:7PoP39q4+O82aWOsd0/3bMvBon6HCBwrs7g+/DXczNc=
+github.com/circonus-labs/go-apiclient v0.7.9 h1:OYDi4XeO8RLPW22RDKb0vIfd2mZUj4Hv12kRLtJQtKI=
+github.com/circonus-labs/go-apiclient v0.7.9/go.mod h1:7PoP39q4+O82aWOsd0/3bMvBon6HCBwrs7g+/DXczNc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

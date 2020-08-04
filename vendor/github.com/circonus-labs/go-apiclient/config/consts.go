@@ -406,12 +406,18 @@ const (
 	// Port
 	// SASLAuthentication
 	// SASLUser
-	EHLO         = Key("ehlo")
-	From         = Key("from")
-	SASLAuthID   = Key("sasl_auth_id")
-	SASLPassword = Key("sasl_password")
-	StartTLS     = Key("starttls")
-	To           = Key("to")
+	EHLO               = Key("ehlo")
+	From               = Key("from")
+	ProxyDestAddress   = Key("proxy_dest_address")
+	ProxyDestPort      = Key("proxy_dest_port")
+	ProxyFamily        = Key("proxy_family")
+	ProxyProtocol      = Key("proxy_protocol")
+	ProxySourceAddress = Key("proxy_source_address")
+	ProxySourcePort    = Key("proxy_source_port")
+	SASLAuthID         = Key("sasl_auth_id")
+	SASLPassword       = Key("sasl_password")
+	StartTLS           = Key("starttls")
+	To                 = Key("to")
 
 	//
 	// SNMP
