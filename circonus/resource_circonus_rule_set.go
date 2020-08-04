@@ -309,7 +309,7 @@ func resourceRuleSet() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
+				ValidateFunc: validateRegexp(ruleSetMetricFilterAttr, `^.+$`),
 			},
 			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
 			ruleSetIdAttr: {
