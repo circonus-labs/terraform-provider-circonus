@@ -1,4 +1,9 @@
-## 0.11.0 (Unreleased)
+## 0.10.1 (Unreleased)
+
+* transfer repository to circonus-labs
+* add goreleaser configuration
+* initial build/release cycle
+
 ## 0.10.0 (July 01, 2020)
 
 IMPROVEMENTS:
