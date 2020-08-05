@@ -44,8 +44,6 @@ github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQ
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cheggaaa/pb v1.0.27/go.mod h1:pQciLPpbU0oxA0h+VJYYLxO+XeDQb5pZijXscXHm81s=
-github.com/circonus-labs/go-apiclient v0.7.7 h1:KlVGUcrdeQREsKNgKgXPaX3QXSVScqix8ZyS7/aEfj8=
-github.com/circonus-labs/go-apiclient v0.7.7/go.mod h1:7PoP39q4+O82aWOsd0/3bMvBon6HCBwrs7g+/DXczNc=
 github.com/circonus-labs/go-apiclient v0.7.9 h1:OYDi4XeO8RLPW22RDKb0vIfd2mZUj4Hv12kRLtJQtKI=
 github.com/circonus-labs/go-apiclient v0.7.9/go.mod h1:7PoP39q4+O82aWOsd0/3bMvBon6HCBwrs7g+/DXczNc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
