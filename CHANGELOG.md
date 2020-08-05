@@ -1,3 +1,9 @@
+## 0.11.1 (Auguts 05, 2020)
+
+FIXES:
+
+* use `{{ .Tag }}` in binary name to get v prefixed version in binary file name using `{{ .Version }}` resulted in `x.y.z`; using `v{{ .Version }}` resulted in `vvx.y.z`
+
 ## 0.11.0 (August 05, 2020)
 
 IMPROVEMENTS:
@@ -16,7 +22,7 @@ IMPROVEMENTS:
 IMPROVEMENTS:
 
 * go-apiclient v0.7.7
-* Environment vars to external checks 
+* Environment vars to external checks
 * Support for new windowing_min_duration in rulesets
 
 FIXES:
