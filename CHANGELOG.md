@@ -1,3 +1,10 @@
+## 0.11.0 (August 05, 2020)
+
+IMPROVEMENTS:
+
+* add NTP check support
+* add SMTP check support
+
 ## 0.10.1 (August 04, 2020)
 
 * transfer repository to circonus-labs
