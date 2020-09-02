@@ -1,4 +1,14 @@
-## 0.11.1 (Auguts 05, 2020)
+## 0.11.2 (September 2, 2020)
+
+FIXES:
+
+* add http check `redirects` attribute
+
+CHANGES:
+
+* deprecate `irc` contact type
+
+## 0.11.1 (August 05, 2020)
 
 FIXES:
 
@@ -36,7 +46,7 @@ FIXES:
 IMPROVEMENTS:
 
 * go-apiclient 0.7.6
-* Fix to prevent noop updates to SNMP checks 
+* Fix to prevent noop updates to SNMP checks
 * The metrics in a check should be a list, not a set, to preserve order (noop updates again)
 * Add a test for metric_filters in a check
 * Add validation for a ruleset to prevent metric_type -> Rule.Criteria mismatches
@@ -45,13 +55,12 @@ IMPROVEMENTS:
 * Fix slack contact groups to have reasonable slack default text
 * Fix external check output extract: JSON, NAGIOS, otherwise treated as regexp
 
-
 ## 0.8.0 (February 24, 2020)
 
 FEATURES:
 
 * New support for check types:
-  - dns
+  * dns
 
 IMPROVEMENTS:
 
@@ -64,7 +73,7 @@ IMPROVEMENTS:
 FEATURES:
 
 * New support for check types:
-  - redis
+  * redis
 
 IMPROVEMENTS:
 
@@ -73,7 +82,7 @@ IMPROVEMENTS:
 
 ## 0.6.0 (January 30, 2020)
 
-* **New Resource:** `circonus_maintenance` 
+* **New Resource:** `circonus_maintenance`
 
 IMPROVEMENTS:
 
@@ -83,16 +92,16 @@ IMPROVEMENTS:
 
 FEATURES:
 
-* **New Resource:** `circonus_overlay_set` 
-* **New Resource:** `circonus_rule_set_group` 
-* **New Resource:** `circonus_dashboard` 
+* **New Resource:** `circonus_overlay_set`
+* **New Resource:** `circonus_rule_set_group`
+* **New Resource:** `circonus_dashboard`
 
 * New support for check types:
-  - external
-  - jmx
-  - memcached
-  - promtext
-  - snmp
+  * external
+  * jmx
+  * memcached
+  * promtext
+  * snmp
 
 IMPROVEMENTS:
 
