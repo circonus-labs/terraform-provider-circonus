@@ -33,6 +33,7 @@ const (
 	checkHTTPReadLimitAttr    = "read_limit"
 	checkHTTPURLAttr          = "url"
 	checkHTTPVersionAttr      = "version"
+	checkHTTPRedirectsAttr    = "redirects"
 )
 
 var checkHTTPDescriptions = attrDescrs{
@@ -52,6 +53,7 @@ var checkHTTPDescriptions = attrDescrs{
 	checkHTTPReadLimitAttr:    "Sets an approximate limit on the data read (0 means no limit)",
 	checkHTTPURLAttr:          "The URL to use as the target of the check",
 	checkHTTPVersionAttr:      "Sets the HTTP version for the check to use",
+	checkHTTPRedirectsAttr:    "The maximum number of Location header redirects to follow.",
 }
 
 var schemaCheckHTTP = &schema.Schema{
@@ -151,6 +153,12 @@ var schemaCheckHTTP = &schema.Schema{
 				Default:      defaultCheckHTTPVersion,
 				ValidateFunc: validateStringIn(checkHTTPVersionAttr, supportedHTTPVersions),
 			},
+			checkHTTPRedirectsAttr: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      defaultCheckHTTPRedirects,
+				ValidateFunc: validateRegexp(checkHTTPRedirectsAttr, `^[0-9]+$`),
+			},
 		}),
 	},
 }
@@ -219,6 +227,7 @@ func checkAPIToStateHTTP(c *circonusCheck, d *schema.ResourceData) error {
 	saveIntConfigToState(config.ReadLimit, checkHTTPReadLimitAttr)
 	saveStringConfigToState(config.URL, checkHTTPURLAttr)
 	saveStringConfigToState(config.HTTPVersion, checkHTTPVersionAttr)
+	saveStringConfigToState(config.Redirects, checkHTTPRedirectsAttr)
 
 	whitelistedConfigKeys := map[config.Key]struct{}{
 		config.ReverseSecretKey: {},
@@ -292,6 +301,7 @@ func hashCheckHTTP(v interface{}) int {
 	writeInt(checkHTTPReadLimitAttr)
 	writeString(checkHTTPURLAttr)
 	writeString(checkHTTPVersionAttr)
+	writeString(checkHTTPRedirectsAttr)
 
 	s := b.String()
 	return hashcode.String(s)
@@ -378,6 +388,10 @@ func checkConfigToAPIHTTP(c *circonusCheck, l interfaceList) error {
 
 		if v, found := httpConfig[checkHTTPVersionAttr]; found {
 			c.Config[config.HTTPVersion] = v.(string)
+		}
+
+		if v, found := httpConfig[checkHTTPRedirectsAttr]; found {
+			c.Config[config.Redirects] = v.(string)
 		}
 	}
 

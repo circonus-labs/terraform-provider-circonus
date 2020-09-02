@@ -43,6 +43,7 @@ const (
 	defaultCheckHTTPCodeRegexp = `^200$`
 	defaultCheckHTTPMethod     = "GET"
 	defaultCheckHTTPVersion    = "1.1"
+	defaultCheckHTTPRedirects  = "0"
 
 	defaultCheckHTTPTrapAsync = false
 

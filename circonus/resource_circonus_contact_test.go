@@ -34,8 +34,6 @@ func TestAccCirconusContactGroup_basic(t *testing.T) {
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.address", "https://www.example.org/post/endpoint"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.format", "json"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.method", "POST"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "irc.#", "0"),
-					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "irc.918937268.user", "/user/6331"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.#", "0"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.#", "1"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.274933206.channel", "#ops-staging"),
@@ -158,12 +156,6 @@ resource "circonus_contact_group" "staging-sev3" {
     address = "https://www.example.org/post/endpoint"
     format = "json"
     method = "POST"
-  }
-*/
-/*
-  // Account needs to be setup with IRC before this can work.
-  irc {
-    user = "/user/6331"
   }
 */
 
