@@ -15,6 +15,14 @@ func testAccCheckDestroyCirconusCheckBundle(s *terraform.State) error {
 			continue
 		}
 
+		// for getting resource ids for acceptance tests
+		// if t, ok := rs.Primary.Attributes["type"]; ok {
+		// 	fmt.Println(t)
+		// 	if t == "http" {
+		// 		fmt.Println(rs.Primary.String())
+		// 	}
+		// }
+
 		cid := rs.Primary.ID
 		exists, err := checkCheckBundleExists(c, api.CIDType(&cid))
 		if err != nil {
