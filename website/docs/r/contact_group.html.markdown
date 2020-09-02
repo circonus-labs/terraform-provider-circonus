@@ -37,10 +37,6 @@ resource "circonus_contact_group" "myteam-alerts" {
     method = "POST"
   }
 
-  irc {
-    user = "/user/6331"
-  }
-
   pager_duty {
     account = "foo"
     service_key = "39328423094283402984204823094"
@@ -114,10 +110,7 @@ resource "circonus_contact_group" "myteam-alerts" {
 * `http` - (Optional) Zero or more `http` attributes may be present to dispatch
   [Webhook/HTTP requests](https://login.circonus.com/user/docs/Alerting/ContactGroups#WebhookNotifications)
   by Circonus.  See below for details on supported attributes.
-
-* `irc` - (Optional) Zero or more `irc` attributes may be present to dispatch
-  IRC notifications to users.  See below for details on supported attributes.
-
+  
 * `long_message` - (Optional) The bulk of the message used in long form alert
   messages.
 
