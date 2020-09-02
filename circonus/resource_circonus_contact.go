@@ -23,7 +23,6 @@ const (
 	contactAlertOptionAttr       = "alert_option"
 	contactEmailAttr             = "email"
 	contactHTTPAttr              = "http"
-	contactIRCAttr               = "irc"
 	contactLongMessageAttr       = "long_message"
 	contactLongSubjectAttr       = "long_subject"
 	contactLongSummaryAttr       = "long_summary"
@@ -51,9 +50,6 @@ const (
 	contactHTTPFormatAttr             = "format"
 	contactHTTPMethodAttr             = "method"
 	contactHTTPAddressAttr schemaAttr = "address"
-
-	// circonus_contact.irc attributes
-	//contactUserCIDAttr
 
 	// circonus_contact.pager_duty attributes
 	//contactContactGroupFallbackAttr
@@ -97,7 +93,6 @@ const (
 	// Contact methods from Circonus
 	circonusMethodEmail     = "email"
 	circonusMethodHTTP      = "http"
-	circonusMethodIRC       = "irc"
 	circonusMethodPagerDuty = "pagerduty"
 	circonusMethodSlack     = "slack"
 	circonusMethodSMS       = "sms"
@@ -143,7 +138,6 @@ var contactGroupDescriptions = attrDescrs{
 	contactContactGroupFallbackAttr: "",
 	contactEmailAttr:                "",
 	contactHTTPAttr:                 "",
-	contactIRCAttr:                  "",
 	contactLastModifiedAttr:         "",
 	contactLastModifiedByAttr:       "",
 	contactLongMessageAttr:          "",
@@ -324,19 +318,6 @@ func resourceContactGroup() *schema.Resource {
 							ValidateFunc: validateStringIn(contactHTTPMethodAttr, validContactHTTPMethods),
 						},
 					}),
-				},
-			},
-			contactIRCAttr: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						contactUserCIDAttr: {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validateUserCID(contactUserCIDAttr),
-						},
-					},
 				},
 			},
 			contactLongMessageAttr: {
@@ -632,10 +613,6 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactHTTPAttr), err)
 	}
 
-	if err := d.Set(contactIRCAttr, contactGroupIRCToState(cg)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactIRCAttr), err)
-	}
-
 	_ = d.Set(contactLongMessageAttr, cg.AlertFormats.LongMessage)
 	_ = d.Set(contactLongSubjectAttr, cg.AlertFormats.LongSubject)
 	_ = d.Set(contactLongSummaryAttr, cg.AlertFormats.LongSummary)
@@ -923,20 +900,6 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 		}
 	}
 
-	if v, ok := d.GetOk(contactIRCAttr); ok {
-		ircListRaw := v.(*schema.Set).List()
-		for _, ircMapRaw := range ircListRaw {
-			ircMap := ircMapRaw.(map[string]interface{})
-
-			if v, ok := ircMap[contactUserCIDAttr]; ok && v.(string) != "" {
-				cg.Contacts.Users = append(cg.Contacts.Users, api.ContactGroupContactsUser{
-					Method:  circonusMethodIRC,
-					UserCID: v.(string),
-				})
-			}
-		}
-	}
-
 	if v, ok := d.GetOk(contactPagerDutyAttr); ok {
 		pagerDutyListRaw := v.(*schema.Set).List()
 		for _, pagerDutyMapRaw := range pagerDutyListRaw {
@@ -1179,21 +1142,6 @@ long=Link to Alert:{link}`
 	}
 
 	return cg, nil
-}
-
-func contactGroupIRCToState(cg *api.ContactGroup) []interface{} {
-	ircContacts := make([]interface{}, 0, len(cg.Contacts.Users))
-
-	for _, user := range cg.Contacts.Users {
-		switch user.Method {
-		case circonusMethodIRC:
-			ircContacts = append(ircContacts, map[string]interface{}{
-				contactUserCIDAttr: user.UserCID,
-			})
-		}
-	}
-
-	return ircContacts
 }
 
 func contactGroupPagerDutyToState(cg *api.ContactGroup) ([]interface{}, error) {
