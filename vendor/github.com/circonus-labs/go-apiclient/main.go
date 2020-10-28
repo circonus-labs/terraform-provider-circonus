@@ -377,8 +377,8 @@ func (a *API) apiCall(reqMethod string, reqPath string, data []byte) ([]byte, er
 
 	if eb {
 		// limit to one request if using exponential backoff
-		client.RetryWaitMin = 1
-		client.RetryWaitMax = 2
+		client.RetryWaitMin = 1 * time.Second
+		client.RetryWaitMax = 60 * time.Second
 		client.RetryMax = 0
 	} else {
 		client.RetryWaitMin = minRetryWait

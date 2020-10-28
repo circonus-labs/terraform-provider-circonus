@@ -1,3 +1,9 @@
+# v0.7.10
+
+* upd: add 429 rate limit tests
+* upd: dependency retryablehttp, to use Retry-After header on 429s
+* upd: increase exp backoff range 1-60
+
 # v0.7.9
 
 * add: additional SMTP check attributes to support proxies

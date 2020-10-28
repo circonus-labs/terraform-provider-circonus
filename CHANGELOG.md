@@ -1,3 +1,9 @@
+## 0.11.3 (October 28, 2020)
+
+CHANGES:
+
+* upgrade dependencies (go-apiclient,retryablehttp) to use Retry-After header on 429 API responses
+
 ## 0.11.2 (September 2, 2020)
 
 FIXES:
