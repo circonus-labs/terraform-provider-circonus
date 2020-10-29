@@ -21,10 +21,53 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusGraph,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, checkName, graphName),
+				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, checkName, graphName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "name", graphName),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "description", "Terraform Test: mixed graph"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "notes", "test notes"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "graph_style", "line"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "left.%", "1"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "left.max", "11"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "right.%", "3"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "right.logarithmic", "10"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "right.max", "20"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "right.min", "-1"),
+
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "line_style", "stepped"),
+
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.#", "2"),
+
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.caql", ""),
+					resource.TestCheckResourceAttrSet("circonus_graph.mixed-points", "metric.0.check"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.metric_name", "maximum"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.metric_type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.name", "Maximum Latency"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.axis", "left"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.color", "#657aa6"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.function", "gauge"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.active", "true"),
+
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.caql", ""),
+					resource.TestCheckResourceAttrSet("circonus_graph.mixed-points", "metric.1.check"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.metric_name", "minimum"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.metric_type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.name", "Minimum Latency"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.axis", "right"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.color", "#657aa6"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.function", "gauge"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.active", "true"),
+
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.#", "2"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.2087084518", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.1401442048", "lifecycle:unittest"),
+				),
+			},
+			{ // force modification of graph description, test updating the graph
+				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, checkName, graphName, "foo"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "name", graphName),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "description", "Terraform Test: mixed graph foo"),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "notes", "test notes"),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "graph_style", "line"),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "left.%", "1"),
@@ -142,7 +185,7 @@ resource "circonus_check" "api_latency" {
 
 resource "circonus_graph" "mixed-points" {
   name = "%s"
-  description = "Terraform Test: mixed graph"
+  description = "Terraform Test: mixed graph %s"
   notes = "test notes"
   graph_style = "line"
   line_style = "stepped"
