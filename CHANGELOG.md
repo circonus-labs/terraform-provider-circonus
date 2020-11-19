@@ -1,3 +1,9 @@
+## 0.11.4 (Novermber 19, 2020)
+
+FIXES:
+
+* http check updating gets two configs in []interface{} list - the first is the valid updated config and the second is empty. This results in the check bundle Config being overwritten with blank values for each attribute, then the API complains about missing attributes.
+
 ## 0.11.3 (October 28, 2020)
 
 CHANGES:
