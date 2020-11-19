@@ -312,88 +312,101 @@ func checkConfigToAPIHTTP(c *circonusCheck, l interfaceList) error {
 
 	// Iterate over all `http` attributes, even though we have a max of 1 in the
 	// schema.
-	for _, mapRaw := range l {
-		httpConfig := newInterfaceMap(mapRaw)
 
-		if v, found := httpConfig[checkHTTPAuthMethodAttr]; found {
-			c.Config[config.AuthMethod] = v.(string)
+	//
+	// Getting TWO, first one the correct config, the second one is blank...
+	// which, with this arbitrary for loop results in the configuration being
+	// overwritten with all blank values. (resulting in an API error for missing config attributes)
+	//
+	// just use the first one in the list if there are > 0 elements
+
+	if len(l) == 0 {
+		return fmt.Errorf("%d http configs found in list", len(l))
+	}
+
+	httpConfig := newInterfaceMap(l[0])
+	// for _, mapRaw := range l {
+	// 	httpConfig := newInterfaceMap(mapRaw)
+
+	if v, found := httpConfig[checkHTTPAuthMethodAttr]; found {
+		c.Config[config.AuthMethod] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPAuthPasswordAttr]; found {
+		c.Config[config.AuthPassword] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPAuthUserAttr]; found {
+		c.Config[config.AuthUser] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPBodyRegexpAttr]; found {
+		c.Config[config.Body] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPCAChainAttr]; found {
+		c.Config[config.CAChain] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPCertFileAttr]; found {
+		c.Config[config.CertFile] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPCiphersAttr]; found {
+		c.Config[config.Ciphers] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPCodeRegexpAttr]; found {
+		c.Config[config.Code] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPExtractAttr]; found {
+		c.Config[config.Extract] = v.(string)
+	}
+
+	for k, v := range httpConfig.CollectMap(checkHTTPHeadersAttr) {
+		h := config.HeaderPrefix + config.Key(k)
+		c.Config[h] = v
+	}
+
+	if v, found := httpConfig[checkHTTPKeyFileAttr]; found {
+		c.Config[config.KeyFile] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPMethodAttr]; found {
+		c.Config[config.Method] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPPayloadAttr]; found {
+		c.Config[config.Payload] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPReadLimitAttr]; found {
+		c.Config[config.ReadLimit] = fmt.Sprintf("%d", v.(int))
+	}
+
+	if v, found := httpConfig[checkHTTPURLAttr]; found {
+		c.Config[config.URL] = v.(string)
+
+		u, _ := url.Parse(v.(string))
+		hostInfo := strings.SplitN(u.Host, ":", 2)
+		if len(c.Target) == 0 {
+			c.Target = hostInfo[0]
 		}
 
-		if v, found := httpConfig[checkHTTPAuthPasswordAttr]; found {
-			c.Config[config.AuthPassword] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPAuthUserAttr]; found {
-			c.Config[config.AuthUser] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPBodyRegexpAttr]; found {
-			c.Config[config.Body] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPCAChainAttr]; found {
-			c.Config[config.CAChain] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPCertFileAttr]; found {
-			c.Config[config.CertFile] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPCiphersAttr]; found {
-			c.Config[config.Ciphers] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPCodeRegexpAttr]; found {
-			c.Config[config.Code] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPExtractAttr]; found {
-			c.Config[config.Extract] = v.(string)
-		}
-
-		for k, v := range httpConfig.CollectMap(checkHTTPHeadersAttr) {
-			h := config.HeaderPrefix + config.Key(k)
-			c.Config[h] = v
-		}
-
-		if v, found := httpConfig[checkHTTPKeyFileAttr]; found {
-			c.Config[config.KeyFile] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPMethodAttr]; found {
-			c.Config[config.Method] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPPayloadAttr]; found {
-			c.Config[config.Payload] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPReadLimitAttr]; found {
-			c.Config[config.ReadLimit] = fmt.Sprintf("%d", v.(int))
-		}
-
-		if v, found := httpConfig[checkHTTPURLAttr]; found {
-			c.Config[config.URL] = v.(string)
-
-			u, _ := url.Parse(v.(string))
-			hostInfo := strings.SplitN(u.Host, ":", 2)
-			if len(c.Target) == 0 {
-				c.Target = hostInfo[0]
-			}
-
-			if len(hostInfo) > 1 && c.Config[config.Port] == "" {
-				c.Config[config.Port] = hostInfo[1]
-			}
-		}
-
-		if v, found := httpConfig[checkHTTPVersionAttr]; found {
-			c.Config[config.HTTPVersion] = v.(string)
-		}
-
-		if v, found := httpConfig[checkHTTPRedirectsAttr]; found {
-			c.Config[config.Redirects] = v.(string)
+		if len(hostInfo) > 1 && c.Config[config.Port] == "" {
+			c.Config[config.Port] = hostInfo[1]
 		}
 	}
+
+	if v, found := httpConfig[checkHTTPVersionAttr]; found {
+		c.Config[config.HTTPVersion] = v.(string)
+	}
+
+	if v, found := httpConfig[checkHTTPRedirectsAttr]; found {
+		c.Config[config.Redirects] = v.(string)
+	}
+	// }
 
 	return nil
 }
