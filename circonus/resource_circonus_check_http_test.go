@@ -17,7 +17,7 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt, checkName, 2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.#", "1"),
@@ -31,10 +31,53 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.1160451518.method", "GET"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.1160451518.read_limit", "1048576"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.1160451518.url", "http://127.0.0.1:8083/resmon"),
-					// for testing default, uncomment this and use resource index id
-					// resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.redirects", "0"),
-					// for testing a setting of 2, uncomment this and use this resource index id
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.1160451518.redirects", "2"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "name", checkName),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "notes", "Check to make sure jezebel is working as expected"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "period", "60s"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.#", "4"),
+
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.active", "true"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.name", "code"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.0.type", "text"),
+
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.active", "true"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.name", "duration"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.1.type", "numeric"),
+
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.active", "true"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.name", "tt_connect"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.2.type", "numeric"),
+
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.active", "true"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.name", "tt_firstbyte"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "metric.3.type", "numeric"),
+
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "tags.#", "4"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "tags.30226350", "app:circonus"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "tags.3219687752", "app:jezebel"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "tags.3241999189", "source:circonus"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "target", "127.0.0.1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "type", "http"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt, checkName, 0),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "active", "true"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.#", "1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.#", "1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.code", `^200$`),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.extract", `HTTP/1.1 200 OK`),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.headers.%", "1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.headers.Host", "127.0.0.1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.version", "1.1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.method", "GET"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.read_limit", "1048576"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.url", "http://127.0.0.1:8083/resmon"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.2871358610.redirects", "0"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "notes", "Check to make sure jezebel is working as expected"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "period", "60s"),
@@ -115,7 +158,7 @@ resource "circonus_check" "jezebel" {
     method      = "GET"
     read_limit  = 1048576
 	url         = "http://127.0.0.1:8083/resmon"
-	redirects   = "2"
+	redirects   = "%d"
   }
 
   metric {
