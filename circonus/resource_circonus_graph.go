@@ -236,9 +236,12 @@ func resourceGraph() *schema.Resource {
 							ValidateFunc: validateStringIn(graphMetricAxisAttr, validAxisAttrs),
 						},
 						graphMetricCAQLAttr: {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ValidateFunc:  validateRegexp(graphMetricCAQLAttr, `.+`),
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphMetricCAQLAttr, `.+`),
+							StateFunc: func(val interface{}) string {
+								return strings.TrimSpace(val.(string))
+							},
 							ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricSearchAttr),
 						},
 						graphMetricSearchAttr: {
@@ -809,6 +812,7 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			if v, found := metricAttrs[graphMetricNameAttr]; found {
 				s := v.(string)
 				if s != "" {
+					s = strings.TrimSpace(s)
 					datapoint.MetricName = s
 				}
 			}
@@ -816,6 +820,7 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			if v, found := metricAttrs[graphMetricCAQLAttr]; found {
 				s := v.(string)
 				if s != "" {
+					s = strings.TrimSpace(s)
 					datapoint.CAQL = &s
 				} else {
 					datapoint.CAQL = nil
@@ -845,6 +850,7 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			if v, found := metricAttrs[graphMetricHumanNameAttr]; found {
 				s := v.(string)
 				if s != "" {
+					s = strings.TrimSpace(s)
 					datapoint.Name = s
 				}
 			}

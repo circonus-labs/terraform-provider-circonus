@@ -17,6 +17,7 @@ import (
 const (
 	// circonus_rule_set.* resource attribute names
 	ruleSetCheckAttr         = "check"
+	ruleSetNameAttr          = "name"
 	ruleSetIfAttr            = "if"
 	ruleSetLinkAttr          = "link"
 	ruleSetMetricTypeAttr    = "metric_type"
@@ -71,6 +72,7 @@ const (
 var ruleSetDescriptions = attrDescrs{
 	// circonus_rule_set.* resource attribute names
 	ruleSetCheckAttr:         "The CID of the check that contains the metric for this rule set",
+	ruleSetNameAttr:          "The name of this ruleset, if ommitted will default to the metric_name (or pattern) and filter",
 	ruleSetIfAttr:            "A rule to execute for this rule set",
 	ruleSetLinkAttr:          "URL to show users when this rule set is active (e.g. wiki)",
 	ruleSetMetricTypeAttr:    "The type of data flowing through the specified metric stream",
@@ -143,6 +145,10 @@ func resourceRuleSet() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetCheckAttr, config.CheckCIDRegex),
 			},
+			ruleSetNameAttr: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			ruleSetIfAttr: {
 				Type:     schema.TypeList,
 				Required: true,
@@ -158,12 +164,13 @@ func resourceRuleSet() *schema.Resource {
 									ruleSetAfterAttr: {
 										Type:         schema.TypeString,
 										Optional:     true,
+										Default:      "0",
 										ValidateFunc: validateRegexp(ruleSetAfterAttr, "^[0-9]+$"),
 									},
 									ruleSetNotifyAttr: {
-										Type:     schema.TypeList,
+										Type:     schema.TypeSet,
 										Optional: true,
-										MinItems: 1,
+										MinItems: 0,
 										Elem: &schema.Schema{
 											Type:         schema.TypeString,
 											ValidateFunc: validateContactGroupCID(ruleSetNotifyAttr),
@@ -366,6 +373,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(rs.CID)
 	_ = d.Set(ruleSetIdAttr, rs.CID)
+	_ = d.Set(ruleSetNameAttr, rs.Name)
 
 	ifRules := make([]interface{}, 0, defaultRuleSetRuleLen)
 	for _, rule := range rs.Rules {
@@ -396,10 +404,19 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("PROVIDER BUG: Unsupported criteria %q", rule.Criteria)
 		}
 
-		if rule.Wait > 0 {
-			thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
-		}
+		thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
 		thenAttrs[string(ruleSetSeverityAttr)] = int(rule.Severity)
+		if int(rule.Severity) > 0 {
+			if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
+				sort.Strings(contactGroups)
+				thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
+			} else {
+				thenAttrs[string(ruleSetNotifyAttr)] = make([]string, 0)
+			}
+		}
+		thenSet := make([]interface{}, 0)
+		thenSet = append(thenSet, thenAttrs)
+		ifAttrs[string(ruleSetThenAttr)] = thenSet
 
 		if rule.WindowingFunction != nil {
 			valueOverAttrs[string(ruleSetUsingAttr)] = *rule.WindowingFunction
@@ -411,16 +428,8 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			valueAttrs[string(ruleSetOverAttr)] = valueOverSet
 		}
 
-		if contactGroups, ok := rs.ContactGroups[uint8(rule.Severity)]; ok {
-			sort.Strings(contactGroups)
-			thenAttrs[string(ruleSetNotifyAttr)] = contactGroups
-		}
-		thenSet := make([]interface{}, 0)
-		thenSet = append(thenSet, thenAttrs)
-
 		valueSet := make([]interface{}, 0)
 		valueSet = append(valueSet, valueAttrs)
-		ifAttrs[string(ruleSetThenAttr)] = thenSet
 		ifAttrs[string(ruleSetValueAttr)] = valueSet
 
 		ifRules = append(ifRules, ifAttrs)
@@ -521,6 +530,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.CheckCID = v.(string)
 	}
 
+	if v, found := d.GetOk(ruleSetNameAttr); found {
+		rs.Name = v.(string)
+	}
+
 	if v, found := d.GetOk(ruleSetLinkAttr); found {
 		s := v.(string)
 		rs.Link = &s
@@ -560,6 +573,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 			rule := api.RuleSetRule{}
 			rule.WindowingFunction = nil
+			rule.Wait = 0
 
 			if thenListRaw, found := ifAttrs[ruleSetThenAttr]; found {
 				thenList := thenListRaw.([]interface{})
@@ -585,10 +599,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 					}
 
 					if notifyListRaw, found := thenAttrs[ruleSetNotifyAttr]; found {
-						notifyList := interfaceList(notifyListRaw.([]interface{}))
+						notifyList := notifyListRaw.(*schema.Set).List()
 
 						sev := uint8(rule.Severity)
-						for _, contactGroupCID := range notifyList.List() {
+						for _, contactGroupCID := range notifyList {
 							var found bool
 							if contactGroups, ok := rs.ContactGroups[sev]; ok {
 								for _, contactGroup := range contactGroups {
@@ -599,7 +613,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 								}
 							}
 							if !found {
-								rs.ContactGroups[sev] = append(rs.ContactGroups[sev], contactGroupCID)
+								rs.ContactGroups[sev] = append(rs.ContactGroups[sev], contactGroupCID.(string))
 							}
 						}
 					}
