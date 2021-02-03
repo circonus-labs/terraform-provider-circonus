@@ -11,10 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-func TestAccCirconusGraph_basic(t *testing.T) {
-	graphName := fmt.Sprintf("Test Graph - %s", acctest.RandString(5))
-	checkName := fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
+var (
+	graphName = fmt.Sprintf("Test Graph - %s", acctest.RandString(5))
+	checkName = fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
+)
 
+func TestAccCirconusGraph_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -88,7 +90,7 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "line_style", "stepped"),
 
-					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.#", "2"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.#", "3"),
 
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.0.caql", ""),
 					resource.TestCheckResourceAttrSet("circonus_graph.mixed-points", "metric.0.check"),
@@ -109,6 +111,15 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.color", "#657aa6"),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.function", "gauge"),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.1.active", "true"),
+
+					resource.TestCheckResourceAttrSet("circonus_graph.mixed-points", "metric.2.caql"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.check", ""),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.metric_type", "caql"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.name", "Foo sum CAQL"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.axis", "left"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.color", "#657aa6"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.function", "gauge"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.active", "true"),
 
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.2087084518", "author:terraform"),
