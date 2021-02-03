@@ -17,6 +17,7 @@ import (
 const (
 	// circonus_rule_set.* resource attribute names
 	ruleSetCheckAttr         = "check"
+	ruleSetNameAttr          = "name"
 	ruleSetIfAttr            = "if"
 	ruleSetLinkAttr          = "link"
 	ruleSetMetricTypeAttr    = "metric_type"
@@ -71,6 +72,7 @@ const (
 var ruleSetDescriptions = attrDescrs{
 	// circonus_rule_set.* resource attribute names
 	ruleSetCheckAttr:         "The CID of the check that contains the metric for this rule set",
+	ruleSetNameAttr:          "The name of this ruleset, if ommitted will default to the metric_name (or pattern) and filter",
 	ruleSetIfAttr:            "A rule to execute for this rule set",
 	ruleSetLinkAttr:          "URL to show users when this rule set is active (e.g. wiki)",
 	ruleSetMetricTypeAttr:    "The type of data flowing through the specified metric stream",
@@ -142,6 +144,10 @@ func resourceRuleSet() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetCheckAttr, config.CheckCIDRegex),
+			},
+			ruleSetNameAttr: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			ruleSetIfAttr: {
 				Type:     schema.TypeList,
@@ -367,6 +373,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(rs.CID)
 	_ = d.Set(ruleSetIdAttr, rs.CID)
+	_ = d.Set(ruleSetNameAttr, rs.Name)
 
 	ifRules := make([]interface{}, 0, defaultRuleSetRuleLen)
 	for _, rule := range rs.Rules {
@@ -521,6 +528,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 
 	if v, found := d.GetOk(ruleSetCheckAttr); found {
 		rs.CheckCID = v.(string)
+	}
+
+	if v, found := d.GetOk(ruleSetNameAttr); found {
+		rs.Name = v.(string)
 	}
 
 	if v, found := d.GetOk(ruleSetLinkAttr); found {
