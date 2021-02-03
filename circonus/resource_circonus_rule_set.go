@@ -384,8 +384,15 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 
 		switch rule.Criteria {
 		case apiRuleSetAbsent:
-			d, _ := time.ParseDuration(fmt.Sprintf("%fs", rule.Value.(float64)))
-			valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%d", int(d.Seconds()))
+			switch v := rule.Value.(type) {
+			case string:
+				valueAttrs[string(ruleSetAbsentAttr)] = v
+			case float64:
+				d, _ := time.ParseDuration(fmt.Sprintf("%fs", v))
+				valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%d", int(d.Seconds()))
+			default:
+				valueAttrs[string(ruleSetAbsentAttr)] = fmt.Sprintf("%v", v)
+			}
 		case apiRuleSetChanged:
 			valueAttrs[string(ruleSetChangedAttr)] = "true"
 		case apiRuleSetContains:
