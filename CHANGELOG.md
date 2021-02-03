@@ -1,3 +1,20 @@
+## 0.11.5 (February 3, 2021)
+
+CHANGES:
+
+* add Name field to ruleset resource
+
+FIXES:
+
+* resolve ruleset notify list ordering issue
+* deal with `if.then.after == 0`, deal with `severity = 0` notify lists
+* spurious diffs in ruleset
+* fix clear ruleset rules (severity 0)
+* fixes for metric.caql whitespace causing spurious diffs
+* merge ntp test fixes from ntp_check branch
+* fix ruleset absence test with type switch since it can be string or number
+* fix graph test, make check name and graph name static across create/modification tests
+
 ## 0.11.4 (Novermber 19, 2020)
 
 FIXES:
