@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/circonus-labs/terraform-provider-circonus/circonus"
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
-	"github.com/rileyberton/terraform-provider-circonus/circonus"
 )
 
 func main() {

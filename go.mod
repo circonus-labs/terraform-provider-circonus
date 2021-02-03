@@ -1,4 +1,4 @@
-module github.com/rileyberton/terraform-provider-circonus
+module github.com/circonus-labs/terraform-provider-circonus
 
 require (
 	cloud.google.com/go v0.49.0 // indirect
