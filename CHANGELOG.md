@@ -1,3 +1,9 @@
+## 0.11.6 (February 16, 2021)
+
+CHANGES:
+
+* add support for eq_value and neq_value for numeric rulesets
+
 ## 0.11.5 (February 3, 2021)
 
 CHANGES:
