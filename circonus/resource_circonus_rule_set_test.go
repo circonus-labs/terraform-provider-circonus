@@ -27,7 +27,7 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "metric_type", "numeric"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "notes", "Simple check to create notifications based on ICMP performance."),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "link", "https://wiki.example.org/playbook/what-to-do-when-high-latency-strikes"),
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.#", "5"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.#", "7"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.#", "1"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.0.value.0.absent", "70"),
@@ -68,6 +68,19 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.value.0.max_value", "500"),
 					resource.TestCheckNoResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.then.0.notify"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.4.then.0.severity", "0"),
+
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.5.value.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.5.value.0.over.#", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.5.value.0.eq_value", "600"),
+					resource.TestCheckNoResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.5.then.0.notify"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.5.then.0.severity", "0"),
+
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.value.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.value.0.over.#", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.value.0.neq_value", "600"),
+					resource.TestCheckNoResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.then.0.notify"),
+					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.then.0.severity", "0"),
+
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.#", "2"),
 				),
 			},
@@ -216,6 +229,24 @@ EOF
       max_value = 500
     }
 
+    then {
+      severity = 0
+    }
+  }
+
+  if {
+    value {
+      eq_value = 600
+    }
+    then {
+      severity = 0
+    }
+  }
+
+  if {
+    value {
+      neq_value = 600
+    }
     then {
       severity = 0
     }

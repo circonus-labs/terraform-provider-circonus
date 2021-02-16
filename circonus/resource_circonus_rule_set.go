@@ -44,6 +44,8 @@ const (
 	ruleSetMatchAttr      = "match"       // apiRuleSetMatch
 	ruleSetMaxValueAttr   = "max_value"   // apiRuleSetMaxValue
 	ruleSetMinValueAttr   = "min_value"   // apiRuleSetMinValue
+	ruleSetEqValueAttr    = "eq_value"    // apiRuleSetEqValue
+	ruleSetNotEqValueAttr = "neq_value"   // apiRuleSetNotEqValue
 	ruleSetNotContainAttr = "not_contain" // apiRuleSetNotContains
 	ruleSetNotMatchAttr   = "not_match"   // apiRuleSetNotMatch
 	ruleSetOverAttr       = "over"
@@ -67,6 +69,8 @@ const (
 	apiRuleSetMinValue    = "min value"        // ruleSetMinValueAttr
 	apiRuleSetNotContains = "does not contain" // ruleSetNotContainAttr
 	apiRuleSetNotMatch    = "does not match"   // ruleSetNotMatchAttr
+	apiRuleSetEqValue     = "equals"           // ruleSetEqValueAttr
+	apiRuleSetNotEqValue  = "does not equal"   // ruleSetNotEqValueAttr
 )
 
 var ruleSetDescriptions = attrDescrs{
@@ -99,6 +103,8 @@ var ruleSetIfValueDescriptions = attrDescrs{
 	ruleSetMatchAttr:      "Fire the rule set if the text metric exactly match the following string",
 	ruleSetNotMatchAttr:   "Fire the rule set if the text metric not match the following string",
 	ruleSetMinValueAttr:   "Fire the rule set if the numeric value less than the specified value",
+	ruleSetEqValueAttr:    "Fire the rule set if the numeric value equals the specified value",
+	ruleSetNotEqValueAttr: "Fire the rule set if the numeric value does not equal the specified value",
 	ruleSetNotContainAttr: "Fire the rule set if the text metric does not contain the following string",
 	ruleSetMaxValueAttr:   "Fire the rule set if the numeric value is more than the specified value",
 	ruleSetOverAttr:       "Use a derived value using a window",
@@ -198,48 +204,60 @@ func resourceRuleSet() *schema.Resource {
 										Type:          schema.TypeString, // Applies to text or numeric metrics
 										Optional:      true,
 										ValidateFunc:  validateRegexp(ruleSetAbsentAttr, "^[0-9]+$"),
-										ConflictsWith: makeConflictsWith(ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										ConflictsWith: makeConflictsWith(ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetChangedAttr: {
 										Type:          schema.TypeString, // Applies to text or numeric metrics
 										Optional:      true,
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetContainsAttr: {
 										Type:          schema.TypeString, // Applies to text metrics only
 										Optional:      true,
 										ValidateFunc:  validateRegexp(ruleSetContainsAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMatchAttr: {
 										Type:          schema.TypeString, // Applies to text metrics only
 										Optional:      true,
 										ValidateFunc:  validateRegexp(ruleSetMatchAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetNotMatchAttr: {
 										Type:          schema.TypeString, // Applies to text metrics only
 										Optional:      true,
 										ValidateFunc:  validateRegexp(ruleSetNotMatchAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMinValueAttr: {
 										Type:          schema.TypeString, // Applies to numeric metrics only
 										Optional:      true,
 										ValidateFunc:  validateRegexp(ruleSetMinValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr),
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr),
 									},
 									ruleSetNotContainAttr: {
 										Type:          schema.TypeString, // Applies to text metrics only
 										Optional:      true,
 										ValidateFunc:  validateRegexp(ruleSetNotContainAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMaxValueAttr: {
 										Type:          schema.TypeString, // Applies to numeric metrics only
 										Optional:      true,
 										ValidateFunc:  validateRegexp(ruleSetMaxValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetNotContainAttr),
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
+									},
+									ruleSetEqValueAttr: {
+										Type:          schema.TypeString, // Applies to numeric metrics only
+										Optional:      true,
+										ValidateFunc:  validateRegexp(ruleSetEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
+									},
+									ruleSetNotEqValueAttr: {
+										Type:          schema.TypeString, // Applies to numeric metrics only
+										Optional:      true,
+										ValidateFunc:  validateRegexp(ruleSetNotEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
+										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotContainAttr),
 									},
 									ruleSetOverAttr: {
 										Type:     schema.TypeList,
@@ -403,6 +421,10 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 			valueAttrs[string(ruleSetMaxValueAttr)] = rule.Value
 		case apiRuleSetMinValue:
 			valueAttrs[string(ruleSetMinValueAttr)] = rule.Value
+		case apiRuleSetEqValue:
+			valueAttrs[string(ruleSetEqValueAttr)] = rule.Value
+		case apiRuleSetNotEqValue:
+			valueAttrs[string(ruleSetNotEqValueAttr)] = rule.Value
 		case apiRuleSetNotContains:
 			valueAttrs[string(ruleSetNotContainAttr)] = rule.Value
 		case apiRuleSetNotMatch:
@@ -658,6 +680,18 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 							rule.Criteria = apiRuleSetMaxValue
 							rule.Value = s
 						}
+					} else if v, found := valueAttrs[ruleSetEqValueAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetEqValue
+							rule.Value = s
+						}
+					} else if v, found := valueAttrs[ruleSetNotEqValueAttr]; found && v.(string) != "" {
+						s := v.(string)
+						if s != "" {
+							rule.Criteria = apiRuleSetNotEqValue
+							rule.Value = s
+						}
 					}
 				case ruleSetMetricTypeText:
 					if v, found := valueAttrs[ruleSetAbsentAttr]; found && v.(string) != "" {
@@ -816,7 +850,7 @@ func (rs *circonusRuleSet) Validate() error {
 				return fmt.Errorf("rule %d for check ID %s is using a textual criteria '%s' but is flagged as a numeric type.  Did you mean 'metric_type = \"text\"'?", i, rs.CheckCID, rule.Criteria)
 			}
 		}
-		if stringInSlice(rule.Criteria, []string{apiRuleSetMaxValue, apiRuleSetMinValue}) {
+		if stringInSlice(rule.Criteria, []string{apiRuleSetMaxValue, apiRuleSetMinValue, apiRuleSetEqValue, apiRuleSetNotEqValue}) {
 			if rs.MetricType != "numeric" {
 				return fmt.Errorf("rule %d for check ID %s is using a numeric criteria '%s' but is flagged as a text type.  Did you mean 'metric_type = \"numeric\"'?", i, rs.CheckCID, rule.Criteria)
 			}
