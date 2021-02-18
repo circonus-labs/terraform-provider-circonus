@@ -1,3 +1,9 @@
+## 0.11.7 (February 17, 2021)
+
+FIXES:
+
+* fix ruleset.parent regex to allow old form and new form
+
 ## 0.11.6 (February 16, 2021)
 
 CHANGES:
