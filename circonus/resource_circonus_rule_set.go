@@ -316,7 +316,7 @@ func resourceRuleSet() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				StateFunc:    suppressWhitespace,
-				ValidateFunc: validateRegexp(ruleSetParentAttr, `^[\d]+(_[\d\w]+)?$`),
+				ValidateFunc: validateRegexp(ruleSetParentAttr, `^([\d]+(_[\d\w]+)?)|(\/rule_set\/[\d]+)$`),
 			},
 			ruleSetMetricNameAttr: {
 				Type:         schema.TypeString,
