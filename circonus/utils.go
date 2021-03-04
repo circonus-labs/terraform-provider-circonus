@@ -1,6 +1,8 @@
 package circonus
 
 import (
+	"encoding/json"
+
 	"fmt"
 	"log"
 	"net/url"
@@ -158,4 +160,18 @@ func suppressEquivalentTimeDurations(k, old, new string, d *schema.ResourceData)
 
 func suppressWhitespace(v interface{}) string {
 	return strings.TrimSpace(v.(string))
+}
+
+func jsonSort(v interface{}) string {
+	var ifce interface{}
+	ob := []byte(v.(string))
+	err := json.Unmarshal(ob, &ifce)
+	if err != nil {
+		return v.(string)
+	}
+	os, err := json.Marshal(ifce)
+	if err != nil {
+		return v.(string)
+	}
+	return string(os)
 }

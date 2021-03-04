@@ -1,3 +1,8 @@
+# v0.7.11
+
+* add: new `user_json` field support to rule_set
+* upd: make timeout/retry tests optional (env var)
+
 # v0.7.10
 
 * upd: add 429 rate limit tests
