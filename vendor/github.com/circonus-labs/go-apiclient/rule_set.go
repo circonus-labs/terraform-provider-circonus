@@ -44,6 +44,7 @@ type RuleSet struct {
 	MetricType    string             `json:"metric_type"`              // string
 	Name          string             `json:"name,omitempty"`           // string
 	Notes         *string            `json:"notes"`                    // string or null
+	UserJSON      json.RawMessage    `json:"user_json,omitempty"`      // // abitrary json the ruleset creator supplies.. this is opaque and only has to be parseable JSON <= 4096 chars
 	Parent        *string            `json:"parent,omitempty"`         // string or null
 	Rules         []RuleSetRule      `json:"rules"`                    // [] len >= 1
 	Tags          []string           `json:"tags"`                     // [] len >= 0

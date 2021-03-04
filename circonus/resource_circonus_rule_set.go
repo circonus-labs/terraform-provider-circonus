@@ -22,6 +22,7 @@ const (
 	ruleSetLinkAttr          = "link"
 	ruleSetMetricTypeAttr    = "metric_type"
 	ruleSetNotesAttr         = "notes"
+	ruleSetUserJsonAttr      = "user_json"
 	ruleSetParentAttr        = "parent"
 	ruleSetMetricNameAttr    = "metric_name"
 	ruleSetMetricPatternAttr = "metric_pattern"
@@ -81,6 +82,7 @@ var ruleSetDescriptions = attrDescrs{
 	ruleSetLinkAttr:          "URL to show users when this rule set is active (e.g. wiki)",
 	ruleSetMetricTypeAttr:    "The type of data flowing through the specified metric stream",
 	ruleSetNotesAttr:         "Notes describing this rule set",
+	ruleSetUserJsonAttr:      "Opaque data that can be supplied with the result and appears in webhooks when alerts go off",
 	ruleSetParentAttr:        "Parent CID that must be healthy for this rule set to be active",
 	ruleSetMetricNameAttr:    "The name of the metric stream within a check to register the rule set with",
 	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
@@ -311,6 +313,42 @@ func resourceRuleSet() *schema.Resource {
 				Computed:  true,
 				StateFunc: suppressWhitespace,
 			},
+			ruleSetUserJsonAttr: {
+				Type:      schema.TypeString,
+				Optional:  true,
+				StateFunc: jsonSort,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+
+					log.Printf("Old: '%s', New: '%s'", old, new)
+
+					var ifce interface{}
+					ob := []byte(old)
+					err := json.Unmarshal(ob, &ifce)
+					if err != nil {
+						return false
+					}
+					os, err := json.Marshal(ifce)
+					if err != nil {
+						return false
+					}
+
+					nb := []byte(new)
+					err = json.Unmarshal(nb, &ifce)
+					if err != nil {
+						return false
+					}
+					ns, err := json.Marshal(ifce)
+					if err != nil {
+						return false
+					}
+
+					log.Printf("Old reformatted: '%s', New reformatted: '%s'", os, ns)
+
+					return string(os) == string(ns)
+				},
+
+				Default: "{}",
+			},
 			ruleSetParentAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -480,6 +518,14 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(ruleSetMetricFilterAttr, rs.Filter)
 	_ = d.Set(ruleSetMetricTypeAttr, rs.MetricType)
 	_ = d.Set(ruleSetNotesAttr, indirect(rs.Notes))
+	j, err := rs.UserJSON.MarshalJSON()
+	rj := json.RawMessage(string(j))
+	log.Printf("%s", string(rj))
+	if err == nil {
+		_ = d.Set(ruleSetUserJsonAttr, string(rj))
+	} else {
+		_ = d.Set(ruleSetUserJsonAttr, "{}")
+	}
 	_ = d.Set(ruleSetParentAttr, indirect(rs.Parent))
 
 	if err := d.Set(ruleSetTagsAttr, tagsToState(apiToTags(rs.Tags))); err != nil {
@@ -575,6 +621,10 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 	if v, found := d.GetOk(ruleSetNotesAttr); found {
 		s := v.(string)
 		rs.Notes = &s
+	}
+
+	if v, found := d.GetOk(ruleSetUserJsonAttr); found {
+		rs.UserJSON = json.RawMessage(v.(string))
 	}
 
 	if v, found := d.GetOk(ruleSetParentAttr); found {

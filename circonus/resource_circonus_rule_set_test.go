@@ -82,6 +82,8 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.then.0.severity", "0"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.#", "2"),
+
+					resource.TestCheckResourceAttr("circonus_rule_set.blank-user-json-test", "user_json", "{}"),
 				),
 			},
 		},
@@ -152,6 +154,11 @@ resource "circonus_check" "api_latency" {
     type = "numeric"
   }
 
+  metric {
+    name = "minimum"
+    type = "numeric"
+  }
+
   tags = "${var.test_tags}"
   target = "api.circonus.com"
 }
@@ -162,6 +169,13 @@ resource "circonus_rule_set" "icmp-latency-alarm" {
   notes = <<-EOF
 Simple check to create notifications based on ICMP performance.
 EOF
+  user_json = jsonencode({
+    foo = "bar"
+    baz = {
+      quux = [1,2,3]
+      bing = "florp"
+    }
+  })
   link = "https://wiki.example.org/playbook/what-to-do-when-high-latency-strikes"
 
   if {
@@ -252,6 +266,31 @@ EOF
     }
   }
 
+
+  tags = "${var.test_tags}"
+}
+
+resource "circonus_rule_set" "blank-user-json-test" {
+  check = "${circonus_check.api_latency.checks[0]}"
+  metric_name = "minimum"
+  notes = <<-EOF
+Simple check to create notifications based on ICMP performance.
+EOF
+  link = "https://wiki.example.org/playbook/what-to-do-when-high-latency-strikes"
+
+  if {
+    value {
+      absent = "70"
+    }
+
+    then {
+      notify = [
+        "/contact_group/4680",
+        "/contact_group/4679"
+      ]
+      severity = 1
+    }
+  }
 
   tags = "${var.test_tags}"
 }
