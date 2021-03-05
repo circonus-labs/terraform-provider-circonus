@@ -1,3 +1,13 @@
+## 0.11.8 (March 5, 2021)
+
+FIXES:
+
+* fix spurious snmp diffs, test for snmp checks
+
+CHANGES:
+
+* implement new ruleset.user_json field
+
 ## 0.11.7 (February 17, 2021)
 
 FIXES:
