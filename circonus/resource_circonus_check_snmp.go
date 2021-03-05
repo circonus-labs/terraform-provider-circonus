@@ -1,17 +1,14 @@
 package circonus
 
 import (
-	"bytes"
 	"fmt"
 	"log"
-	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/circonus-labs/go-apiclient/config"
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -61,11 +58,10 @@ var checkSNMPOIDDescriptions = attrDescrs{
 }
 
 var schemaCheckSNMP = &schema.Schema{
-	Type:     schema.TypeSet,
+	Type:     schema.TypeList,
 	Optional: true,
 	MaxItems: 1,
 	MinItems: 1,
-	Set:      hashCheckSNMP,
 	Elem: &schema.Resource{
 		Schema: convertToHelperSchema(checkSNMPDescriptions, map[schemaAttr]*schema.Schema{
 			checkSNMPAuthPassphrase: {
@@ -139,6 +135,7 @@ var schemaCheckSNMP = &schema.Schema{
 			checkSNMPOID: {
 				Type:     schema.TypeList,
 				Required: true,
+				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(checkSNMPOIDDescriptions, map[schemaAttr]*schema.Schema{
 						checkSNMPOIDName: {
@@ -232,11 +229,11 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 			oid_count++
 		}
 	}
-	oid_list := make([]interface{}, oid_count)
+	oid_list := make([]interface{}, 0)
 	for k, v := range c.Config {
 		key := string(k)
 		if strings.HasPrefix(key, string(config.OIDPrefix)) {
-			oidProps := make(map[string]interface{}, 3)
+			oidProps := make(map[string]interface{})
 			name := key[4:]
 			oidProps[string(checkSNMPOIDName)] = name
 			oidProps[string(checkSNMPOIDPath)] = v
@@ -276,88 +273,11 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 		}
 	}
 
-	if err := d.Set(checkSNMPAttr, schema.NewSet(hashCheckSNMP, []interface{}{snmpConfig})); err != nil {
+	if err := d.Set(checkSNMPAttr, []interface{}{snmpConfig}); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkSNMPAttr), err)
 	}
 
 	return nil
-}
-
-// hashCheckSNMP creates a stable hash of the normalized values
-func hashCheckSNMP(v interface{}) int {
-	m := v.(map[string]interface{})
-	b := &bytes.Buffer{}
-	b.Grow(defaultHashBufSize)
-
-	writeBool := func(attrName schemaAttr) {
-		if v, ok := m[string(attrName)]; ok {
-			fmt.Fprintf(b, "%t", v.(bool))
-		}
-	}
-
-	writeInt := func(attrName schemaAttr) {
-		if v, ok := m[string(attrName)]; ok {
-			fmt.Fprintf(b, "%x", v.(int))
-		}
-	}
-
-	writeString := func(attrName schemaAttr) {
-		if v, ok := m[string(attrName)]; ok && v.(string) != "" {
-			fmt.Fprint(b, strings.TrimSpace(v.(string)))
-		}
-	}
-
-	writeString(checkSNMPAuthPassphrase)
-	writeString(checkSNMPAuthProtocol)
-	writeString(checkSNMPCommunity)
-	writeString(checkSNMPContextEngine)
-	writeString(checkSNMPContextName)
-	writeInt(checkSNMPPort)
-	writeString(checkSNMPPrivacyPassphrase)
-	writeString(checkSNMPPrivacyProtocol)
-	writeString(checkSNMPSecurityEngine)
-	writeString(checkSNMPSecurityLevel)
-	writeString(checkSNMPSecurityName)
-	writeBool(checkSNMPSeparateQueries)
-	writeString(checkSNMPVersion)
-
-	setType := reflect.TypeOf((*schema.Set)(nil)).Elem()
-
-	var x []interface{}
-
-	z := m[string(checkSNMPOID)]
-	value := reflect.ValueOf(z)
-	f := reflect.Indirect(value)
-	log.Printf("setType: %s, zType: %s\n", setType.String(), f.Type().String())
-	if f.IsValid() && f.Type() == setType {
-		log.Printf("Converting schema.Set\n")
-		x = z.(*schema.Set).List()
-	} else {
-		log.Printf("Converting Slice\n")
-		x = z.([]interface{})
-	}
-
-	sort.Slice(x, func(i, j int) bool {
-		if x[i] != nil && x[j] != nil {
-			y := x[i].(map[string]interface{})
-			z := x[j].(map[string]interface{})
-			return y[string(checkSNMPOIDName)].(string) < z[string(checkSNMPOIDName)].(string)
-		}
-		return true
-	})
-
-	for _, s := range x {
-		if s != nil {
-			t := s.(map[string]interface{})
-			log.Printf("path: %s, name: %s\n", t["path"].(string), t["name"].(string))
-			fmt.Fprintf(b, "%s%s", strings.TrimSpace(t["path"].(string)), strings.TrimSpace(t["name"].(string)))
-		}
-	}
-
-	s := b.String()
-	hc := hashcode.String(s)
-	log.Printf("Hashcode: %d\n", hc)
-	return hc
 }
 
 func checkConfigToAPISNMP(c *circonusCheck, l interfaceList) error {
