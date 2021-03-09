@@ -41,13 +41,19 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/stats"
 	"google.golang.org/grpc/status"
 )
 
+// clientConnectionCounter counts the number of connections a client has
+// initiated (equal to the number of http2Clients created). Must be accessed
+// atomically.
+var clientConnectionCounter uint64
+
 // http2Client implements the ClientTransport interface with HTTP2.
 type http2Client struct {
-	lastRead   int64 // keep this field 64-bit aligned
+	lastRead   int64 // Keep this field 64-bit aligned. Accessed atomically.
 	ctx        context.Context
 	cancel     context.CancelFunc
 	ctxDone    <-chan struct{} // Cache the ctx.Done() chan.
@@ -126,6 +132,8 @@ type http2Client struct {
 	onClose  func()
 
 	bufferPool *bufferPool
+
+	connectionID uint64
 }
 
 func dial(ctx context.Context, fn func(context.Context, string) (net.Conn, error), addr string) (net.Conn, error) {
@@ -154,7 +162,7 @@ func isTemporary(err error) bool {
 // newHTTP2Client constructs a connected ClientTransport to addr based on HTTP2
 // and starts to receive messages on it. Non-nil error returns if construction
 // fails.
-func newHTTP2Client(connectCtx, ctx context.Context, addr TargetInfo, opts ConnectOptions, onPrefaceReceipt func(), onGoAway func(GoAwayReason), onClose func()) (_ *http2Client, err error) {
+func newHTTP2Client(connectCtx, ctx context.Context, addr resolver.Address, opts ConnectOptions, onPrefaceReceipt func(), onGoAway func(GoAwayReason), onClose func()) (_ *http2Client, err error) {
 	scheme := "http"
 	ctx, cancel := context.WithCancel(ctx)
 	defer func() {
@@ -207,12 +215,20 @@ func newHTTP2Client(connectCtx, ctx context.Context, addr TargetInfo, opts Conne
 		}
 	}
 	if transportCreds != nil {
-		scheme = "https"
-		conn, authInfo, err = transportCreds.ClientHandshake(connectCtx, addr.Authority, conn)
+		// gRPC, resolver, balancer etc. can specify arbitrary data in the
+		// Attributes field of resolver.Address, which is shoved into connectCtx
+		// and passed to the credential handshaker. This makes it possible for
+		// address specific arbitrary data to reach the credential handshaker.
+		contextWithHandshakeInfo := internal.NewClientHandshakeInfoContext.(func(context.Context, credentials.ClientHandshakeInfo) context.Context)
+		connectCtx = contextWithHandshakeInfo(connectCtx, credentials.ClientHandshakeInfo{Attributes: addr.Attributes})
+		conn, authInfo, err = transportCreds.ClientHandshake(connectCtx, addr.ServerName, conn)
 		if err != nil {
 			return nil, connectionErrorf(isTemporary(err), err, "transport: authentication handshake failed: %v", err)
 		}
 		isSecure = true
+		if transportCreds.Info().SecurityProtocol == "tls" {
+			scheme = "https"
+		}
 	}
 	dynamicWindow := true
 	icwz := int32(initialWindowSize)
@@ -329,6 +345,8 @@ func newHTTP2Client(connectCtx, ctx context.Context, addr TargetInfo, opts Conne
 		}
 	}
 
+	t.connectionID = atomic.AddUint64(&clientConnectionCounter, 1)
+
 	if err := t.framer.writer.Flush(); err != nil {
 		return nil, err
 	}
@@ -394,7 +412,8 @@ func (t *http2Client) getPeer() *peer.Peer {
 func (t *http2Client) createHeaderFields(ctx context.Context, callHdr *CallHdr) ([]hpack.HeaderField, error) {
 	aud := t.createAudience(callHdr)
 	ri := credentials.RequestInfo{
-		Method: callHdr.Method,
+		Method:   callHdr.Method,
+		AuthInfo: t.authInfo,
 	}
 	ctxWithRequestInfo := internal.NewRequestInfoContext.(func(context.Context, credentials.RequestInfo) context.Context)(ctx, ri)
 	authData, err := t.getTrAuthData(ctxWithRequestInfo, aud)
@@ -424,6 +443,7 @@ func (t *http2Client) createHeaderFields(ctx context.Context, callHdr *CallHdr) 
 
 	if callHdr.SendCompress != "" {
 		headerFields = append(headerFields, hpack.HeaderField{Name: "grpc-encoding", Value: callHdr.SendCompress})
+		headerFields = append(headerFields, hpack.HeaderField{Name: "grpc-accept-encoding", Value: callHdr.SendCompress})
 	}
 	if dl, ok := ctx.Deadline(); ok {
 		// Send out timeout regardless its value. The server can detect timeout context by itself.
@@ -543,13 +563,26 @@ func (t *http2Client) getCallAuthData(ctx context.Context, audience string, call
 	return callAuthData, nil
 }
 
+// PerformedIOError wraps an error to indicate IO may have been performed
+// before the error occurred.
+type PerformedIOError struct {
+	Err error
+}
+
+// Error implements error.
+func (p PerformedIOError) Error() string {
+	return p.Err.Error()
+}
+
 // NewStream creates a stream and registers it into the transport as "active"
 // streams.
 func (t *http2Client) NewStream(ctx context.Context, callHdr *CallHdr) (_ *Stream, err error) {
 	ctx = peer.NewContext(ctx, t.getPeer())
 	headerFields, err := t.createHeaderFields(ctx, callHdr)
 	if err != nil {
-		return nil, err
+		// We may have performed I/O in the per-RPC creds callback, so do not
+		// allow transparent retry.
+		return nil, PerformedIOError{err}
 	}
 	s := t.newStream(ctx, callHdr)
 	cleanup := func(err error) {
@@ -669,12 +702,21 @@ func (t *http2Client) NewStream(ctx context.Context, callHdr *CallHdr) (_ *Strea
 		}
 	}
 	if t.statsHandler != nil {
+		header, ok := metadata.FromOutgoingContext(ctx)
+		if ok {
+			header.Set("user-agent", t.userAgent)
+		} else {
+			header = metadata.Pairs("user-agent", t.userAgent)
+		}
+		// Note: The header fields are compressed with hpack after this call returns.
+		// No WireLength field is set here.
 		outHeader := &stats.OutHeader{
 			Client:      true,
 			FullMethod:  callHdr.Method,
 			RemoteAddr:  t.remoteAddr,
 			LocalAddr:   t.localAddr,
 			Compression: callHdr.SendCompress,
+			Header:      header,
 		}
 		t.statsHandler.HandleRPC(s.ctx, outHeader)
 	}
@@ -834,18 +876,10 @@ func (t *http2Client) Write(s *Stream, hdr []byte, data []byte, opts *Options) e
 	df := &dataFrame{
 		streamID:  s.id,
 		endStream: opts.Last,
+		h:         hdr,
+		d:         data,
 	}
-	if hdr != nil || data != nil { // If it's not an empty data frame.
-		// Add some data to grpc message header so that we can equally
-		// distribute bytes across frames.
-		emptyLen := http2MaxFrameLen - len(hdr)
-		if emptyLen > len(data) {
-			emptyLen = len(data)
-		}
-		hdr = append(hdr, data[:emptyLen]...)
-		data = data[emptyLen:]
-		df.h, df.d = hdr, data
-		// TODO(mmukhi): The above logic in this if can be moved to loopyWriter's data handler.
+	if hdr != nil || data != nil { // If it's not an empty data frame, check quota.
 		if err := s.wq.get(int32(len(hdr) + len(data))); err != nil {
 			return err
 		}
@@ -1175,14 +1209,17 @@ func (t *http2Client) operateHeaders(frame *http2.MetaHeadersFrame) {
 		if t.statsHandler != nil {
 			if isHeader {
 				inHeader := &stats.InHeader{
-					Client:     true,
-					WireLength: int(frame.Header().Length),
+					Client:      true,
+					WireLength:  int(frame.Header().Length),
+					Header:      s.header.Copy(),
+					Compression: s.recvCompress,
 				}
 				t.statsHandler.HandleRPC(s.ctx, inHeader)
 			} else {
 				inTrailer := &stats.InTrailer{
 					Client:     true,
 					WireLength: int(frame.Header().Length),
+					Trailer:    s.trailer.Copy(),
 				}
 				t.statsHandler.HandleRPC(s.ctx, inTrailer)
 			}
@@ -1369,7 +1406,6 @@ func (t *http2Client) keepalive() {
 			// acked).
 			sleepDuration := minTime(t.kp.Time, timeoutLeft)
 			timeoutLeft -= sleepDuration
-			prevNano = lastRead
 			timer.Reset(sleepDuration)
 		case <-t.ctx.Done():
 			if !timer.Stop() {
