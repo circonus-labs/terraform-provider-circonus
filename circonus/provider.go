@@ -142,7 +142,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error initializing Circonus",
-			Detail:   fmt.Sprintf("Unable to initialized Circonus API client %s", err),
+			Detail:   fmt.Sprintf("Unable to initialize Circonus API client: %s", err),
 		})
 		return nil, diags
 	}
