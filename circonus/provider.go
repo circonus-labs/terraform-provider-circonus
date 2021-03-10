@@ -2,11 +2,13 @@
 package circonus
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
 	api "github.com/circonus-labs/go-apiclient"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -35,7 +37,6 @@ var providerDescription = map[string]string{
 var (
 	validContactHTTPFormats = validStringValues{"json", "params"}
 	validContactHTTPMethods = validStringValues{"GET", "POST"}
-	tfVer                   = "unk"
 )
 
 type contactMethods string
@@ -101,21 +102,14 @@ func Provider() *schema.Provider {
 			"circonus_rule_set_group": resourceRuleSetGroup(),
 			"circonus_worksheet":      resourceWorksheet(),
 		},
+
+		ConfigureContextFunc: providerConfigure,
 	}
 
-	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) { //nolint
-		terraformVersion := p.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-		return providerConfigure(d, terraformVersion)
-	}
 	return p
 }
 
-func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	globalAutoTag = d.Get(providerAutoTagAttr).(bool)
 
 	envLevel := os.Getenv("TF_LOG")
@@ -127,7 +121,7 @@ func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, e
 	config := &api.Config{
 		URL:      d.Get(providerAPIURLAttr).(string),
 		TokenKey: d.Get(providerKeyAttr).(string),
-		TokenApp: tfAppName(),
+		TokenApp: "terraform-provider-circonus",
 	}
 
 	if debug {
@@ -141,22 +135,23 @@ func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, e
 		config.Log = log.New(log.Writer(), "", log.LstdFlags)
 	}
 
+	var diags diag.Diagnostics
+
 	client, err := api.NewAPI(config)
 	if err != nil {
-		return nil, fmt.Errorf("Error initializing Circonus: %w", err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error initializing Circonus",
+			Detail:   fmt.Sprintf("Unable to initialized Circonus API client %s", err),
+		})
+		return nil, diags
 	}
 
 	client.EnableExponentialBackoff()
-
-	tfVer = tfVersion
 
 	return &providerContext{
 		client:     client,
 		autoTag:    d.Get(providerAutoTagAttr).(bool),
 		defaultTag: defaultCirconusTag,
-	}, nil
-}
-
-func tfAppName() string {
-	return fmt.Sprintf("Terraform v%s", tfVer)
+	}, diags
 }
