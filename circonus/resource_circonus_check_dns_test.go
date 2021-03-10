@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckDNS_basic(t *testing.T) {
@@ -29,12 +29,11 @@ func TestAccCirconusCheckDNS_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.google", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.google", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.google", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.google", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.google", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.google", "dns.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.google", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.google", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.google", "metric.#", "3"),
-
 					resource.TestCheckResourceAttr("circonus_check.google", "tags.#", "2"),
 					resource.TestCheckResourceAttr("circonus_check.google", "target", "api.circonus.com"),
 					resource.TestCheckResourceAttr("circonus_check.google", "type", "dns"),

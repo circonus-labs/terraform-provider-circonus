@@ -13,8 +13,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // convertToHelperSchema converts the schema and injects the necessary
@@ -59,7 +58,7 @@ func failoverGroupCIDToID(cid api.CIDType) (int, error) {
 
 	contactGroupID, err := strconv.Atoi(matches[1])
 	if err != nil {
-		return -1, errwrap.Wrapf(fmt.Sprintf("invalid contact_group ID: unable to find an ID in %q: {{error}}", string(*cid)), err)
+		return -1, fmt.Errorf("invalid contact_group ID: unable to find an ID in %q: %w", string(*cid), err)
 	}
 
 	return contactGroupID, nil

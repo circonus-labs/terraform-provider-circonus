@@ -6,9 +6,8 @@ import (
 	"strings"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -97,7 +96,7 @@ func checkAPIToStateDNS(c *circonusCheck, d *schema.ResourceData) error {
 	}
 
 	if err := d.Set(checkDNSAttr, schema.NewSet(hashCheckDNS, []interface{}{dnsConfig})); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkDNSAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkDNSAttr, err)
 	}
 
 	return nil

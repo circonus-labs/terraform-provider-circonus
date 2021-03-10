@@ -5,9 +5,8 @@ import (
 	"time"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceMaintenance() *schema.Resource {
@@ -58,12 +57,12 @@ func resourceMaintenance() *schema.Resource {
 			"start": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.ValidateRFC3339TimeString,
+				ValidateFunc: validation.IsRFC3339Time,
 			},
 			"stop": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.ValidateRFC3339TimeString,
+				ValidateFunc: validation.IsRFC3339Time,
 			},
 			"tags": {
 				Type:     schema.TypeList,
@@ -81,11 +80,11 @@ func maintenanceCreate(d *schema.ResourceData, meta interface{}) error {
 	m := newMaintenance()
 
 	if err := m.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing maintenance schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing maintenance schema during create: %w", err)
 	}
 
 	if err := m.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating maintenance: {{err}}", err)
+		return fmt.Errorf("error creating maintenance: %w", err)
 	}
 
 	d.SetId(m.CID)
@@ -157,7 +156,7 @@ func maintenanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	m.CID = d.Id()
 
 	if err := m.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update maintenance %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update maintenance %q: %w", d.Id(), err)
 	}
 
 	return maintenanceRead(d, meta)
@@ -168,7 +167,7 @@ func maintenanceDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteMaintenanceWindowByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete rule set %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete rule set %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -271,7 +270,7 @@ func (m *circonusMaintenance) Create(ctxt *providerContext) error {
 func (m *circonusMaintenance) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateMaintenanceWindow(&m.Maintenance)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update maintenance %s: {{err}}", m.CID), err)
+		return fmt.Errorf("Unable to update maintenance %s: %w", m.CID, err)
 	}
 
 	return nil

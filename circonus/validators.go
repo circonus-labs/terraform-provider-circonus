@@ -9,7 +9,6 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
 )
 
 var knownCheckTypes map[circonusCheckType]struct{}
@@ -123,7 +122,7 @@ func validateDurationMin(attrName schemaAttr, minDuration string) func(v interfa
 		min, err = time.ParseDuration(minDuration)
 		if err != nil {
 			return func(interface{}, string) (warnings []string, errors []error) {
-				errors = []error{errwrap.Wrapf(fmt.Sprintf("Invalid time +%q: {{err}}", minDuration), err)}
+				errors = []error{fmt.Errorf("Invalid time +%q: %w", minDuration, err)}
 				return warnings, errors
 			}
 		}
@@ -133,7 +132,7 @@ func validateDurationMin(attrName schemaAttr, minDuration string) func(v interfa
 		d, err := time.ParseDuration(v.(string))
 		switch {
 		case err != nil:
-			errors = append(errors, errwrap.Wrapf(fmt.Sprintf("Invalid %s specified (%q): {{err}}", attrName, v.(string)), err))
+			errors = append(errors, fmt.Errorf("Invalid %s specified (%q): %w", attrName, v.(string), err))
 		case d < min:
 			errors = append(errors, fmt.Errorf("Invalid %s specified (%q): minimum value must be %s", attrName, v.(string), min))
 		}
@@ -149,7 +148,7 @@ func validateDurationMax(attrName schemaAttr, maxDuration string) func(v interfa
 		max, err = time.ParseDuration(maxDuration)
 		if err != nil {
 			return func(interface{}, string) (warnings []string, errors []error) {
-				errors = []error{errwrap.Wrapf(fmt.Sprintf("Invalid time +%q: {{err}}", maxDuration), err)}
+				errors = []error{fmt.Errorf("Invalid time +%q: %w", maxDuration, err)}
 				return warnings, errors
 			}
 		}
@@ -159,7 +158,7 @@ func validateDurationMax(attrName schemaAttr, maxDuration string) func(v interfa
 		d, err := time.ParseDuration(v.(string))
 		switch {
 		case err != nil:
-			errors = append(errors, errwrap.Wrapf(fmt.Sprintf("Invalid %s specified (%q): {{err}}", attrName, v.(string)), err))
+			errors = append(errors, fmt.Errorf("Invalid %s specified (%q): %w", attrName, v.(string), err))
 		case d > max:
 			errors = append(errors, fmt.Errorf("Invalid %s specified (%q): maximum value must be less than or equal to %s", attrName, v.(string), max))
 		}
@@ -326,7 +325,7 @@ func validateHTTPURL(attrName schemaAttr, checkFlags urlParseFlags) func(v inter
 		u, err := url.Parse(v.(string))
 		switch {
 		case err != nil:
-			errors = append(errors, errwrap.Wrapf(fmt.Sprintf("Invalid %s specified (%q): {{err}}", attrName, v.(string)), err))
+			errors = append(errors, fmt.Errorf("Invalid %s specified (%q): %w", attrName, v.(string), err))
 		case u.Host == "":
 			errors = append(errors, fmt.Errorf("Invalid %s specified: host can not be empty", attrName))
 		case !(u.Scheme == "http" || u.Scheme == "https"):

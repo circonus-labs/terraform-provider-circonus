@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -47,7 +46,7 @@ func resourceWorksheet() *schema.Resource {
 		Delete: worksheetDelete,
 		Exists: worksheetExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: convertToHelperSchema(worksheetDescriptions, map[schemaAttr]*schema.Schema{
@@ -113,11 +112,11 @@ func worksheetCreate(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 	g := newWorksheet()
 	if err := g.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing graph schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing graph schema during create: %w", err)
 	}
 
 	if err := g.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating graph: {{err}}", err)
+		return fmt.Errorf("error creating graph: %w", err)
 	}
 
 	d.SetId(g.CID)
@@ -142,11 +141,11 @@ func worksheetRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(workspaceNotesAttr, w.Notes)
 
 	if err := d.Set(workspaceGraphsAttr, worksheetGraphsToState(apiToWorksheetGraphs(w.Graphs))); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store workspace %q attribute: {{err}}", workspaceTagsAttr), err)
+		return fmt.Errorf("Unable to store workspace %q attribute: %w", workspaceTagsAttr, err)
 	}
 
 	if err := d.Set(workspaceTagsAttr, tagsToState(apiToTags(w.Tags))); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store workspace %q attribute: {{err}}", workspaceTagsAttr), err)
+		return fmt.Errorf("Unable to store workspace %q attribute: %w", workspaceTagsAttr, err)
 	}
 
 	var smartQueries []map[string]interface{}
@@ -163,7 +162,7 @@ func worksheetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set(workspaceSmartQueriesAttr, smartQueries); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to store worksheet %q attribute: {{err}}", workspaceSmartQueriesAttr), err)
+		return fmt.Errorf("unable to store worksheet %q attribute: %w", workspaceSmartQueriesAttr, err)
 	}
 
 	return nil
@@ -198,7 +197,7 @@ func worksheetUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	w.CID = d.Id()
 	if err := w.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update worksheet %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update worksheet %q: %w", d.Id(), err)
 	}
 
 	return worksheetRead(d, meta)
@@ -209,7 +208,7 @@ func worksheetDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteWorksheetByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete worksheet %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete worksheet %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -231,7 +230,7 @@ func (w *circonusWorksheet) Create(ctxt *providerContext) error {
 func (w *circonusWorksheet) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateWorksheet(&w.Worksheet)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update worksheet %s: {{err}}", w.CID), err)
+		return fmt.Errorf("Unable to update worksheet %s: %w", w.CID, err)
 	}
 
 	return nil

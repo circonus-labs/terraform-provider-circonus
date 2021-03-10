@@ -5,8 +5,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -150,7 +149,7 @@ func dataSourceCirconusCollectorRead(d *schema.ResourceData, meta interface{}) e
 	d.SetId(collector.CID)
 
 	if err := d.Set(collectorDetailsAttr, collectorDetailsToState(collector)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store collector %q attribute: {{err}}", collectorDetailsAttr), err)
+		return fmt.Errorf("Unable to store collector %q attribute: %w", collectorDetailsAttr, err)
 	}
 
 	_ = d.Set(collectorIDAttr, collector.CID)

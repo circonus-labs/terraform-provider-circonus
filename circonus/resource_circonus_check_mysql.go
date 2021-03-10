@@ -6,9 +6,8 @@ import (
 	"strings"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -54,7 +53,7 @@ func checkAPIToStateMySQL(c *circonusCheck, d *schema.ResourceData) error {
 	MySQLConfig[string(checkMySQLQueryAttr)] = c.Config[config.SQL]
 
 	if err := d.Set(checkMySQLAttr, schema.NewSet(hashCheckMySQL, []interface{}{MySQLConfig})); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkMySQLAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkMySQLAttr, err)
 	}
 
 	return nil

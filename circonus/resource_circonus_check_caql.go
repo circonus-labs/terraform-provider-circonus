@@ -6,9 +6,8 @@ import (
 	"strings"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -45,7 +44,7 @@ func checkAPIToStateCAQL(c *circonusCheck, d *schema.ResourceData) error {
 	caqlConfig[string(checkCAQLQueryAttr)] = c.Config[config.Query]
 
 	if err := d.Set(checkCAQLAttr, schema.NewSet(hashCheckCAQL, []interface{}{caqlConfig})); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkCAQLAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkCAQLAttr, err)
 	}
 
 	return nil

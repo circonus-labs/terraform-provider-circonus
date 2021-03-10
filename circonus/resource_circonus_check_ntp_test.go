@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckNTP_basic(t *testing.T) {
@@ -29,7 +29,7 @@ func TestAccCirconusCheckNTP_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.clock", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.clock", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.clock", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "ntp.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.clock", "period", "300s"),

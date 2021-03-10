@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckTCP_basic(t *testing.T) {
@@ -21,10 +21,10 @@ func TestAccCirconusCheckTCP_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.host", "127.0.0.1"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.453641246.port", "443"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.0.host", "127.0.0.1"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.0.port", "443"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "notes", "Check to harvest cert expiration information"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "period", "60s"),
@@ -67,10 +67,10 @@ func TestAccCirconusCheckTCP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "metric.8.type", "numeric"),
 
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.#", "4"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.30226350", "app:circonus"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.213659730", "app:tls_cert"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.862116066", "source:fastly"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.0", "app:circonus"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.1", "app:tls_cert"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.2", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tags.3", "source:fastly"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "target", "127.0.0.1"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "type", "tcp"),
 				),

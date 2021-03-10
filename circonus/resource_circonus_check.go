@@ -23,8 +23,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -170,7 +169,7 @@ func resourceCheck() *schema.Resource {
 		Delete: checkDelete,
 		Exists: checkExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: convertToHelperSchema(checkDescriptions, map[schemaAttr]*schema.Schema{
@@ -372,11 +371,11 @@ func checkCreate(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 	c := newCheck()
 	if err := c.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing check schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing check schema during create: %w", err)
 	}
 
 	if err := c.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating check: {{err}}", err)
+		return fmt.Errorf("error creating check: %w", err)
 	}
 
 	d.SetId(c.CID)
@@ -460,7 +459,7 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(checkActiveAttr, checkAPIStatusToBool(c.Status))
 
 	if err := d.Set(checkCollectorAttr, stringListToSet(c.Brokers, checkCollectorIDAttr)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkCollectorAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkCollectorAttr, err)
 	}
 
 	_ = d.Set(checkMetricLimitAttr, c.MetricLimit)
@@ -469,15 +468,15 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(checkPeriodAttr, fmt.Sprintf("%ds", c.Period))
 
 	if err := d.Set(checkMetricAttr, metrics); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkMetricAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkMetricAttr, err)
 	}
 
 	if err := d.Set(checkMetricFilterAttr, metricFilters); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkMetricFilterAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkMetricFilterAttr, err)
 	}
 
 	if err := d.Set(checkTagsAttr, c.Tags); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkTagsAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkTagsAttr, err)
 	}
 
 	_ = d.Set(checkTargetAttr, c.Target)
@@ -491,20 +490,20 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 
 	// Last step: parse a check_bundle's config into the statefile.
 	if err := parseCheckTypeConfig(&c, d); err != nil {
-		return errwrap.Wrapf("Unable to parse check config: {{err}}", err)
+		return fmt.Errorf("Unable to parse check config: %w", err)
 	}
 
 	// Out parameters
 	if err := d.Set(checkOutByCollectorAttr, checkIDsByCollector); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkOutByCollectorAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutByCollectorAttr, err)
 	}
 
 	if err := d.Set(checkOutCheckUUIDsAttr, c.CheckUUIDs); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkOutCheckUUIDsAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutCheckUUIDsAttr, err)
 	}
 
 	if err := d.Set(checkOutChecksAttr, c.Checks); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkOutChecksAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutChecksAttr, err)
 	}
 
 	if checkID != "" {
@@ -516,7 +515,7 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(checkOutLastModifiedByAttr, c.LastModifedBy)
 
 	if err := d.Set(checkOutReverseConnectURLsAttr, c.ReverseConnectURLs); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkOutReverseConnectURLsAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutReverseConnectURLsAttr, err)
 	}
 
 	return nil
@@ -531,7 +530,7 @@ func checkUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	c.CID = d.Id()
 	if err := c.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update check %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update check %q: %w", d.Id(), err)
 	}
 
 	return checkRead(d, meta)
@@ -541,7 +540,7 @@ func checkDelete(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 
 	if _, err := ctxt.client.Delete(d.Id()); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete check %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete check %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -585,7 +584,7 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 	if v, found := d.GetOk(checkPeriodAttr); found {
 		d, err := time.ParseDuration(v.(string))
 		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("unable to parse %q as a duration: {{err}}", checkPeriodAttr), err)
+			return fmt.Errorf("unable to parse %q as a duration: %w", checkPeriodAttr, err)
 		}
 
 		c.Period = uint(d.Seconds())
@@ -605,13 +604,13 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 				var err error
 				id, err = newMetricID()
 				if err != nil {
-					return errwrap.Wrapf("unable to create a new metric ID: {{err}}", err)
+					return fmt.Errorf("unable to create a new metric ID: %w", err)
 				}
 			}
 
 			m := newMetric()
 			if err := m.ParseConfigMap(id, metricAttrs); err != nil {
-				return errwrap.Wrapf("unable to parse config: {{err}}", err)
+				return fmt.Errorf("unable to parse config: %w", err)
 			}
 
 			c.Metrics = append(c.Metrics, m.CheckBundleMetric)
@@ -657,7 +656,7 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 	if v, found := d.GetOk(checkTimeoutAttr); found {
 		d, err := time.ParseDuration(v.(string))
 		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("unable to parse %q as a duration: {{err}}", checkTimeoutAttr), err)
+			return fmt.Errorf("unable to parse %q as a duration: %w", checkTimeoutAttr, err)
 		}
 
 		t := float32(d.Seconds())
@@ -666,7 +665,7 @@ func (c *circonusCheck) ParseConfig(d *schema.ResourceData) error {
 
 	// Last step: parse the individual check types
 	if err := checkConfigToAPI(c, d); err != nil {
-		return errwrap.Wrapf("unable to parse check type: {{err}}", err)
+		return fmt.Errorf("unable to parse check type: %w", err)
 	}
 
 	if err := c.Fixup(); err != nil {
@@ -711,11 +710,11 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 			switch u := listRaw.(type) {
 			case []interface{}:
 				if err := fn(c, u); err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Unable to parse type %q: {{err}}", string(checkType)), err)
+					return fmt.Errorf("Unable to parse type %q: %w", string(checkType), err)
 				}
 			case *schema.Set:
 				if err := fn(c, u.List()); err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Unable to parse type %q: {{err}}", string(checkType)), err)
+					return fmt.Errorf("Unable to parse type %q: %w", string(checkType), err)
 				}
 			default:
 				return fmt.Errorf("PROVIDER BUG: unsupported check type interface: %q", checkType)
@@ -759,7 +758,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 	}
 
 	if err := fn(c, d); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to parse the API config for %q: {{err}}", c.Type), err)
+		return fmt.Errorf("unable to parse the API config for %q: %w", c.Type, err)
 	}
 
 	return nil

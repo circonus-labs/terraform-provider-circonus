@@ -8,8 +8,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -130,13 +129,13 @@ var graphMetricClusterDescriptions = attrDescrs{
 // }
 
 func resourceGraph() *schema.Resource {
-	makeConflictsWith := func(in ...schemaAttr) []string {
-		out := make([]string, 0, len(in))
-		for _, attr := range in {
-			out = append(out, string(graphMetricAttr)+"."+string(attr))
-		}
-		return out
-	}
+	// makeConflictsWith := func(in ...schemaAttr) []string {
+	// 	out := make([]string, 0, len(in))
+	// 	for _, attr := range in {
+	// 		out = append(out, string(graphMetricAttr)+"."+string(attr))
+	// 	}
+	// 	return out
+	// }
 
 	return &schema.Resource{
 		Create: graphCreate,
@@ -145,7 +144,7 @@ func resourceGraph() *schema.Resource {
 		Delete: graphDelete,
 		Exists: graphExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: convertToHelperSchema(graphDescriptions, map[schemaAttr]*schema.Schema{
@@ -235,6 +234,7 @@ func resourceGraph() *schema.Resource {
 							Default:      "left",
 							ValidateFunc: validateStringIn(graphMetricAxisAttr, validAxisAttrs),
 						},
+
 						graphMetricCAQLAttr: {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -242,20 +242,27 @@ func resourceGraph() *schema.Resource {
 							StateFunc: func(val interface{}) string {
 								return strings.TrimSpace(val.(string))
 							},
-							ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricSearchAttr),
+							// ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricSearchAttr),
 						},
 						graphMetricSearchAttr: {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ValidateFunc:  validateRegexp(graphMetricSearchAttr, `.+`),
-							ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricCAQLAttr),
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphMetricSearchAttr, `.+`),
+							// ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricCAQLAttr),
 						},
 						graphMetricCheckAttr: {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ValidateFunc:  validateRegexp(graphMetricCheckAttr, config.CheckCIDRegex),
-							ConflictsWith: makeConflictsWith(graphMetricCAQLAttr, graphMetricSearchAttr),
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphMetricCheckAttr, config.CheckCIDRegex),
+							// ConflictsWith: makeConflictsWith(graphMetricCAQLAttr, graphMetricSearchAttr),
 						},
+						graphMetricNameAttr: {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphMetricNameAttr, `.+`),
+							// ConflictsWith: makeConflictsWith(graphMetricCAQLAttr, graphMetricSearchAttr),
+						},
+
 						graphMetricColorAttr: {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -286,11 +293,6 @@ func resourceGraph() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validateRegexp(graphMetricHumanNameAttr, `.+`),
-						},
-						graphMetricNameAttr: {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validateRegexp(graphMetricNameAttr, `.+`),
 						},
 						graphMetricStackAttr: {
 							Type:         schema.TypeString,
@@ -356,11 +358,11 @@ func graphCreate(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 	g := newGraph()
 	if err := g.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing graph schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing graph schema during create: %w", err)
 	}
 
 	if err := g.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating graph: {{err}}", err)
+		return fmt.Errorf("error creating graph: %w", err)
 	}
 
 	d.SetId(g.CID)
@@ -548,7 +550,7 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(graphDescriptionAttr, g.Description)
 
 	if err := d.Set(graphLeftAttr, leftAxisMap); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphLeftAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphLeftAttr, err)
 	}
 
 	_ = d.Set(graphLineStyleAttr, g.LineStyle)
@@ -556,21 +558,21 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(graphNotesAttr, indirect(g.Notes))
 
 	if err := d.Set(graphRightAttr, rightAxisMap); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphRightAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphRightAttr, err)
 	}
 
 	if err := d.Set(graphMetricAttr, metrics); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphMetricAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphMetricAttr, err)
 	}
 
 	if err := d.Set(graphMetricClusterAttr, metricClusters); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphMetricClusterAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphMetricClusterAttr, err)
 	}
 
 	_ = d.Set(graphStyleAttr, g.Style)
 
 	if err := d.Set(graphTagsAttr, tagsToState(apiToTags(g.Tags))); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphTagsAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphTagsAttr, err)
 	}
 
 	guides := make([]interface{}, 0, len(g.Guides))
@@ -609,7 +611,7 @@ func graphUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	g.CID = d.Id()
 	if err := g.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update graph %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update graph %q: %w", d.Id(), err)
 	}
 
 	return graphRead(d, meta)
@@ -620,7 +622,7 @@ func graphDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteGraphByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete graph %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete graph %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -1048,7 +1050,7 @@ func (g *circonusGraph) Create(ctxt *providerContext) error {
 func (g *circonusGraph) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateGraph(&g.Graph)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update graph %s: {{err}}", g.CID), err)
+		return fmt.Errorf("Unable to update graph %s: %w", g.CID, err)
 	}
 
 	return nil

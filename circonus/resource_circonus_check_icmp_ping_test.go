@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
@@ -29,11 +29,11 @@ func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.loopback_latency", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.979664239.availability", "100"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.979664239.count", "5"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.979664239.interval", "500ms"),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.0.availability", "100"),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.0.count", "5"),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.0.interval", "500ms"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.#", "5"),
@@ -54,8 +54,8 @@ func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "metric.4.type", "numeric"),
 
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "tags.0", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "tags.1", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "target", "api.circonus.com"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "type", "ping_icmp"),
 				),

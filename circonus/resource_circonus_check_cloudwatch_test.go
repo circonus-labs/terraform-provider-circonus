@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckCloudWatch_basic(t *testing.T) {
@@ -33,14 +33,14 @@ func TestAccCirconusCheckCloudWatch_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.46539847.dimmensions.%", "1"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.46539847.dimmensions.DBInstanceIdentifier", "atlas-production"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.46539847.metric.#", "17"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.46539847.namespace", "AWS/RDS"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.46539847.version", "2010-08-01"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.46539847.url", "https://monitoring.us-east-1.amazonaws.com"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.dimmensions.%", "1"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.dimmensions.DBInstanceIdentifier", "atlas-production"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.metric.#", "17"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.namespace", "AWS/RDS"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.version", "2010-08-01"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.url", "https://monitoring.us-east-1.amazonaws.com"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "notes", "Collect all the things exposed"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "period", "60s"),
@@ -115,10 +115,10 @@ func TestAccCirconusCheckCloudWatch_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "metric.16.type", "numeric"),
 
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.#", "4"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.2964981562", "app:postgresql"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.1313458811", "app:rds"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.4259413593", "source:cloudwatch"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.0", "app:postgresql"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.1", "app:rds"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.2", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "tags.3", "source:cloudwatch"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "target", "atlas-production.us-east-1.rds._aws"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "type", "cloudwatch"),
 				),

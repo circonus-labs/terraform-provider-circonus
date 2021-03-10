@@ -10,9 +10,8 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -214,7 +213,7 @@ func resourceContactGroup() *schema.Resource {
 		Delete: contactGroupDelete,
 		Exists: contactGroupExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: convertToHelperSchema(contactGroupDescriptions, map[schemaAttr]*schema.Schema{
@@ -277,7 +276,8 @@ func resourceContactGroup() *schema.Resource {
 				},
 			},
 			contactEmailAttr: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
+				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(contactEmailDescriptions, map[schemaAttr]*schema.Schema{
@@ -415,7 +415,8 @@ func resourceContactGroup() *schema.Resource {
 				},
 			},
 			contactSMSAttr: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
+				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(contactSMSDescriptions, map[schemaAttr]*schema.Schema{
@@ -481,7 +482,8 @@ func resourceContactGroup() *schema.Resource {
 				},
 			},
 			contactXMPPAttr: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
+				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(contactXMPPDescriptions, map[schemaAttr]*schema.Schema{
@@ -602,15 +604,15 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(contactGroupTypeAttr, cg.GroupType)
 
 	if err := d.Set(contactAlertOptionAttr, contactGroupAlertOptionsToState(cg)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactAlertOptionAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactAlertOptionAttr, err)
 	}
 
 	if err := d.Set(contactEmailAttr, contactGroupEmailToState(cg)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactEmailAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactEmailAttr, err)
 	}
 
 	if err := d.Set(contactHTTPAttr, httpState); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactHTTPAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactHTTPAttr, err)
 	}
 
 	_ = d.Set(contactLongMessageAttr, cg.AlertFormats.LongMessage)
@@ -619,30 +621,30 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(contactNameAttr, cg.Name)
 
 	if err := d.Set(contactPagerDutyAttr, pagerDutyState); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactPagerDutyAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactPagerDutyAttr, err)
 	}
 
 	_ = d.Set(contactShortMessageAttr, cg.AlertFormats.ShortMessage)
 	_ = d.Set(contactShortSummaryAttr, cg.AlertFormats.ShortSummary)
 
 	if err := d.Set(contactSlackAttr, slackState); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactSlackAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactSlackAttr, err)
 	}
 
 	if err := d.Set(contactSMSAttr, smsState); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactSMSAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactSMSAttr, err)
 	}
 
 	if err := d.Set(contactTagsAttr, cg.Tags); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactTagsAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactTagsAttr, err)
 	}
 
 	if err := d.Set(contactVictorOpsAttr, victorOpsState); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactVictorOpsAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactVictorOpsAttr, err)
 	}
 
 	if err := d.Set(contactXMPPAttr, xmppState); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store contact %q attribute: {{err}}", contactXMPPAttr), err)
+		return fmt.Errorf("Unable to store contact %q attribute: %w", contactXMPPAttr, err)
 	}
 
 	// Out parameters
@@ -663,7 +665,7 @@ func contactGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	in.CID = d.Id()
 
 	if _, err := c.client.UpdateContactGroup(in); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update contact group %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update contact group %q: %w", d.Id(), err)
 	}
 
 	return contactGroupRead(d, meta)
@@ -674,7 +676,7 @@ func contactGroupDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := c.client.DeleteContactGroupByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete contact group %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete contact group %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -761,7 +763,7 @@ func contactGroupHTTPToState(cg *api.ContactGroup) ([]interface{}, error) {
 		case circonusMethodHTTP:
 			url := contactHTTPInfo{}
 			if err := json.Unmarshal([]byte(ext.Info), &url); err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("unable to decode external %s JSON (%q): {{err}}", contactHTTPAttr, ext.Info), err)
+				return nil, fmt.Errorf("unable to decode external %s JSON (%q): %w", contactHTTPAttr, ext.Info, err)
 			}
 
 			httpContacts = append(httpContacts, map[string]interface{}{
@@ -890,7 +892,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 
 			js, err := json.Marshal(httpInfo)
 			if err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("error marshalling %s JSON config string: {{err}}", contactHTTPAttr), err)
+				return nil, fmt.Errorf("error marshalling %s JSON config string: %w", contactHTTPAttr, err)
 			}
 
 			cg.Contacts.External = append(cg.Contacts.External, api.ContactGroupContactsExternal{
@@ -911,7 +913,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 				cid := v.(string)
 				contactGroupID, err := failoverGroupCIDToID(api.CIDType(&cid))
 				if err != nil {
-					return nil, errwrap.Wrapf("error reading contact group CID: {{err}}", err)
+					return nil, fmt.Errorf("error reading contact group CID: %w", err)
 				}
 				pagerDutyInfo.FallbackGroupCID = contactGroupID
 			}
@@ -930,7 +932,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 
 			js, err := json.Marshal(pagerDutyInfo)
 			if err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("error marshalling %s JSON config string: {{err}}", contactPagerDutyAttr), err)
+				return nil, fmt.Errorf("error marshalling %s JSON config string: %w", contactPagerDutyAttr, err)
 			}
 
 			cg.Contacts.External = append(cg.Contacts.External, api.ContactGroupContactsExternal{
@@ -964,7 +966,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 				cid := v.(string)
 				contactGroupID, err := failoverGroupCIDToID(api.CIDType(&cid))
 				if err != nil {
-					return nil, errwrap.Wrapf("error reading contact group CID: {{err}}", err)
+					return nil, fmt.Errorf("error reading contact group CID: %w", err)
 				}
 				slackInfo.FallbackGroupCID = contactGroupID
 			}
@@ -979,7 +981,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 
 			js, err := json.Marshal(slackInfo)
 			if err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("error marshalling %s JSON config string: {{err}}", contactSlackAttr), err)
+				return nil, fmt.Errorf("error marshalling %s JSON config string: %w", contactSlackAttr, err)
 			}
 
 			cg.Contacts.External = append(cg.Contacts.External, api.ContactGroupContactsExternal{
@@ -1030,7 +1032,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 				cid := v.(string)
 				contactGroupID, err := failoverGroupCIDToID(api.CIDType(&cid))
 				if err != nil {
-					return nil, errwrap.Wrapf("error reading contact group CID: {{err}}", err)
+					return nil, fmt.Errorf("error reading contact group CID: %w", err)
 				}
 				victorOpsInfo.FallbackGroupCID = contactGroupID
 			}
@@ -1057,7 +1059,7 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 
 			js, err := json.Marshal(victorOpsInfo)
 			if err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("error marshalling %s JSON config string: {{err}}", contactVictorOpsAttr), err)
+				return nil, fmt.Errorf("error marshalling %s JSON config string: %w", contactVictorOpsAttr, err)
 			}
 
 			cg.Contacts.External = append(cg.Contacts.External, api.ContactGroupContactsExternal{
@@ -1152,7 +1154,7 @@ func contactGroupPagerDutyToState(cg *api.ContactGroup) ([]interface{}, error) {
 		case circonusMethodPagerDuty:
 			pdInfo := contactPagerDutyInfo{}
 			if err := json.Unmarshal([]byte(ext.Info), &pdInfo); err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("unable to decode external %s JSON (%q): {{err}}", contactPagerDutyAttr, ext.Info), err)
+				return nil, fmt.Errorf("unable to decode external %s JSON (%q): %w", contactPagerDutyAttr, ext.Info, err)
 			}
 
 			pdContacts = append(pdContacts, map[string]interface{}{
@@ -1175,7 +1177,7 @@ func contactGroupSlackToState(cg *api.ContactGroup) ([]interface{}, error) {
 		case circonusMethodSlack:
 			slackInfo := contactSlackInfo{}
 			if err := json.Unmarshal([]byte(ext.Info), &slackInfo); err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("unable to decode external %s JSON (%q): {{err}}", contactSlackAttr, ext.Info), err)
+				return nil, fmt.Errorf("unable to decode external %s JSON (%q): %w", contactSlackAttr, ext.Info, err)
 			}
 
 			slackContacts = append(slackContacts, map[string]interface{}{
@@ -1223,7 +1225,7 @@ func contactGroupVictorOpsToState(cg *api.ContactGroup) ([]interface{}, error) {
 		case circonusMethodVictorOps:
 			victorOpsInfo := contactVictorOpsInfo{}
 			if err := json.Unmarshal([]byte(ext.Info), &victorOpsInfo); err != nil {
-				return nil, errwrap.Wrapf(fmt.Sprintf("unable to decode external %s JSON (%q): {{err}}", contactVictorOpsInfoAttr, ext.Info), err)
+				return nil, fmt.Errorf("unable to decode external %s JSON (%q): %w", contactVictorOpsInfoAttr, ext.Info, err)
 			}
 
 			victorOpsContacts = append(victorOpsContacts, map[string]interface{}{

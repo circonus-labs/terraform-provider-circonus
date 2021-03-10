@@ -6,9 +6,8 @@ import (
 	"strconv"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -220,7 +219,7 @@ func checkAPIToStateSMTP(c *circonusCheck, d *schema.ResourceData) error {
 	}
 
 	if err := d.Set(checkSMTPAttr, schema.NewSet(hashCheckSMTP, []interface{}{smtpConfig})); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to store check %q attribute: {{err}}", checkSMTPAttr), err)
+		return fmt.Errorf("unable to store check %q attribute: %w", checkSMTPAttr, err)
 	}
 
 	return nil

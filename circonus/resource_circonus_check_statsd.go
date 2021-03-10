@@ -3,8 +3,7 @@ package circonus
 import (
 	"fmt"
 
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -41,7 +40,7 @@ func checkAPIToStateStatsd(c *circonusCheck, d *schema.ResourceData) error {
 	statsdConfig[string(checkStatsdSourceIPAttr)] = c.Target
 
 	if err := d.Set(checkStatsdAttr, []interface{}{statsdConfig}); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkStatsdAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkStatsdAttr, err)
 	}
 
 	return nil

@@ -9,8 +9,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceRuleSetGroup() *schema.Resource {
@@ -140,11 +139,11 @@ func ruleSetGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	rsg := newRuleSetGroup()
 
 	if err := rsg.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing rule set group schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing rule set group schema during create: %w", err)
 	}
 
 	if err := rsg.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating rule set group: {{err}}", err)
+		return fmt.Errorf("error creating rule set group: %w", err)
 	}
 
 	d.SetId(rsg.CID)
@@ -241,7 +240,7 @@ func ruleSetGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	rs.CID = d.Id()
 
 	if err := rs.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update rule set group %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update rule set group %q: %w", d.Id(), err)
 	}
 
 	return ruleSetGroupRead(d, meta)
@@ -252,7 +251,7 @@ func ruleSetGroupDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteRuleSetGroupByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete rule set group %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete rule set group %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -495,7 +494,7 @@ func (rsg *circonusRuleSetGroup) Create(ctxt *providerContext) error {
 func (rsg *circonusRuleSetGroup) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateRuleSetGroup(&rsg.RuleSetGroup)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update rule set group %s: {{err}}", rsg.CID), err)
+		return fmt.Errorf("Unable to update rule set group %s: %w", rsg.CID, err)
 	}
 
 	return nil

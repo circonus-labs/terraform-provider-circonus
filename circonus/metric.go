@@ -7,10 +7,9 @@ import (
 	"fmt"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/errwrap"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
 	uuid "github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type circonusMetric struct {
@@ -102,7 +101,7 @@ func metricActiveToAPIStatus(active bool) string {
 func newMetricID() (string, error) {
 	id, err := uuid.GenerateUUID()
 	if err != nil {
-		return "", errwrap.Wrapf("metric ID creation failed: {{err}}", err)
+		return "", fmt.Errorf("metric ID creation failed: %w", err)
 	}
 
 	return id, nil

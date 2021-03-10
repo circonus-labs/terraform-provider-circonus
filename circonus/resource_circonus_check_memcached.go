@@ -6,9 +6,8 @@ import (
 	"strconv"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -48,13 +47,13 @@ func checkAPIToStateMemcached(c *circonusCheck, d *schema.ResourceData) error {
 
 	port, err := strconv.ParseInt(c.Config[config.Port], 10, 64)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to parse %s: {{err}}", config.Port), err)
+		return fmt.Errorf("unable to parse %s: %w", config.Port, err)
 	}
 
 	memcachedConfig[string(checkMemcachedPortAttr)] = int(port)
 
 	if err := d.Set(checkMemcachedAttr, schema.NewSet(hashCheckMemcached, []interface{}{memcachedConfig})); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkMemcachedAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkMemcachedAttr, err)
 	}
 
 	return nil

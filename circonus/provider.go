@@ -7,9 +7,7 @@ import (
 	"os"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -62,7 +60,7 @@ type providerContext struct {
 }
 
 // Provider returns a terraform.ResourceProvider.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			providerAPIURLAttr: {
@@ -105,7 +103,7 @@ func Provider() terraform.ResourceProvider {
 		},
 	}
 
-	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) { //nolint
 		terraformVersion := p.TerraformVersion
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
@@ -145,7 +143,7 @@ func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, e
 
 	client, err := api.NewAPI(config)
 	if err != nil {
-		return nil, errwrap.Wrapf("Error initializing Circonus: %s", err)
+		return nil, fmt.Errorf("Error initializing Circonus: %w", err)
 	}
 
 	client.EnableExponentialBackoff()

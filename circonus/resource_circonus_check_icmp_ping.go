@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -71,17 +70,17 @@ func checkAPIToStateICMPPing(c *circonusCheck, d *schema.ResourceData) error {
 
 	availNeeded, err := strconv.ParseFloat(c.Config[config.AvailNeeded], 64)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to parse %s: {{err}}", config.AvailNeeded), err)
+		return fmt.Errorf("unable to parse %s: %w", config.AvailNeeded, err)
 	}
 
 	count, err := strconv.ParseInt(c.Config[config.Count], 10, 64)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to parse %s: {{err}}", config.Count), err)
+		return fmt.Errorf("unable to parse %s: %w", config.Count, err)
 	}
 
 	interval, err := time.ParseDuration(fmt.Sprintf("%sms", c.Config[config.Interval]))
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to parse %s: {{err}}", config.Interval), err)
+		return fmt.Errorf("unable to parse %s: %w", config.Interval, err)
 	}
 
 	icmpPingConfig[string(checkICMPPingAvailabilityAttr)] = availNeeded
@@ -89,7 +88,7 @@ func checkAPIToStateICMPPing(c *circonusCheck, d *schema.ResourceData) error {
 	icmpPingConfig[string(checkICMPPingIntervalAttr)] = interval.String()
 
 	if err := d.Set(checkICMPPingAttr, schema.NewSet(hashCheckICMPPing, []interface{}{icmpPingConfig})); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkICMPPingAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkICMPPingAttr, err)
 	}
 
 	return nil

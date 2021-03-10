@@ -7,8 +7,9 @@ package circonus
 // `circonus_metric` resource if no value was set.
 
 import (
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -37,7 +38,7 @@ func resourceMetric() *schema.Resource {
 		Delete: metricDelete,
 		Exists: metricExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: convertToHelperSchema(metricDescriptions, map[schemaAttr]*schema.Schema{
@@ -68,16 +69,16 @@ func metricCreate(d *schema.ResourceData, meta interface{}) error {
 		var err error
 		id, err = newMetricID()
 		if err != nil {
-			return errwrap.Wrapf("metric ID creation failed: {{err}}", err)
+			return fmt.Errorf("metric ID creation failed: %w", err)
 		}
 	}
 
 	if err := m.ParseConfig(id, d); err != nil {
-		return errwrap.Wrapf("error parsing metric schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing metric schema during create: %w", err)
 	}
 
 	if err := m.Create(d); err != nil {
-		return errwrap.Wrapf("error creating metric: {{err}}", err)
+		return fmt.Errorf("error creating metric: %w", err)
 	}
 
 	return metricRead(d, meta)
@@ -87,11 +88,11 @@ func metricRead(d *schema.ResourceData, meta interface{}) error {
 	m := newMetric()
 
 	if err := m.ParseConfig(d.Id(), d); err != nil {
-		return errwrap.Wrapf("error parsing metric schema during read: {{err}}", err)
+		return fmt.Errorf("error parsing metric schema during read: %w", err)
 	}
 
 	if err := m.SaveState(d); err != nil {
-		return errwrap.Wrapf("error saving metric during read: {{err}}", err)
+		return fmt.Errorf("error saving metric during read: %w", err)
 	}
 
 	return nil
@@ -101,11 +102,11 @@ func metricUpdate(d *schema.ResourceData, meta interface{}) error {
 	m := newMetric()
 
 	if err := m.ParseConfig(d.Id(), d); err != nil {
-		return errwrap.Wrapf("error parsing metric schema during update: {{err}}", err)
+		return fmt.Errorf("error parsing metric schema during update: %w", err)
 	}
 
 	if err := m.Update(d); err != nil {
-		return errwrap.Wrapf("error updating metric: {{err}}", err)
+		return fmt.Errorf("error updating metric: %w", err)
 	}
 
 	return nil
