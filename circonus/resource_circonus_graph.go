@@ -260,7 +260,6 @@ func resourceGraph() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validateRegexp(graphMetricNameAttr, `.+`),
-							// ConflictsWith: makeConflictsWith(graphMetricCAQLAttr, graphMetricSearchAttr),
 						},
 
 						graphMetricColorAttr: {
@@ -733,7 +732,7 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 
 	if listRaw, found := d.GetOk(graphMetricAttr); found {
 		metricList := listRaw.([]interface{})
-		for _, metricListElem := range metricList {
+		for metricIdx, metricListElem := range metricList {
 			metricAttrs := newInterfaceMap(metricListElem.(map[string]interface{}))
 			datapoint := api.GraphDatapoint{}
 
@@ -761,15 +760,6 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 					datapoint.Axis = "r"
 				default:
 					return fmt.Errorf("PROVIDER BUG: Unsupported axis attribute %q: %q", graphMetricAxisAttr, v.(string))
-				}
-			}
-
-			if v, found := metricAttrs[graphMetricCheckAttr]; found {
-				re := regexp.MustCompile(config.CheckCIDRegex)
-				matches := re.FindStringSubmatch(v.(string))
-				if len(matches) == 3 {
-					checkID, _ := strconv.ParseUint(matches[2], 10, 64)
-					datapoint.CheckID = uint(checkID)
 				}
 			}
 
@@ -811,37 +801,6 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 				datapoint.LegendFormula = nil
 			}
 
-			if v, found := metricAttrs[graphMetricNameAttr]; found {
-				s := v.(string)
-				if s != "" {
-					s = strings.TrimSpace(s)
-					datapoint.MetricName = s
-				}
-			}
-
-			if v, found := metricAttrs[graphMetricCAQLAttr]; found {
-				s := v.(string)
-				if s != "" {
-					s = strings.TrimSpace(s)
-					datapoint.CAQL = &s
-				} else {
-					datapoint.CAQL = nil
-				}
-			} else {
-				datapoint.CAQL = nil
-			}
-
-			if v, found := metricAttrs[graphMetricSearchAttr]; found {
-				s := v.(string)
-				if s != "" {
-					datapoint.Search = &s
-				} else {
-					datapoint.Search = nil
-				}
-			} else {
-				datapoint.Search = nil
-			}
-
 			if v, found := metricAttrs[graphMetricMetricTypeAttr]; found {
 				s := v.(string)
 				if s != "" {
@@ -863,6 +822,80 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 					u64, _ := strconv.ParseUint(s, 10, 64)
 					u := uint(u64)
 					datapoint.Stack = &u
+				}
+			}
+
+			//
+			// metric locator can be ONE of the following:
+			//   check id + metric name
+			//   caql query
+			//   search expression
+			//
+			// ConflictWith no longer works on non-list schema elements,
+			// so we have to enforce it here.
+			caql := ""
+			search := ""
+			check := uint(0)
+			name := ""
+
+			if v, found := metricAttrs[graphMetricNameAttr]; found {
+				s := strings.TrimSpace(v.(string))
+				if s != "" {
+					name = s
+				}
+			}
+			if v, found := metricAttrs[graphMetricCheckAttr]; found {
+				re := regexp.MustCompile(config.CheckCIDRegex)
+				matches := re.FindStringSubmatch(v.(string))
+				if len(matches) == 3 {
+					checkID, _ := strconv.ParseUint(matches[2], 10, 64)
+					check = uint(checkID)
+				}
+			}
+
+			if v, found := metricAttrs[graphMetricCAQLAttr]; found {
+				s := strings.TrimSpace(v.(string))
+				if s != "" {
+					caql = s
+				}
+			}
+
+			if v, found := metricAttrs[graphMetricSearchAttr]; found {
+				s := strings.TrimSpace(v.(string))
+				if s != "" {
+					search = s
+				}
+			}
+
+			metricLocatorError := fmt.Errorf("metric[%d] name=%q: locator issue - %q(%v) + %q(%v) OR %q(%v) OR %q(%v)",
+				metricIdx, datapoint.Name,
+				graphMetricCheckAttr, check,
+				graphMetricNameAttr, name,
+				graphMetricCAQLAttr, caql,
+				graphMetricSearchAttr, search)
+			datapoint.CAQL = nil
+			datapoint.Search = nil
+
+			switch {
+			case check == 0 && name != "":
+				return fmt.Errorf("metric[%d] name=%q: locator using %q requires %q", metricIdx, datapoint.Name, graphMetricNameAttr, graphMetricCheckAttr)
+			case check > 0 && name == "":
+				return fmt.Errorf("metric[%d] name=%q: locator using %q requires %q", metricIdx, datapoint.Name, graphMetricCheckAttr, graphMetricNameAttr)
+			case check > 0 && (caql != "" || search != ""):
+				return metricLocatorError
+			case caql != "" && (check != 0 || name != "" || search != ""):
+				return metricLocatorError
+			case search != "" && (check != 0 || name != "" || caql != ""):
+				return metricLocatorError
+			default:
+				switch {
+				case check > 0:
+					datapoint.CheckID = check
+					datapoint.MetricName = name
+				case caql != "":
+					datapoint.CAQL = &caql
+				case search != "":
+					datapoint.Search = &search
 				}
 			}
 
