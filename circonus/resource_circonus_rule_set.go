@@ -360,7 +360,7 @@ func resourceRuleSet() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validateRegexp(ruleSetMetricNameAttr, `^[\S]+$`),
+				ValidateFunc: validateRegexp(ruleSetMetricNameAttr, `^.+$`),
 			},
 			ruleSetMetricPatternAttr: {
 				Type:         schema.TypeString,
