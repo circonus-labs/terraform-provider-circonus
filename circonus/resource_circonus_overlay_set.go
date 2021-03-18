@@ -6,8 +6,7 @@ import (
 	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -28,7 +27,7 @@ func resourceOverlaySet() *schema.Resource {
 		Delete: overlaySetDelete,
 		Exists: overlaySetExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"graph_cid": {
@@ -109,11 +108,11 @@ func overlaySetCreate(d *schema.ResourceData, meta interface{}) error {
 	o := newOverlaySet()
 
 	if err := o.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing graph schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing graph schema during create: %w", err)
 	}
 
 	if err := o.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating graph: {{err}}", err)
+		return fmt.Errorf("error creating graph: %w", err)
 	}
 
 	return overlaySetRead(d, meta)
@@ -212,7 +211,7 @@ func overlaySetUpdate(d *schema.ResourceData, meta interface{}) error {
 	g.OverlaySetID = d.Id()
 
 	if err := g.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update graph %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update graph %q: %w", d.Id(), err)
 	}
 
 	return overlaySetRead(d, meta)
@@ -227,7 +226,7 @@ func overlaySetDelete(d *schema.ResourceData, meta interface{}) error {
 		var graph *api.Graph
 		var err error
 		if graph, err = ctxt.client.FetchGraph(api.CIDType(&s)); err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("unable to delete overlay set %q: {{err}}", d.Id()), err)
+			return fmt.Errorf("unable to delete overlay set %q: %w", d.Id(), err)
 		}
 
 		if graph.OverlaySets != nil {
@@ -235,7 +234,7 @@ func overlaySetDelete(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		if _, err := ctxt.client.UpdateGraph(graph); err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("unable to delete overlay set %q: {{err}}", d.Id()), err)
+			return fmt.Errorf("unable to delete overlay set %q: %w", d.Id(), err)
 		}
 
 		d.SetId("")

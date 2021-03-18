@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckPostgreSQL_basic(t *testing.T) {
@@ -21,10 +21,10 @@ func TestAccCirconusCheckPostgreSQL_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.1831600166.dsn", "user=postgres host=pg1.example.org port=5432 password=12345 sslmode=require"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.1831600166.query", `SELECT 'tables', sum(n_tup_ins) as inserts, sum(n_tup_upd) as updates, sum(n_tup_del) as deletes, sum(idx_scan)  as index_scans, sum(seq_scan) as seq_scans, sum(idx_tup_fetch) as index_tup_fetch, sum(seq_tup_read) as seq_tup_read from pg_stat_all_tables`),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.0.dsn", "user=postgres host=pg1.example.org port=5432 password=12345 sslmode=require"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.0.query", `SELECT 'tables', sum(n_tup_ins) as inserts, sum(n_tup_upd) as updates, sum(n_tup_del) as deletes, sum(idx_scan)  as index_scans, sum(seq_scan) as seq_scans, sum(idx_tup_fetch) as index_tup_fetch, sum(seq_tup_read) as seq_tup_read from pg_stat_all_tables`),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.#", "7"),
@@ -51,8 +51,8 @@ func TestAccCirconusCheckPostgreSQL_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "metric.5.type", "numeric"),
 
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.0", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "tags.1", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "target", "pgdb.example.org"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "type", "postgres"),
 				),

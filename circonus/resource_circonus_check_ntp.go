@@ -6,9 +6,8 @@ import (
 	"strconv"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -58,7 +57,7 @@ func checkAPIToStateNTP(c *circonusCheck, d *schema.ResourceData) error {
 	}
 
 	if err := d.Set(checkNTPAttr, schema.NewSet(hashCheckNTP, []interface{}{ntpConfig})); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkNTPAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkNTPAttr, err)
 	}
 
 	return nil

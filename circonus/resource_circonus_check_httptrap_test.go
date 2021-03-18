@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
@@ -21,10 +21,10 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "collector.1263561585.id", "/broker/35"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "collector.0.id", "/broker/35"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.async_metrics", "false"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.2067899660.secret", "12345"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.0.async_metrics", "false"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.0.secret", "12345"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.consul", "notes", "Check to receive consul server telemetry"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "period", "60s"),
@@ -43,9 +43,9 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.consul", "metric.2.type", "histogram"),
 
 					resource.TestCheckResourceAttr("circonus_check.consul", "tags.#", "3"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "tags.3728194417", "app:consul"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "tags.1401442048", "lifecycle:unittest"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "tags.2058715988", "source:consul"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "tags.0", "app:consul"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "tags.1", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "tags.2", "source:consul"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "target", "consul-server-10-151-2-8"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "type", "httptrap"),
 				),

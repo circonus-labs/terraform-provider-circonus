@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckSNMP_basic(t *testing.T) {
@@ -24,7 +24,7 @@ func TestAccCirconusCheckSNMP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.snmp", "active", "true"),
 					resource.TestMatchResourceAttr("circonus_check.snmp", "check_id", regexp.MustCompile(config.CheckCIDRegex)),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.snmp", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.snmp", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "metric.#", "3"),

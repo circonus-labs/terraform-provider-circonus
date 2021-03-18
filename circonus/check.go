@@ -6,7 +6,6 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
 )
 
 // The circonusCheck type is the backing store of the `circonus_check` resource.
@@ -97,7 +96,7 @@ func (c *circonusCheck) Create(ctxt *providerContext) error {
 func (c *circonusCheck) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateCheckBundle(&c.CheckBundle)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update check bundle %s: {{err}}", c.CID), err)
+		return fmt.Errorf("Unable to update check bundle %s: %w", c.CID, err)
 	}
 
 	return nil

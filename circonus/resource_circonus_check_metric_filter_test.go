@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckMetricFilter_basic(t *testing.T) {
@@ -30,11 +30,11 @@ func TestAccCirconusCheckMetricFilter_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.metric_filter", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.979664239.availability", "100"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.979664239.count", "5"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.979664239.interval", "500ms"),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.0.availability", "100"),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.0.count", "5"),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.0.interval", "500ms"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "metric_filter.#", "3"),
@@ -47,8 +47,8 @@ func TestAccCirconusCheckMetricFilter_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "metric_filter.2.regex", ".*"),
 
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "tags.0", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "tags.1", "lifecycle:unittest"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "target", target),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "type", "ping_icmp"),
 				),

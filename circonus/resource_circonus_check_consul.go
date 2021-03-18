@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -194,7 +193,7 @@ func checkAPIToStateConsul(c *circonusCheck, d *schema.ResourceData) error {
 	if v, found := c.Config[config.URL]; found {
 		u, err := url.Parse(v)
 		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("unable to parse %q from config: {{err}}", config.URL), err)
+			return fmt.Errorf("unable to parse %q from config: %w", config.URL, err)
 		}
 
 		queryArgs := u.Query()
@@ -298,7 +297,7 @@ func checkAPIToStateConsul(c *circonusCheck, d *schema.ResourceData) error {
 	}
 
 	if err := d.Set(checkConsulAttr, []interface{}{consulConfig}); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store check %q attribute: {{err}}", checkConsulAttr), err)
+		return fmt.Errorf("Unable to store check %q attribute: %w", checkConsulAttr, err)
 	}
 
 	return nil
@@ -348,7 +347,7 @@ func checkConfigToAPIConsul(c *circonusCheck, l interfaceList) error {
 			httpAddr := consulConfig[checkConsulHTTPAddrAttr].(string)
 			checkURL, err := url.Parse(httpAddr)
 			if err != nil {
-				return errwrap.Wrapf(fmt.Sprintf("Unable to parse %s's attribute %q: {{err}}", checkConsulAttr, httpAddr), err)
+				return fmt.Errorf("Unable to parse %s's attribute %q: %w", checkConsulAttr, httpAddr, err)
 			}
 
 			hostInfo := strings.SplitN(checkURL.Host, ":", 2)

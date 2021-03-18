@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccCirconusCheckRedis_basic(t *testing.T) {
@@ -21,7 +21,7 @@ func TestAccCirconusCheckRedis_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.redis", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.redis", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.redis", "collector.2388330941.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.redis", "collector.0.id", "/broker/1"),
 					resource.TestCheckResourceAttr("circonus_check.redis", "redis.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.redis", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.redis", "notes", "Check to grab redis metrics"),

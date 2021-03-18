@@ -10,8 +10,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -128,13 +127,15 @@ var ruleSetIfThenDescriptions = attrDescrs{
 }
 
 func resourceRuleSet() *schema.Resource {
-	makeConflictsWith := func(in ...schemaAttr) []string {
-		out := make([]string, 0, len(in))
-		for _, attr := range in {
-			out = append(out, string(ruleSetIfAttr)+"."+string(ruleSetValueAttr)+"."+string(attr))
+	/*
+		makeConflictsWith := func(in ...schemaAttr) []string {
+			out := make([]string, 0, len(in))
+			for _, attr := range in {
+				out = append(out, string(ruleSetIfAttr)+"."+string(ruleSetValueAttr)+"."+string(attr))
+			}
+			return out
 		}
-		return out
-	}
+	*/
 
 	return &schema.Resource{
 		Create: ruleSetCreate,
@@ -203,63 +204,63 @@ func resourceRuleSet() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: convertToHelperSchema(ruleSetIfValueDescriptions, map[schemaAttr]*schema.Schema{
 									ruleSetAbsentAttr: {
-										Type:          schema.TypeString, // Applies to text or numeric metrics
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetAbsentAttr, "^[0-9]+$"),
-										ConflictsWith: makeConflictsWith(ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										Type:         schema.TypeString, // Applies to text or numeric metrics
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetAbsentAttr, "^[0-9]+$"),
+										// ConflictsWith: makeConflictsWith(ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetChangedAttr: {
-										Type:          schema.TypeString, // Applies to text or numeric metrics
-										Optional:      true,
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										Type:     schema.TypeString, // Applies to text or numeric metrics
+										Optional: true,
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetContainsAttr: {
-										Type:          schema.TypeString, // Applies to text metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetContainsAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										Type:         schema.TypeString, // Applies to text metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetContainsAttr, `.+`),
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMatchAttr: {
-										Type:          schema.TypeString, // Applies to text metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetMatchAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										Type:         schema.TypeString, // Applies to text metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetMatchAttr, `.+`),
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetNotMatchAttr: {
-										Type:          schema.TypeString, // Applies to text metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetNotMatchAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
+										Type:         schema.TypeString, // Applies to text metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetNotMatchAttr, `.+`),
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMinValueAttr: {
-										Type:          schema.TypeString, // Applies to numeric metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetMinValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr),
+										Type:         schema.TypeString, // Applies to numeric metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetMinValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr),
 									},
 									ruleSetNotContainAttr: {
-										Type:          schema.TypeString, // Applies to text metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetNotContainAttr, `.+`),
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetOverAttr),
+										Type:         schema.TypeString, // Applies to text metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetNotContainAttr, `.+`),
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMaxValueAttr: {
-										Type:          schema.TypeString, // Applies to numeric metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetMaxValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
+										Type:         schema.TypeString, // Applies to numeric metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetMaxValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
 									},
 									ruleSetEqValueAttr: {
-										Type:          schema.TypeString, // Applies to numeric metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
+										Type:         schema.TypeString, // Applies to numeric metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
 									},
 									ruleSetNotEqValueAttr: {
-										Type:          schema.TypeString, // Applies to numeric metrics only
-										Optional:      true,
-										ValidateFunc:  validateRegexp(ruleSetNotEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotContainAttr),
+										Type:         schema.TypeString, // Applies to numeric metrics only
+										Optional:     true,
+										ValidateFunc: validateRegexp(ruleSetNotEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotContainAttr),
 									},
 									ruleSetOverAttr: {
 										Type:     schema.TypeList,
@@ -268,7 +269,7 @@ func resourceRuleSet() *schema.Resource {
 										// ruleSetOverAttr is only compatible with checks of
 										// numeric type.  NOTE: It may be premature to conflict with
 										// ruleSetChangedAttr.
-										ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr),
+										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr),
 										Elem: &schema.Resource{
 											Schema: convertToHelperSchema(ruleSetIfValueOverDescriptions, map[schemaAttr]*schema.Schema{
 												ruleSetLastAttr: {
@@ -388,11 +389,11 @@ func ruleSetCreate(d *schema.ResourceData, meta interface{}) error {
 	rs := newRuleSet()
 
 	if err := rs.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing rule set schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing rule set schema during create: %w", err)
 	}
 
 	if err := rs.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating rule set: {{err}}", err)
+		return fmt.Errorf("error creating rule set: %w", err)
 	}
 
 	d.SetId(rs.CID)
@@ -509,7 +510,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("%s", s)
 
 	if err := d.Set(ruleSetIfAttr, ifRules); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetIfAttr), err)
+		return fmt.Errorf("Unable to store rule set %q attribute: %w", ruleSetIfAttr, err)
 	}
 
 	_ = d.Set(ruleSetLinkAttr, indirect(rs.Link))
@@ -529,7 +530,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(ruleSetParentAttr, indirect(rs.Parent))
 
 	if err := d.Set(ruleSetTagsAttr, tagsToState(apiToTags(rs.Tags))); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store rule set %q attribute: {{err}}", ruleSetTagsAttr), err)
+		return fmt.Errorf("Unable to store rule set %q attribute: %w", ruleSetTagsAttr, err)
 	}
 
 	return nil
@@ -546,7 +547,7 @@ func ruleSetUpdate(d *schema.ResourceData, meta interface{}) error {
 	rs.CID = d.Id()
 
 	if err := rs.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update rule set %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update rule set %q: %w", d.Id(), err)
 	}
 
 	return ruleSetRead(d, meta)
@@ -557,7 +558,7 @@ func ruleSetDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteRuleSetByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete rule set %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete rule set %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -665,7 +666,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						if s != "" {
 							d, err := time.ParseDuration(v.(string) + "s")
 							if err != nil {
-								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetAfterAttr, v.(string)), err)
+								return fmt.Errorf("unable to parse %q duration %q: %w", ruleSetAfterAttr, v.(string), err)
 							}
 							rule.Wait = uint(d.Minutes())
 						}
@@ -797,14 +798,14 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						if v, found := overAttrs[ruleSetLastAttr]; found && v != "" {
 							i, err := strconv.Atoi(v.(string))
 							if err != nil {
-								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetLastAttr, v.(string)), err)
+								return fmt.Errorf("unable to parse %q duration %q: %w", ruleSetLastAttr, v.(string), err)
 							}
 							windowDuration = uint(i)
 						}
 						if v, found := overAttrs[ruleSetAtLeastAttr]; found && v != "" {
 							i, err := strconv.Atoi(v.(string))
 							if err != nil {
-								return errwrap.Wrapf(fmt.Sprintf("unable to parse %q duration %q: {{err}}", ruleSetAtLeastAttr, v.(string)), err)
+								return fmt.Errorf("unable to parse %q duration %q: %w", ruleSetAtLeastAttr, v.(string), err)
 							}
 							windowMinDuration = uint(i)
 						}
@@ -854,7 +855,7 @@ func (rs *circonusRuleSet) Create(ctxt *providerContext) error {
 func (rs *circonusRuleSet) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateRuleSet(&rs.RuleSet)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update rule set %s: {{err}}", rs.CID), err)
+		return fmt.Errorf("Unable to update rule set %s: %w", rs.CID, err)
 	}
 
 	return nil

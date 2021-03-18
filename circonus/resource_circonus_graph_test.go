@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 var (
@@ -70,8 +70,8 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.active", "true"),
 
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.0", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.1", "lifecycle:unittest"),
 				),
 			},
 			{ // force modification of graph description, test updating the graph
@@ -122,8 +122,8 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "metric.2.active", "true"),
 
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.1401442048", "lifecycle:unittest"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.0", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "tags.1", "lifecycle:unittest"),
 				),
 			},
 		},

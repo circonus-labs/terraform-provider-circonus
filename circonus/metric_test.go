@@ -1,8 +1,6 @@
 package circonus
 
-import (
-	"testing"
-)
+import "testing"
 
 func Test_MetricChecksum(t *testing.T) {
 	m := interfaceMap{

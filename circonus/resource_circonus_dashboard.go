@@ -7,9 +7,8 @@ import (
 	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDashboard() *schema.Resource {
@@ -20,7 +19,7 @@ func resourceDashboard() *schema.Resource {
 		Delete: dashboardDelete,
 		Exists: dashboardExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"title": {
@@ -677,11 +676,11 @@ func dashboardCreate(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 	dash := newDashboard()
 	if err := dash.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing graph schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing graph schema during create: %w", err)
 	}
 
 	if err := dash.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating dashboard: {{err}}", err)
+		return fmt.Errorf("error creating dashboard: %w", err)
 	}
 
 	d.SetId(dash.CID)
@@ -887,7 +886,7 @@ func dashboardUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	dash.CID = d.Id()
 	if err := dash.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update dashboard %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update dashboard %q: %w", d.Id(), err)
 	}
 
 	return dashboardRead(d, meta)
@@ -898,7 +897,7 @@ func dashboardDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteDashboardByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete dashboard %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete dashboard %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -1372,7 +1371,7 @@ func (dash *circonusDashboard) Create(ctxt *providerContext) error {
 func (dash *circonusDashboard) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateDashboard(&dash.Dashboard)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update dashboard %s: {{err}}", dash.CID), err)
+		return fmt.Errorf("Unable to update dashboard %s: %w", dash.CID, err)
 	}
 
 	return nil

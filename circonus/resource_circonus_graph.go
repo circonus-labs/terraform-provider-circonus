@@ -8,8 +8,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -130,13 +129,13 @@ var graphMetricClusterDescriptions = attrDescrs{
 // }
 
 func resourceGraph() *schema.Resource {
-	makeConflictsWith := func(in ...schemaAttr) []string {
-		out := make([]string, 0, len(in))
-		for _, attr := range in {
-			out = append(out, string(graphMetricAttr)+"."+string(attr))
-		}
-		return out
-	}
+	// makeConflictsWith := func(in ...schemaAttr) []string {
+	// 	out := make([]string, 0, len(in))
+	// 	for _, attr := range in {
+	// 		out = append(out, string(graphMetricAttr)+"."+string(attr))
+	// 	}
+	// 	return out
+	// }
 
 	return &schema.Resource{
 		Create: graphCreate,
@@ -145,7 +144,7 @@ func resourceGraph() *schema.Resource {
 		Delete: graphDelete,
 		Exists: graphExists,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: convertToHelperSchema(graphDescriptions, map[schemaAttr]*schema.Schema{
@@ -235,6 +234,7 @@ func resourceGraph() *schema.Resource {
 							Default:      "left",
 							ValidateFunc: validateStringIn(graphMetricAxisAttr, validAxisAttrs),
 						},
+
 						graphMetricCAQLAttr: {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -242,20 +242,26 @@ func resourceGraph() *schema.Resource {
 							StateFunc: func(val interface{}) string {
 								return strings.TrimSpace(val.(string))
 							},
-							ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricSearchAttr),
+							// ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricSearchAttr),
 						},
 						graphMetricSearchAttr: {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ValidateFunc:  validateRegexp(graphMetricSearchAttr, `.+`),
-							ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricCAQLAttr),
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphMetricSearchAttr, `.+`),
+							// ConflictsWith: makeConflictsWith(graphMetricCheckAttr, graphMetricNameAttr, graphMetricCAQLAttr),
 						},
 						graphMetricCheckAttr: {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ValidateFunc:  validateRegexp(graphMetricCheckAttr, config.CheckCIDRegex),
-							ConflictsWith: makeConflictsWith(graphMetricCAQLAttr, graphMetricSearchAttr),
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphMetricCheckAttr, config.CheckCIDRegex),
+							// ConflictsWith: makeConflictsWith(graphMetricCAQLAttr, graphMetricSearchAttr),
 						},
+						graphMetricNameAttr: {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateRegexp(graphMetricNameAttr, `.+`),
+						},
+
 						graphMetricColorAttr: {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -286,11 +292,6 @@ func resourceGraph() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validateRegexp(graphMetricHumanNameAttr, `.+`),
-						},
-						graphMetricNameAttr: {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validateRegexp(graphMetricNameAttr, `.+`),
 						},
 						graphMetricStackAttr: {
 							Type:         schema.TypeString,
@@ -356,11 +357,11 @@ func graphCreate(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 	g := newGraph()
 	if err := g.ParseConfig(d); err != nil {
-		return errwrap.Wrapf("error parsing graph schema during create: {{err}}", err)
+		return fmt.Errorf("error parsing graph schema during create: %w", err)
 	}
 
 	if err := g.Create(ctxt); err != nil {
-		return errwrap.Wrapf("error creating graph: {{err}}", err)
+		return fmt.Errorf("error creating graph: %w", err)
 	}
 
 	d.SetId(g.CID)
@@ -548,7 +549,7 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(graphDescriptionAttr, g.Description)
 
 	if err := d.Set(graphLeftAttr, leftAxisMap); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphLeftAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphLeftAttr, err)
 	}
 
 	_ = d.Set(graphLineStyleAttr, g.LineStyle)
@@ -556,21 +557,21 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set(graphNotesAttr, indirect(g.Notes))
 
 	if err := d.Set(graphRightAttr, rightAxisMap); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphRightAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphRightAttr, err)
 	}
 
 	if err := d.Set(graphMetricAttr, metrics); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphMetricAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphMetricAttr, err)
 	}
 
 	if err := d.Set(graphMetricClusterAttr, metricClusters); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphMetricClusterAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphMetricClusterAttr, err)
 	}
 
 	_ = d.Set(graphStyleAttr, g.Style)
 
 	if err := d.Set(graphTagsAttr, tagsToState(apiToTags(g.Tags))); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store graph %q attribute: {{err}}", graphTagsAttr), err)
+		return fmt.Errorf("Unable to store graph %q attribute: %w", graphTagsAttr, err)
 	}
 
 	guides := make([]interface{}, 0, len(g.Guides))
@@ -609,7 +610,7 @@ func graphUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	g.CID = d.Id()
 	if err := g.Update(ctxt); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to update graph %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to update graph %q: %w", d.Id(), err)
 	}
 
 	return graphRead(d, meta)
@@ -620,7 +621,7 @@ func graphDelete(d *schema.ResourceData, meta interface{}) error {
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteGraphByCID(api.CIDType(&cid)); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("unable to delete graph %q: {{err}}", d.Id()), err)
+		return fmt.Errorf("unable to delete graph %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -731,7 +732,7 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 
 	if listRaw, found := d.GetOk(graphMetricAttr); found {
 		metricList := listRaw.([]interface{})
-		for _, metricListElem := range metricList {
+		for metricIdx, metricListElem := range metricList {
 			metricAttrs := newInterfaceMap(metricListElem.(map[string]interface{}))
 			datapoint := api.GraphDatapoint{}
 
@@ -759,15 +760,6 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 					datapoint.Axis = "r"
 				default:
 					return fmt.Errorf("PROVIDER BUG: Unsupported axis attribute %q: %q", graphMetricAxisAttr, v.(string))
-				}
-			}
-
-			if v, found := metricAttrs[graphMetricCheckAttr]; found {
-				re := regexp.MustCompile(config.CheckCIDRegex)
-				matches := re.FindStringSubmatch(v.(string))
-				if len(matches) == 3 {
-					checkID, _ := strconv.ParseUint(matches[2], 10, 64)
-					datapoint.CheckID = uint(checkID)
 				}
 			}
 
@@ -809,37 +801,6 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 				datapoint.LegendFormula = nil
 			}
 
-			if v, found := metricAttrs[graphMetricNameAttr]; found {
-				s := v.(string)
-				if s != "" {
-					s = strings.TrimSpace(s)
-					datapoint.MetricName = s
-				}
-			}
-
-			if v, found := metricAttrs[graphMetricCAQLAttr]; found {
-				s := v.(string)
-				if s != "" {
-					s = strings.TrimSpace(s)
-					datapoint.CAQL = &s
-				} else {
-					datapoint.CAQL = nil
-				}
-			} else {
-				datapoint.CAQL = nil
-			}
-
-			if v, found := metricAttrs[graphMetricSearchAttr]; found {
-				s := v.(string)
-				if s != "" {
-					datapoint.Search = &s
-				} else {
-					datapoint.Search = nil
-				}
-			} else {
-				datapoint.Search = nil
-			}
-
 			if v, found := metricAttrs[graphMetricMetricTypeAttr]; found {
 				s := v.(string)
 				if s != "" {
@@ -861,6 +822,80 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 					u64, _ := strconv.ParseUint(s, 10, 64)
 					u := uint(u64)
 					datapoint.Stack = &u
+				}
+			}
+
+			//
+			// metric locator can be ONE of the following:
+			//   check id + metric name
+			//   caql query
+			//   search expression
+			//
+			// ConflictWith no longer works on non-list schema elements,
+			// so we have to enforce it here.
+			caql := ""
+			search := ""
+			check := uint(0)
+			name := ""
+
+			if v, found := metricAttrs[graphMetricNameAttr]; found {
+				s := strings.TrimSpace(v.(string))
+				if s != "" {
+					name = s
+				}
+			}
+			if v, found := metricAttrs[graphMetricCheckAttr]; found {
+				re := regexp.MustCompile(config.CheckCIDRegex)
+				matches := re.FindStringSubmatch(v.(string))
+				if len(matches) == 3 {
+					checkID, _ := strconv.ParseUint(matches[2], 10, 64)
+					check = uint(checkID)
+				}
+			}
+
+			if v, found := metricAttrs[graphMetricCAQLAttr]; found {
+				s := strings.TrimSpace(v.(string))
+				if s != "" {
+					caql = s
+				}
+			}
+
+			if v, found := metricAttrs[graphMetricSearchAttr]; found {
+				s := strings.TrimSpace(v.(string))
+				if s != "" {
+					search = s
+				}
+			}
+
+			metricLocatorError := fmt.Errorf("metric[%d] name=%q: locator issue - %q(%v) + %q(%v) OR %q(%v) OR %q(%v)",
+				metricIdx, datapoint.Name,
+				graphMetricCheckAttr, check,
+				graphMetricNameAttr, name,
+				graphMetricCAQLAttr, caql,
+				graphMetricSearchAttr, search)
+			datapoint.CAQL = nil
+			datapoint.Search = nil
+
+			switch {
+			case check == 0 && name != "":
+				return fmt.Errorf("metric[%d] name=%q: locator using %q requires %q", metricIdx, datapoint.Name, graphMetricNameAttr, graphMetricCheckAttr)
+			case check > 0 && name == "":
+				return fmt.Errorf("metric[%d] name=%q: locator using %q requires %q", metricIdx, datapoint.Name, graphMetricCheckAttr, graphMetricNameAttr)
+			case check > 0 && (caql != "" || search != ""):
+				return metricLocatorError
+			case caql != "" && (check != 0 || name != "" || search != ""):
+				return metricLocatorError
+			case search != "" && (check != 0 || name != "" || caql != ""):
+				return metricLocatorError
+			default:
+				switch {
+				case check > 0:
+					datapoint.CheckID = check
+					datapoint.MetricName = name
+				case caql != "":
+					datapoint.CAQL = &caql
+				case search != "":
+					datapoint.Search = &search
 				}
 			}
 
@@ -1048,7 +1083,7 @@ func (g *circonusGraph) Create(ctxt *providerContext) error {
 func (g *circonusGraph) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateGraph(&g.Graph)
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to update graph %s: {{err}}", g.CID), err)
+		return fmt.Errorf("Unable to update graph %s: %w", g.CID, err)
 	}
 
 	return nil

@@ -1,3 +1,9 @@
+## 0.12.0 (March 10, 2021)
+
+CHANGES:
+
+* upd: terraform-plugin-sdk v2 (Terraform v0.12.0+ required)
+
 ## 0.11.8 (March 5, 2021)
 
 FIXES:

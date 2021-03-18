@@ -5,8 +5,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -250,7 +249,7 @@ func dataSourceCirconusAccountRead(d *schema.ResourceData, meta interface{}) err
 	_ = d.Set(accountDescriptionAttr, a.Description)
 
 	if err := d.Set(accountInvitesAttr, invitesList); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store account %q attribute: {{err}}", accountInvitesAttr), err)
+		return fmt.Errorf("Unable to store account %q attribute: %w", accountInvitesAttr, err)
 	}
 
 	_ = d.Set(accountNameAttr, a.Name)
@@ -260,11 +259,11 @@ func dataSourceCirconusAccountRead(d *schema.ResourceData, meta interface{}) err
 	_ = d.Set(accountUIBaseURLAttr, a.UIBaseURL)
 
 	if err := d.Set(accountUsageAttr, usageList); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store account %q attribute: {{err}}", accountUsageAttr), err)
+		return fmt.Errorf("Unable to store account %q attribute: %w", accountUsageAttr, err)
 	}
 
 	if err := d.Set(accountUsersAttr, usersList); err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Unable to store account %q attribute: {{err}}", accountUsersAttr), err)
+		return fmt.Errorf("Unable to store account %q attribute: %w", accountUsersAttr, err)
 	}
 
 	return nil

@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	api "github.com/circonus-labs/go-apiclient"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccCirconusContactGroup_basic(t *testing.T) {
@@ -85,8 +85,8 @@ func TestAccCirconusContactGroup_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "short_message", "short message"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "short_summary", "short summary"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "tags.#", "2"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "tags.2087084518", "author:terraform"),
-					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "tags.393923453", "other:foo"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "tags.0", "author:terraform"),
+					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "tags.1", "other:foo"),
 				),
 			},
 		},
