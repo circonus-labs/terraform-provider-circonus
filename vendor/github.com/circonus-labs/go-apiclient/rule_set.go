@@ -20,13 +20,13 @@ import (
 
 // RuleSetRule defines a ruleset rule
 type RuleSetRule struct {
+	Value                interface{} `json:"value"`                            // BUG doc: string, api: actual type returned switches based on Criteria
+	WindowingFunction    *string     `json:"windowing_function,omitempty"`     // string or null
 	Criteria             string      `json:"criteria"`                         // string
 	Severity             uint        `json:"severity"`                         // uint
-	Value                interface{} `json:"value"`                            // BUG doc: string, api: actual type returned switches based on Criteria
 	Wait                 uint        `json:"wait"`                             // uint
 	WindowingDuration    uint        `json:"windowing_duration,omitempty"`     // uint
 	WindowingMinDuration uint        `json:"windowing_min_duration,omitempty"` // uint
-	WindowingFunction    *string     `json:"windowing_function,omitempty"`     // string or null
 }
 
 // RuleSet defines a ruleset. See https://login.circonus.com/resources/api/calls/rule_set for more information.

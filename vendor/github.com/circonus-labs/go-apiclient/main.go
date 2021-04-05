@@ -83,38 +83,32 @@ type TagType []string
 
 // Config options for Circonus API
 type Config struct {
-	// URL defines the API URL - default https://api.circonus.com/v2/
-	URL string
-
-	// TokenKey defines the key to use when communicating with the API
-	TokenKey string
-
-	// TokenApp defines the app to use when communicating with the API
-	TokenApp string
-
-	TokenAccountID string
-
-	// CACert deprecating, use TLSConfig instead
-	CACert *x509.CertPool
-
+	Log Logger
 	// TLSConfig defines a custom tls configuration to use when communicating with the API
 	TLSConfig *tls.Config
-
-	Log   Logger
-	Debug bool
+	// CACert deprecating, use TLSConfig instead
+	CACert *x509.CertPool
+	// URL defines the API URL - default https://api.circonus.com/v2/
+	URL string
+	// TokenKey defines the key to use when communicating with the API
+	TokenKey string
+	// TokenApp defines the app to use when communicating with the API
+	TokenApp       string
+	TokenAccountID string
+	Debug          bool
 }
 
 // API Circonus API
 type API struct {
+	Log                     Logger
+	caCert                  *x509.CertPool
+	tlsConfig               *tls.Config
 	apiURL                  *url.URL
 	key                     TokenKeyType
 	app                     TokenAppType
 	accountID               TokenAccountIDType
-	caCert                  *x509.CertPool
-	tlsConfig               *tls.Config
-	Debug                   bool
-	Log                     Logger
 	useExponentialBackoff   bool
+	Debug                   bool
 	useExponentialBackoffmu sync.Mutex
 }
 
@@ -226,7 +220,7 @@ func (a *API) Put(reqPath string, data []byte) ([]byte, error) {
 }
 
 func backoff(interval uint) float64 {
-	return math.Floor(((float64(interval) * (1 + rand.Float64())) / 2) + .5)
+	return math.Floor(((float64(interval) * (1 + rand.Float64())) / 2) + .5) //nolint:gosec
 }
 
 // apiRequest manages retry strategy for exponential backoffs
@@ -322,7 +316,9 @@ func (a *API) apiCall(reqMethod string, reqPath string, data []byte) ([]byte, er
 		return false, nil
 	}
 
-	a.Log.Printf("[DEBUG] sending json (%s)\n", string(data))
+	if len(data) > 0 {
+		a.Log.Printf("[DEBUG] sending json (%s)\n", string(data))
+	}
 
 	dataReader := bytes.NewReader(data)
 
@@ -343,7 +339,10 @@ func (a *API) apiCall(reqMethod string, reqPath string, data []byte) ([]byte, er
 		if a.tlsConfig != nil { // preference full custom tls config
 			tlscfg = a.tlsConfig
 		} else if a.caCert != nil {
-			tlscfg = &tls.Config{RootCAs: a.caCert}
+			tlscfg = &tls.Config{
+				RootCAs:    a.caCert,
+				MinVersion: tls.VersionTLS12,
+			}
 		}
 		client.HTTPClient.Transport = &http.Transport{
 			Proxy: http.ProxyFromEnvironment,

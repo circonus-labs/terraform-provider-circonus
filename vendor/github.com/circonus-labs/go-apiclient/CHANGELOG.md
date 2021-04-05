@@ -1,3 +1,13 @@
+# v0.7.13
+
+* upd: dependencies
+
+# v0.7.12
+
+* fix: lint issues
+* add: lint config and workflow
+* upd: squelch empty data debug msg
+
 # v0.7.11
 
 * add: new `user_json` field support to rule_set
