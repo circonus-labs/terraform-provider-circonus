@@ -95,6 +95,9 @@ type Config struct {
 	// TokenApp defines the app to use when communicating with the API
 	TokenApp       string
 	TokenAccountID string
+	MinRetryDelay  string
+	MaxRetryDelay  string
+	MaxRetries     uint
 	Debug          bool
 }
 
@@ -107,6 +110,9 @@ type API struct {
 	key                     TokenKeyType
 	app                     TokenAppType
 	accountID               TokenAccountIDType
+	minRetryDelay           time.Duration
+	maxRetryDelay           time.Duration
+	maxRetries              uint
 	useExponentialBackoff   bool
 	Debug                   bool
 	useExponentialBackoffmu sync.Mutex
@@ -177,6 +183,27 @@ func New(ac *Config) (*API, error) {
 	}
 	if a.Log == nil {
 		a.Log = log.New(ioutil.Discard, "", log.LstdFlags)
+	}
+
+	a.maxRetries = maxRetries
+	if ac.MaxRetries > 0 {
+		a.maxRetries = ac.MaxRetries
+	}
+	a.minRetryDelay = minRetryWait
+	if ac.MinRetryDelay != "" {
+		mr, err := time.ParseDuration(ac.MinRetryDelay)
+		if err != nil {
+			a.Log.Printf("[ERR] min retry delay (%s): %s", ac.MinRetryDelay, err)
+		}
+		a.minRetryDelay = mr
+	}
+	a.maxRetryDelay = maxRetryWait
+	if ac.MaxRetryDelay != "" {
+		mr, err := time.ParseDuration(ac.MaxRetryDelay)
+		if err != nil {
+			a.Log.Printf("[ERR] max retry delay (%s): %s", ac.MaxRetryDelay, err)
+		}
+		a.maxRetryDelay = mr
 	}
 
 	return a, nil
@@ -380,9 +407,9 @@ func (a *API) apiCall(reqMethod string, reqPath string, data []byte) ([]byte, er
 		client.RetryWaitMax = 60 * time.Second
 		client.RetryMax = 0
 	} else {
-		client.RetryWaitMin = minRetryWait
-		client.RetryWaitMax = maxRetryWait
-		client.RetryMax = maxRetries
+		client.RetryWaitMin = a.minRetryDelay
+		client.RetryWaitMax = a.maxRetryDelay
+		client.RetryMax = int(a.maxRetries)
 	}
 
 	// retryablehttp only groks log or no log
