@@ -1,3 +1,7 @@
+# v0.7.14
+
+* add: `MaxRetries`, `MinRetryDelay`, and `MaxRetryDelay` settings
+
 # v0.7.13
 
 * upd: dependencies
