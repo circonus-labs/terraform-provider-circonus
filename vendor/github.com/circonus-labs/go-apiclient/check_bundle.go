@@ -165,6 +165,17 @@ func (a *API) CreateCheckBundle(cfg *CheckBundle) (*CheckBundle, error) {
 		return nil, errors.New("invalid check bundle config (nil)")
 	}
 
+	if len(cfg.Tags) > 0 {
+		// remove blanks
+		tags := make([]string, 0, len(cfg.Tags))
+		for _, tag := range cfg.Tags {
+			if tag != "" {
+				tags = append(tags, tag)
+			}
+		}
+		cfg.Tags = tags
+	}
+
 	jsonCfg, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, err
