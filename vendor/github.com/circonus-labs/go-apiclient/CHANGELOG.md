@@ -1,3 +1,7 @@
+# v0.7.15
+
+* fix: do not allow blank tags through on check bundle creation
+
 # v0.7.14
 
 * add: `MaxRetries`, `MinRetryDelay`, and `MaxRetryDelay` settings
