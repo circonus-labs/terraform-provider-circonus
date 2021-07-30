@@ -144,7 +144,7 @@ var schemaCheckSMTP = &schema.Schema{
 }
 
 // checkAPIToStateSMTP reads the Config data out of circonusCheck.CheckBundle
-// into the statefile
+// into the statefile.
 func checkAPIToStateSMTP(c *circonusCheck, d *schema.ResourceData) error {
 	smtpConfig := make(map[string]interface{}, len(c.Config))
 
@@ -225,7 +225,7 @@ func checkAPIToStateSMTP(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckSMTP creates a stable hash of the normalized values
+// hashCheckSMTP creates a stable hash of the normalized values.
 func hashCheckSMTP(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -272,7 +272,7 @@ func hashCheckSMTP(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPISMTP(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPISMTP(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeSMTP)
 
 	mapRaw := l[0]

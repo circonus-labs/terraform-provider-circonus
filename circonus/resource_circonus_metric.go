@@ -13,13 +13,13 @@ import (
 )
 
 const (
-	// circonus_metric.* resource attribute names
+	// circonus_metric.* resource attribute names.
 	metricActiveAttr = "active"
 	metricIDAttr     = "id"
 	metricNameAttr   = "name"
 	metricTypeAttr   = "type"
 
-	// CheckBundle.Metric.Status can be one of these values
+	// CheckBundle.Metric.Status can be one of these values.
 	metricStatusActive    = "active"
 	metricStatusAvailable = "available"
 )

@@ -24,7 +24,7 @@ func TestAccCirconusWorksheet_basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCirconusWorksheetConfigFmt, checkName, graphName, worksheetName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("circonus_worksheet.test", "favourite"),
+					resource.TestCheckResourceAttrSet("circonus_worksheet.test", "favorite"),
 				),
 			},
 		},
@@ -73,7 +73,7 @@ func checkWorksheetExists(c *providerContext, worksheetCID api.CIDType) (bool, e
 
 const testAccCirconusWorksheetConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 

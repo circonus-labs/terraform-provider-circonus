@@ -503,11 +503,11 @@ func resourceDashboard() *schema.Resource {
 	}
 }
 
-type ByWidgetId []map[string]interface{}
+type ByWidgetID []map[string]interface{}
 
-func (a ByWidgetId) Len() int      { return len(a) }
-func (a ByWidgetId) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByWidgetId) Less(i, j int) bool {
+func (a ByWidgetID) Len() int      { return len(a) }
+func (a ByWidgetID) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByWidgetID) Less(i, j int) bool {
 	x := a[i]
 	y := a[j]
 	return x["widget_id"].(string) < y["widget_id"].(string)
@@ -542,9 +542,8 @@ func hashWidgets(vv interface{}) int {
 	}
 
 	widgetsRaw := vv.([]map[string]interface{})
-	sort.Sort(ByWidgetId(widgetsRaw))
+	sort.Sort(ByWidgetID(widgetsRaw))
 	for _, m := range widgetsRaw {
-
 		// Order writes to the buffer using lexically sorted list for easy visual
 		// reconciliation with other lists.
 		writeBool(m, "active")
@@ -776,7 +775,7 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["layout"] = widget.Settings.Layout
 		dashWidgetSettingsAttrs["layout_style"] = widget.Settings.LayoutStyle
 		dashWidgetSettingsAttrs["limit"] = int(widget.Settings.Limit)
-		dashWidgetSettingsAttrs["link_url"] = widget.Settings.LinkUrl
+		dashWidgetSettingsAttrs["link_url"] = widget.Settings.LinkURL
 		dashWidgetSettingsAttrs["maintenance"] = widget.Settings.Maintenance
 		dashWidgetSettingsAttrs["markup"] = widget.Settings.Markup
 		dashWidgetSettingsAttrs["metric_display_name"] = widget.Settings.MetricDisplayName
@@ -786,10 +785,10 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 		dashWidgetSettingsAttrs["off_hours"] = widget.Settings.OffHours
 		dashWidgetSettingsAttrs["overlay_set_id"] = widget.Settings.OverlaySetID
 		if widget.Settings.RangeHigh != nil {
-			dashWidgetSettingsAttrs["range_high"] = int(*widget.Settings.RangeHigh)
+			dashWidgetSettingsAttrs["range_high"] = *widget.Settings.RangeHigh
 		}
 		if widget.Settings.RangeLow != nil {
-			dashWidgetSettingsAttrs["range_low"] = int(*widget.Settings.RangeLow)
+			dashWidgetSettingsAttrs["range_low"] = *widget.Settings.RangeLow
 		}
 		dashWidgetSettingsAttrs["resource_limit"] = widget.Settings.ResourceLimit
 		dashWidgetSettingsAttrs["resource_usage"] = widget.Settings.ResourceUsage
@@ -956,7 +955,6 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 		if v, ok := glMap["height"]; ok {
 			dash.GridLayout.Height = uint(v.(int))
 		}
-
 	}
 	if v, found := d.GetOk("options"); found {
 		optionList := v.(*schema.Set).List()
@@ -1019,7 +1017,6 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 			}
 			dash.Options.Linkages = make([][]string, 0)
 		}
-
 	}
 
 	if listRaw, found := d.GetOk("widget"); found {
@@ -1203,7 +1200,7 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 						w.Settings.LayoutStyle = (v.(string))
 					}
 					if v, found := sMap["link_url"]; found {
-						w.Settings.LinkUrl = (v.(string))
+						w.Settings.LinkURL = (v.(string))
 					}
 					if v, found := sMap["limit"]; found {
 						w.Settings.Limit = uint(v.(int))
@@ -1377,7 +1374,7 @@ func (dash *circonusDashboard) Update(ctxt *providerContext) error {
 	return nil
 }
 
-func (g *circonusDashboard) Validate() error {
+func (dash *circonusDashboard) Validate() error {
 	// for i, datapoint := range g.Datapoints {
 	// 	if *g.Style == apiGraphStyleLine && datapoint.Alpha != nil && *datapoint.Alpha != 0 {
 	// 		return fmt.Errorf("%s can not be set on graphs with style %s", graphMetricAlphaAttr, apiGraphStyleLine)

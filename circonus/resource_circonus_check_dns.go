@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// circonus_check.dns.* resource attribute names
+	// circonus_check.dns.* resource attribute names.
 	checkDNSCTypeAttr      = "ctype"
 	checkDNSNameserverAttr = "nameserver"
 	checkDNSQueryAttr      = "query"
@@ -102,7 +102,7 @@ func checkAPIToStateDNS(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckICMPPing creates a stable hash of the normalized values
+// hashCheckICMPPing creates a stable hash of the normalized values.
 func hashCheckDNS(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -123,7 +123,7 @@ func hashCheckDNS(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIDNS(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIDNS(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeDNS)
 
 	mapRaw := l[0]

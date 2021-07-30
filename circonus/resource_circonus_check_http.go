@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	// circonus_check.http.* resource attribute names
+	// circonus_check.http.* resource attribute names.
 	checkHTTPAuthMethodAttr   = "auth_method"
 	checkHTTPAuthPasswordAttr = "auth_password"
 	checkHTTPAuthUserAttr     = "auth_user"
@@ -250,7 +250,7 @@ func checkAPIToStateHTTP(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckHTTP creates a stable hash of the normalized values
+// hashCheckHTTP creates a stable hash of the normalized values.
 func hashCheckHTTP(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}

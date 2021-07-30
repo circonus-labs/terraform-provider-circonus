@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	// circonus_check.json.* resource attribute names
+	// circonus_check.json.* resource attribute names.
 	checkPromTextPortAttr = "port"
 	checkPromTextURLAttr  = "url"
 )
@@ -137,7 +137,7 @@ func checkPromTextConfigChecksum(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIPromText(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIPromText(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypePromText)
 
 	// Iterate over all `promtext` attributes, even though we have a max of 1 in the
@@ -165,7 +165,6 @@ func checkConfigToAPIPromText(c *circonusCheck, l interfaceList) error {
 				c.Config[config.Port] = hostInfo[1]
 			}
 		}
-
 	}
 
 	return nil

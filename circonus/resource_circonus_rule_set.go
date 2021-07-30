@@ -14,30 +14,30 @@ import (
 )
 
 const (
-	// circonus_rule_set.* resource attribute names
+	// circonus_rule_set.* resource attribute names.
 	ruleSetCheckAttr         = "check"
 	ruleSetNameAttr          = "name"
 	ruleSetIfAttr            = "if"
 	ruleSetLinkAttr          = "link"
 	ruleSetMetricTypeAttr    = "metric_type"
 	ruleSetNotesAttr         = "notes"
-	ruleSetUserJsonAttr      = "user_json"
+	ruleSetUserJSONAttr      = "user_json"
 	ruleSetParentAttr        = "parent"
 	ruleSetMetricNameAttr    = "metric_name"
 	ruleSetMetricPatternAttr = "metric_pattern"
 	ruleSetMetricFilterAttr  = "metric_filter"
 	ruleSetTagsAttr          = "tags"
 
-	// circonus_rule_set.if.* resource attribute names
+	// circonus_rule_set.if.* resource attribute names.
 	ruleSetThenAttr  = "then"
 	ruleSetValueAttr = "value"
 
-	// circonus_rule_set.if.then.* resource attribute names
+	// circonus_rule_set.if.then.* resource attribute names.
 	ruleSetAfterAttr    = "after"
 	ruleSetNotifyAttr   = "notify"
 	ruleSetSeverityAttr = "severity"
 
-	// circonus_rule_set.if.value.* resource attribute names
+	// circonus_rule_set.if.value.* resource attribute names.
 	ruleSetAbsentAttr     = "absent"      // apiRuleSetAbsent
 	ruleSetChangedAttr    = "changed"     // apiRuleSetChanged
 	ruleSetContainsAttr   = "contains"    // apiRuleSetContains
@@ -50,17 +50,17 @@ const (
 	ruleSetNotMatchAttr   = "not_match"   // apiRuleSetNotMatch
 	ruleSetOverAttr       = "over"
 
-	// circonus_rule_set.if.value.over.* resource attribute names
+	// circonus_rule_set.if.value.over.* resource attribute names.
 	ruleSetLastAttr    = "last"
 	ruleSetUsingAttr   = "using"
 	ruleSetAtLeastAttr = "atleast"
 
-	// out attributes
-	ruleSetIdAttr = "rule_set_id"
+	// out attributes.
+	ruleSetIDAttr = "rule_set_id"
 )
 
 const (
-	// Different criteria that an api.RuleSetRule can return
+	// Different criteria that an api.RuleSetRule can return.
 	apiRuleSetAbsent      = "on absence"       // ruleSetAbsentAttr
 	apiRuleSetChanged     = "on change"        // ruleSetChangedAttr
 	apiRuleSetContains    = "contains"         // ruleSetContainsAttr
@@ -76,18 +76,18 @@ const (
 var ruleSetDescriptions = attrDescrs{
 	// circonus_rule_set.* resource attribute names
 	ruleSetCheckAttr:         "The CID of the check that contains the metric for this rule set",
-	ruleSetNameAttr:          "The name of this ruleset, if ommitted will default to the metric_name (or pattern) and filter",
+	ruleSetNameAttr:          "The name of this ruleset, if omitted will default to the metric_name (or pattern) and filter",
 	ruleSetIfAttr:            "A rule to execute for this rule set",
 	ruleSetLinkAttr:          "URL to show users when this rule set is active (e.g. wiki)",
 	ruleSetMetricTypeAttr:    "The type of data flowing through the specified metric stream",
 	ruleSetNotesAttr:         "Notes describing this rule set",
-	ruleSetUserJsonAttr:      "Opaque data that can be supplied with the result and appears in webhooks when alerts go off",
+	ruleSetUserJSONAttr:      "Opaque data that can be supplied with the result and appears in webhooks when alerts go off",
 	ruleSetParentAttr:        "Parent CID that must be healthy for this rule set to be active",
 	ruleSetMetricNameAttr:    "The name of the metric stream within a check to register the rule set with",
 	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
 	ruleSetMetricFilterAttr:  "The tag filter a pattern match ruleset will user",
 	ruleSetTagsAttr:          "Tags associated with this rule set",
-	ruleSetIdAttr:            "out",
+	ruleSetIDAttr:            "out",
 }
 
 var ruleSetIfDescriptions = attrDescrs{
@@ -314,13 +314,12 @@ func resourceRuleSet() *schema.Resource {
 				Computed:  true,
 				StateFunc: suppressWhitespace,
 			},
-			ruleSetUserJsonAttr: {
+			ruleSetUserJSONAttr: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				StateFunc: jsonSort,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-
-					log.Printf("Old: '%s', New: '%s'", old, new)
+				DiffSuppressFunc: func(k, old, update string, d *schema.ResourceData) bool {
+					log.Printf("Old: '%s', New: '%s'", old, update)
 
 					var ifce interface{}
 					ob := []byte(old)
@@ -333,7 +332,7 @@ func resourceRuleSet() *schema.Resource {
 						return false
 					}
 
-					nb := []byte(new)
+					nb := []byte(update)
 					err = json.Unmarshal(nb, &ifce)
 					if err != nil {
 						return false
@@ -376,7 +375,7 @@ func resourceRuleSet() *schema.Resource {
 				ValidateFunc: validateRegexp(ruleSetMetricFilterAttr, `^.+$`),
 			},
 			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
-			ruleSetIdAttr: {
+			ruleSetIDAttr: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -429,7 +428,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(rs.CID)
-	_ = d.Set(ruleSetIdAttr, rs.CID)
+	_ = d.Set(ruleSetIDAttr, rs.CID)
 	_ = d.Set(ruleSetNameAttr, rs.Name)
 
 	ifRules := make([]interface{}, 0, defaultRuleSetRuleLen)
@@ -501,7 +500,6 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		ifAttrs[string(ruleSetValueAttr)] = valueSet
 
 		ifRules = append(ifRules, ifAttrs)
-
 	}
 
 	_ = d.Set(ruleSetCheckAttr, rs.CheckCID)
@@ -509,7 +507,7 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	s, _ := json.MarshalIndent(ifRules, "", "  ")
 	log.Printf("%s", s)
 
-	if err := d.Set(ruleSetIfAttr, ifRules); err != nil {
+	if err = d.Set(ruleSetIfAttr, ifRules); err != nil {
 		return fmt.Errorf("Unable to store rule set %q attribute: %w", ruleSetIfAttr, err)
 	}
 
@@ -523,9 +521,9 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	rj := json.RawMessage(string(j))
 	log.Printf("%s", string(rj))
 	if err == nil {
-		_ = d.Set(ruleSetUserJsonAttr, string(rj))
+		_ = d.Set(ruleSetUserJSONAttr, string(rj))
 	} else {
-		_ = d.Set(ruleSetUserJsonAttr, "{}")
+		_ = d.Set(ruleSetUserJSONAttr, "{}")
 	}
 	_ = d.Set(ruleSetParentAttr, indirect(rs.Parent))
 
@@ -562,7 +560,7 @@ func ruleSetDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
-	_ = d.Set(ruleSetIdAttr, "")
+	_ = d.Set(ruleSetIDAttr, "")
 
 	return nil
 }
@@ -601,7 +599,6 @@ func loadRuleSet(ctxt *providerContext, cid api.CIDType) (circonusRuleSet, error
 // Circonus RuleSet object.  ParseConfig and ruleSetRead()
 // must be kept in sync.
 func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
-
 	if v, found := d.GetOk(ruleSetCheckAttr); found {
 		rs.CheckCID = v.(string)
 	}
@@ -624,7 +621,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		rs.Notes = &s
 	}
 
-	if v, found := d.GetOk(ruleSetUserJsonAttr); found {
+	if v, found := d.GetOk(ruleSetUserJSONAttr); found {
 		rs.UserJSON = json.RawMessage(v.(string))
 	}
 
@@ -712,7 +709,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						if s != "" {
 							d, _ := time.ParseDuration(s + "s")
 							rule.Criteria = apiRuleSetAbsent
-							rule.Value = float64(d.Seconds())
+							rule.Value = d.Seconds()
 						}
 					} else if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(string) != "" {
 						b := v.(string)
@@ -750,7 +747,7 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 						if s != "" {
 							d, _ := time.ParseDuration(s + "s")
 							rule.Criteria = apiRuleSetAbsent
-							rule.Value = float64(d.Seconds())
+							rule.Value = d.Seconds()
 						}
 					} else if v, found := valueAttrs[ruleSetChangedAttr]; found && v.(string) != "" {
 						b := v.(string)
@@ -887,7 +884,6 @@ func (rs *circonusRuleSet) Validate() error {
 	}
 
 	for i, rule := range rs.Rules {
-
 		if rule.Criteria == "" {
 			return fmt.Errorf("rule %d for check ID %s has an empty criteria", i, rs.CheckCID)
 		}

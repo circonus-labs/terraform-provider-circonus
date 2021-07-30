@@ -81,7 +81,7 @@ func TestAccCirconusCheckTCP_basic(t *testing.T) {
 
 const testAccCirconusCheckTCPConfigFmt = `
 variable "tcp_check_tags" {
-  type = "list"
+  type = list(string)
   default = [ "app:circonus", "app:tls_cert", "lifecycle:unittest", "source:fastly" ]
 }
 

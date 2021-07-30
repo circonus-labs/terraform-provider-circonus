@@ -129,7 +129,7 @@ func TestAccCirconusCheckCloudWatch_basic(t *testing.T) {
 
 const testAccCirconusCheckCloudWatchConfigFmt = `
 variable "cloudwatch_rds_tags" {
-  type = "list"
+  type = list(string)
   default = [
     "app:postgresql",
     "app:rds",

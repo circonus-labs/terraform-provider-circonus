@@ -45,7 +45,7 @@ func TestAccCirconusCheckDNS_basic(t *testing.T) {
 
 const testAccCirconusCheckDNSConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 resource "circonus_check" "google" {

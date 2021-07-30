@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// circonus_check.snmp.* resource attribute names
+	// circonus_check.snmp.* resource attribute names.
 	checkSNMPAuthPassphrase    = "auth_passphrase"
 	checkSNMPAuthProtocol      = "auth_protocol"
 	checkSNMPCommunity         = "community"
@@ -221,14 +221,14 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 	saveStringConfigToState(config.Version, checkSNMPVersion)
 
 	// count the number of oids in the config so we can make our list
-	var oid_count = 0
+	oidCount := 0
 	for k := range c.Config {
 		key := string(k)
 		if strings.HasPrefix(key, string(config.OIDPrefix)) {
-			oid_count++
+			oidCount++
 		}
 	}
-	oid_list := make([]interface{}, 0)
+	oidList := make([]interface{}, 0)
 	for k, v := range c.Config {
 		key := string(k)
 		if strings.HasPrefix(key, string(config.OIDPrefix)) {
@@ -243,19 +243,19 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 				delete(swamp, config.Key(t))
 			}
 			delete(swamp, k)
-			oid_list = append(oid_list, oidProps)
+			oidList = append(oidList, oidProps)
 		}
 	}
 
-	sort.Slice(oid_list, func(i, j int) bool {
-		if oid_list[i] != nil && oid_list[j] != nil {
-			y := oid_list[i].(map[string]interface{})
-			z := oid_list[j].(map[string]interface{})
+	sort.Slice(oidList, func(i, j int) bool {
+		if oidList[i] != nil && oidList[j] != nil {
+			y := oidList[i].(map[string]interface{})
+			z := oidList[j].(map[string]interface{})
 			return y[string(checkSNMPOIDName)].(string) < z[string(checkSNMPOIDName)].(string)
 		}
 		return true
 	})
-	snmpConfig[string(checkSNMPOID)] = oid_list
+	snmpConfig[string(checkSNMPOID)] = oidList
 
 	whitelistedConfigKeys := map[config.Key]struct{}{
 		config.ReverseSecretKey: {},
@@ -279,7 +279,7 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-func checkConfigToAPISNMP(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPISNMP(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeSNMP)
 
 	// Iterate over all `snmp` attributes, even though we have a max of 1 in the

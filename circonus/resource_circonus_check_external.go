@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// circonus_check.http.* resource attribute names
+	// circonus_check.http.* resource attribute names.
 	checkCommandAttr       = "command"
 	checkOutputExtractAttr = "output_extract"
 	checkArg1Attr          = "arg1"
@@ -178,7 +178,7 @@ func checkAPIToStateExternal(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-func checkConfigToAPIExternal(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIExternal(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeExternal)
 
 	// Iterate over all `http` attributes, even though we have a max of 1 in the

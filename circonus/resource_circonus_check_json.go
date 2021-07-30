@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	// circonus_check.json.* resource attribute names
+	// circonus_check.json.* resource attribute names.
 	checkJSONAuthMethodAttr   = "auth_method"
 	checkJSONAuthPasswordAttr = "auth_password"
 	checkJSONAuthUserAttr     = "auth_user"
@@ -281,7 +281,7 @@ func checkJSONConfigChecksum(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIJSON(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIJSON(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeJSON)
 
 	// Iterate over all `json` attributes, even though we have a max of 1 in the

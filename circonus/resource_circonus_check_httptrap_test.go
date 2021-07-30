@@ -56,12 +56,12 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 
 const testAccCirconusCheckHTTPTrapConfigFmt = `
 variable "httptrap_check_tags" {
-  type = "list"
+  type = list(string)
   default = [ "app:consul", "lifecycle:unittest", "source:consul" ]
 }
 
 variable "consul_hostname" {
-  type = "string"
+  type = string
   default = "consul-server-10-151-2-8"
 }
 

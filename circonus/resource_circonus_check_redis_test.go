@@ -38,7 +38,7 @@ func TestAccCirconusCheckRedis_basic(t *testing.T) {
 
 const testAccCirconusCheckRedisConfigFmt = `
 variable "tcp_check_tags" {
-  type = "list"
+  type = list(string)
   default = [ "app:redis", "lifecycle:unittest", "source:fastly" ]
 }
 

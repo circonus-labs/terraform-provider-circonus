@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// circonus_check.httptrap.* resource attribute names
+	// circonus_check.httptrap.* resource attribute names.
 	checkHTTPTrapAsyncMetricsAttr = "async_metrics"
 	checkHTTPTrapSecretAttr       = "secret"
 )
@@ -104,7 +104,7 @@ func checkAPIToStateHTTPTrap(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckHTTPTrap creates a stable hash of the normalized values
+// hashCheckHTTPTrap creates a stable hash of the normalized values.
 func hashCheckHTTPTrap(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -131,7 +131,7 @@ func hashCheckHTTPTrap(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIHTTPTrap(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIHTTPTrap(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeHTTPTrapAttr)
 
 	// Iterate over all `httptrap` attributes, even though we have a max of 1 in the

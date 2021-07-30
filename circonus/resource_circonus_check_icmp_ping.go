@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// circonus_check.icmp_ping.* resource attribute names
+	// circonus_check.icmp_ping.* resource attribute names.
 	checkICMPPingAvailabilityAttr = "availability"
 	checkICMPPingCountAttr        = "count"
 	checkICMPPingIntervalAttr     = "interval"
@@ -94,7 +94,7 @@ func checkAPIToStateICMPPing(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckICMPPing creates a stable hash of the normalized values
+// hashCheckICMPPing creates a stable hash of the normalized values.
 func hashCheckICMPPing(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -129,7 +129,7 @@ func hashCheckICMPPing(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIICMPPing(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIICMPPing(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeICMPPing)
 
 	// Iterate over all `icmp_ping` attributes, even though we have a max of 1 in

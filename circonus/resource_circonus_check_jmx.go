@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	// circonus_check.jmx.* resource attribute names
+	// circonus_check.jmx.* resource attribute names.
 	checkJMXMBeanDomainsAttr    = "mbean_domains"
 	checkJMXMBeanPropertiesAttr = "mbean_properties"
 	checkJMXPasswordAttr        = "password"
@@ -140,7 +140,7 @@ func checkAPIToStateJMX(c *circonusCheck, d *schema.ResourceData) error {
 	saveStringConfigToState(config.URI, checkJMXURIAttr)
 	jmxConfig[string(checkJMXHostAttr)] = c.Target
 
-	l := make([]interface{}, 3)
+	l := make([]interface{}, 0, 3)
 	// deal with config.MBeanDomains into a list
 	if v, ok := c.Config[config.MbeanDomains]; ok {
 		log.Printf("Domains: %s", v)
@@ -160,7 +160,7 @@ func checkAPIToStateJMX(c *circonusCheck, d *schema.ResourceData) error {
 		key := string(k)
 		if strings.HasPrefix(key, "mbean_properties_") {
 			beanProps := make(map[string]interface{}, 3)
-			l := strings.Split(string(v), ",")
+			l := strings.Split(v, ",")
 			for _, s := range l {
 				t := strings.Split(s, "=")
 				beanProps[t[0]] = t[1]
@@ -193,7 +193,7 @@ func checkAPIToStateJMX(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckJMX creates a stable hash of the normalized values
+// hashCheckJMX creates a stable hash of the normalized values.
 func hashCheckJMX(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -245,7 +245,7 @@ func hashCheckJMX(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIJMX(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIJMX(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeJMX)
 
 	// Iterate over all `tcp` attributes, even though we have a max of 1 in the

@@ -11,12 +11,13 @@ import (
 	"github.com/circonus-labs/go-apiclient/config"
 )
 
-var knownCheckTypes map[circonusCheckType]struct{}
-var knownContactMethods map[contactMethods]struct{}
-
-var userContactMethods map[contactMethods]struct{}
-var externalContactMethods map[contactMethods]struct{}
-var supportedHTTPVersions = validStringValues{"0.9", "1.0", "1.1", "2.0"}
+var (
+	knownCheckTypes        map[circonusCheckType]struct{}
+	knownContactMethods    map[contactMethods]struct{}
+	userContactMethods     map[contactMethods]struct{}
+	externalContactMethods map[contactMethods]struct{}
+	supportedHTTPVersions  = validStringValues{"0.9", "1.0", "1.1", "2.0"}
+)
 
 func init() {
 	checkTypes := []circonusCheckType{

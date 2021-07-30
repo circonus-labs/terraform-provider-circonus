@@ -8,7 +8,7 @@ import (
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() *schema.Provider {
+		ProviderFunc: func() *schema.Provider { //nolint
 			return circonus.Provider()
 		},
 	})

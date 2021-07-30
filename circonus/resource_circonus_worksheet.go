@@ -1,17 +1,19 @@
 package circonus
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
 	workspaceTitleAttr        = "title"
 	workspaceDescriptionAttr  = "description"
-	workspaceFavouriteAttr    = "favourite"
+	workspaceFavoriteAttr     = "favorite"
 	workspaceNotesAttr        = "notes"
 	workspaceTagsAttr         = "tags"
 	workspaceGraphsAttr       = "graphs"
@@ -25,7 +27,7 @@ const (
 var worksheetDescriptions = attrDescrs{
 	workspaceTitleAttr:        "",
 	workspaceDescriptionAttr:  "",
-	workspaceFavouriteAttr:    "",
+	workspaceFavoriteAttr:     "",
 	workspaceNotesAttr:        "",
 	workspaceTagsAttr:         "",
 	workspaceGraphsAttr:       "",
@@ -40,11 +42,11 @@ var worksheetSmartQueryDescriptions = attrDescrs{
 
 func resourceWorksheet() *schema.Resource {
 	return &schema.Resource{
-		Create: worksheetCreate,
-		Read:   worksheetRead,
-		Update: worksheetUpdate,
-		Delete: worksheetDelete,
-		Exists: worksheetExists,
+		CreateContext: worksheetCreate,
+		ReadContext:   worksheetRead,
+		UpdateContext: worksheetUpdate,
+		DeleteContext: worksheetDelete,
+		Exists:        worksheetExists,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -61,7 +63,7 @@ func resourceWorksheet() *schema.Resource {
 				StateFunc: suppressWhitespace,
 			},
 
-			workspaceFavouriteAttr: {
+			workspaceFavoriteAttr: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  defaultWorkspaceFavourite,
@@ -108,50 +110,52 @@ func resourceWorksheet() *schema.Resource {
 	}
 }
 
-func worksheetCreate(d *schema.ResourceData, meta interface{}) error {
+func worksheetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
+
 	g := newWorksheet()
 	if err := g.ParseConfig(d); err != nil {
-		return fmt.Errorf("error parsing graph schema during create: %w", err)
+		return diag.FromErr(fmt.Errorf("parsing worksheet schema during create: %w", err))
 	}
 
 	if err := g.Create(ctxt); err != nil {
-		return fmt.Errorf("error creating graph: %w", err)
+		return diag.FromErr(fmt.Errorf("creating worksheet: %w", err))
 	}
 
 	d.SetId(g.CID)
 
-	return worksheetRead(d, meta)
+	return worksheetRead(ctx, d, meta)
 }
 
-func worksheetRead(d *schema.ResourceData, meta interface{}) error {
+func worksheetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	ctxt := meta.(*providerContext)
 
 	cid := d.Id()
 	w, err := loadWorksheet(ctxt, api.CIDType(&cid))
 	if err != nil {
-		return err
+		return diag.FromErr(fmt.Errorf("load worksheet: %w", err))
 	}
 
 	d.SetId(w.CID)
 
 	_ = d.Set(workspaceTitleAttr, w.Title)
 	_ = d.Set(workspaceDescriptionAttr, w.Description)
-	_ = d.Set(workspaceFavouriteAttr, w.Favorite)
+	_ = d.Set(workspaceFavoriteAttr, w.Favorite)
 	_ = d.Set(workspaceNotesAttr, w.Notes)
 
 	if err := d.Set(workspaceGraphsAttr, worksheetGraphsToState(apiToWorksheetGraphs(w.Graphs))); err != nil {
-		return fmt.Errorf("Unable to store workspace %q attribute: %w", workspaceTagsAttr, err)
+		return diag.FromErr(fmt.Errorf("unable to store worksheet %q attribute: %w", workspaceTagsAttr, err))
 	}
 
 	if err := d.Set(workspaceTagsAttr, tagsToState(apiToTags(w.Tags))); err != nil {
-		return fmt.Errorf("Unable to store workspace %q attribute: %w", workspaceTagsAttr, err)
+		return diag.FromErr(fmt.Errorf("unable to store worksheet %q attribute: %w", workspaceTagsAttr, err))
 	}
 
-	var smartQueries []map[string]interface{}
+	smartQueries := make([]map[string]interface{}, 0, len(w.SmartQueries))
 
 	for _, query := range w.SmartQueries {
-
 		newQuery := map[string]interface{}{
 			"name":  query.Name,
 			"query": query.Query,
@@ -162,10 +166,10 @@ func worksheetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set(workspaceSmartQueriesAttr, smartQueries); err != nil {
-		return fmt.Errorf("unable to store worksheet %q attribute: %w", workspaceSmartQueriesAttr, err)
+		return diag.FromErr(fmt.Errorf("unable to store worksheet %q attribute: %w", workspaceSmartQueriesAttr, err))
 	}
 
-	return nil
+	return diags
 }
 
 func worksheetExists(d *schema.ResourceData, meta interface{}) (bool, error) {
@@ -188,32 +192,34 @@ func worksheetExists(d *schema.ResourceData, meta interface{}) (bool, error) {
 	return true, nil
 }
 
-func worksheetUpdate(d *schema.ResourceData, meta interface{}) error {
+func worksheetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
 	w := newWorksheet()
 	if err := w.ParseConfig(d); err != nil {
-		return err
+		return diag.FromErr(fmt.Errorf("parse worksheet config: %w", err))
 	}
 
 	w.CID = d.Id()
 	if err := w.Update(ctxt); err != nil {
-		return fmt.Errorf("unable to update worksheet %q: %w", d.Id(), err)
+		return diag.FromErr(fmt.Errorf("unable to update worksheet %q: %w", d.Id(), err))
 	}
 
-	return worksheetRead(d, meta)
+	return worksheetRead(ctx, d, meta)
 }
 
-func worksheetDelete(d *schema.ResourceData, meta interface{}) error {
+func worksheetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	ctxt := meta.(*providerContext)
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteWorksheetByCID(api.CIDType(&cid)); err != nil {
-		return fmt.Errorf("unable to delete worksheet %q: %w", d.Id(), err)
+		return diag.FromErr(fmt.Errorf("unable to delete worksheet %q: %w", d.Id(), err))
 	}
 
 	d.SetId("")
 
-	return nil
+	return diags
 }
 
 func (w *circonusWorksheet) Create(ctxt *providerContext) error {
@@ -321,7 +327,7 @@ func newWorksheet() circonusWorksheet {
 }
 
 func apiToWorksheetGraphs(graphs []api.WorksheetGraph) []string {
-	var workSheetGraphs []string
+	workSheetGraphs := make([]string, 0, len(graphs))
 
 	for _, v := range graphs {
 		workSheetGraphs = append(workSheetGraphs, v.GraphCID)
@@ -332,7 +338,7 @@ func apiToWorksheetGraphs(graphs []api.WorksheetGraph) []string {
 func worksheetGraphsToState(graphs []string) *schema.Set {
 	graphsSet := schema.NewSet(schema.HashString, nil)
 	for i := range graphs {
-		graphsSet.Add(string(graphs[i]))
+		graphsSet.Add(graphs[i])
 	}
 	return graphsSet
 }

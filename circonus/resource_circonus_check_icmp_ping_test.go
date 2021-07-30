@@ -66,7 +66,7 @@ func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
 
 const testAccCirconusCheckICMPPingConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 resource "circonus_check" "loopback_latency" {

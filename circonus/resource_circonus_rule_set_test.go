@@ -132,7 +132,7 @@ func checkRuleSetExists(c *providerContext, ruleSetCID api.CIDType) (bool, error
 
 const testAccCirconusRuleSetConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 

@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	// circonus_check.* global resource attribute names
+	// circonus_check.* global resource attribute names.
 	checkActiveAttr       = "active"
 	checkCAQLAttr         = "caql"
 	checkCloudWatchAttr   = "cloudwatch"
@@ -61,16 +61,16 @@ const (
 	checkTimeoutAttr      = "timeout"
 	checkTypeAttr         = "type"
 
-	// circonus_check.collector.* resource attribute names
+	// circonus_check.collector.* resource attribute names.
 	checkCollectorIDAttr = "id"
 
 	// circonus_check.metric.* resource attribute names are aliased to
 	// circonus_metric.* resource attributes.
 
 	// circonus_check.metric.* resource attribute names
-	// metricIDAttr  = "id"
+	// metricIDAttr  = "id".
 
-	// Out parameters for circonus_check
+	// Out parameters for circonus_check.
 	checkOutByCollectorAttr        = "check_by_collector"
 	checkOutIDAttr                 = "check_id"
 	checkOutChecksAttr             = "checks"
@@ -82,7 +82,7 @@ const (
 )
 
 const (
-	// Circonus API constants from their API endpoints
+	// Circonus API constants from their API endpoints.
 	apiCheckTypeCAQLAttr       apiCheckType = "caql"
 	apiCheckTypeCloudWatchAttr apiCheckType = "cloudwatch"
 	apiCheckTypeConsulAttr     apiCheckType = "consul"
@@ -153,13 +153,15 @@ var checkCollectorDescriptions = attrDescrs{
 	checkCollectorIDAttr: "The ID of the collector",
 }
 
-var checkMetricDescriptions = metricDescriptions
-var checkMetricFilterDescriptions = attrDescrs{
-	"type":      "'allow' or 'deny'",
-	"regex":     "Regex of the filter",
-	"comment":   "Comment on this filter",
-	"tag_query": "The tag query to apply",
-}
+var (
+	checkMetricDescriptions       = metricDescriptions
+	checkMetricFilterDescriptions = attrDescrs{
+		"type":      "'allow' or 'deny'",
+		"regex":     "Regex of the filter",
+		"comment":   "Comment on this filter",
+		"tag_query": "The tag query to apply",
+	}
+)
 
 func resourceCheck() *schema.Resource {
 	return &schema.Resource{
@@ -710,11 +712,11 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 			switch u := listRaw.(type) {
 			case []interface{}:
 				if err := fn(c, u); err != nil {
-					return fmt.Errorf("Unable to parse type %q: %w", string(checkType), err)
+					return fmt.Errorf("Unable to parse type %q: %w", checkType, err)
 				}
 			case *schema.Set:
 				if err := fn(c, u.List()); err != nil {
-					return fmt.Errorf("Unable to parse type %q: %w", string(checkType), err)
+					return fmt.Errorf("Unable to parse type %q: %w", checkType, err)
 				}
 			default:
 				return fmt.Errorf("PROVIDER BUG: unsupported check type interface: %q", checkType)

@@ -54,7 +54,7 @@ func TestAccCirconusCheckJMX_basic(t *testing.T) {
 
 const testAccCirconusCheckJMXConfigFmt = `
 variable "jmx_check_tags" {
-  type = "list"
+  type = list(string)
   default = [ "app:circonus", "app:something", "lifecycle:unittest", "source:fastly" ]
 }
 

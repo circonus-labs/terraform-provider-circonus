@@ -2,8 +2,10 @@ package circonus
 
 import "log"
 
-type interfaceList []interface{}
-type interfaceMap map[string]interface{}
+type (
+	interfaceList []interface{}
+	interfaceMap  map[string]interface{}
+)
 
 // newInterfaceMap returns a helper type that has methods for common operations
 // for accessing data.
@@ -27,7 +29,7 @@ func (l interfaceList) CollectList(attrName schemaAttr) []string {
 	return stringList
 }
 
-// List returns a list of values in a Set as a string slice
+// List returns a list of values in a Set as a string slice.
 func (l interfaceList) List() []string {
 	stringList := make([]string, 0, len(l))
 	for _, e := range l {

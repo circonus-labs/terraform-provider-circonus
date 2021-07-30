@@ -47,7 +47,7 @@ func TestAccCirconusCheckSNMP_basic(t *testing.T) {
 
 const testAccCirconusCheckSNMPConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 resource "circonus_check" "snmp" {

@@ -2,7 +2,6 @@ package circonus
 
 import (
 	"encoding/json"
-
 	"fmt"
 	"log"
 	"net/url"
@@ -51,14 +50,14 @@ func failoverGroupIDToCID(groupID int) string {
 
 func failoverGroupCIDToID(cid api.CIDType) (int, error) {
 	re := regexp.MustCompile("^" + config.ContactGroupPrefix + "/(" + config.DefaultCIDRegex + ")$")
-	matches := re.FindStringSubmatch(string(*cid))
+	matches := re.FindStringSubmatch(*cid)
 	if matches == nil || len(matches) < 2 {
-		return -1, fmt.Errorf("Did not find a valid contact_group ID in the CID %q", string(*cid))
+		return -1, fmt.Errorf("Did not find a valid contact_group ID in the CID %q", *cid)
 	}
 
 	contactGroupID, err := strconv.Atoi(matches[1])
 	if err != nil {
-		return -1, fmt.Errorf("invalid contact_group ID: unable to find an ID in %q: %w", string(*cid), err)
+		return -1, fmt.Errorf("invalid contact_group ID: unable to find an ID in %q: %w", *cid, err)
 	}
 
 	return contactGroupID, nil
@@ -76,7 +75,7 @@ func flattenList(l []interface{}) []*string {
 	return vals
 }
 
-// flattenSet flattens the values in a schema.Set and returns a []*string
+// flattenSet flattens the values in a schema.Set and returns a []*string.
 func flattenSet(s *schema.Set) []*string {
 	return flattenList(s.List())
 }
@@ -143,13 +142,13 @@ func indirect(v interface{}) interface{} {
 	}
 }
 
-func suppressEquivalentTimeDurations(k, old, new string, d *schema.ResourceData) bool {
+func suppressEquivalentTimeDurations(k, old, update string, d *schema.ResourceData) bool {
 	d1, err := time.ParseDuration(old)
 	if err != nil {
 		return false
 	}
 
-	d2, err := time.ParseDuration(new)
+	d2, err := time.ParseDuration(update)
 	if err != nil {
 		return false
 	}

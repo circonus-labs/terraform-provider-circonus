@@ -45,7 +45,7 @@ func TestAccCirconusCheckMySQL_basic(t *testing.T) {
 
 const testAccCirconusCheckMySQLConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 

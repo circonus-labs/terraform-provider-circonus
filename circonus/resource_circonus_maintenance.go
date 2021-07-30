@@ -118,23 +118,34 @@ func maintenanceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(m.CID)
-	if m.Type == "account" {
+
+	switch m.Type {
+	case "account":
 		_ = d.Set("account", m.Item)
-	} else if m.Type == "rule_set" {
+	case "rule_set":
 		_ = d.Set("rule_set", m.Item)
-	} else if m.Type == "check" {
+	case "check":
 		_ = d.Set("check", m.Item)
-	} else if m.Type == "host" {
+	case "host":
 		_ = d.Set("target", m.Item)
 	}
 
 	_ = d.Set("notes", m.Notes)
-	_ = d.Set("severities", m.Severities.([]interface{}))
+
+	sevs := make([]string, 0)
+	if len(m.Severities.([]interface{})) > 0 {
+		for _, s := range m.Severities.([]interface{}) {
+			sevs = append(sevs, fmt.Sprintf("%d", int64(s.(float64))))
+		}
+	}
+	_ = d.Set("severities", sevs)
+
 	start := time.Unix(int64(m.Start), 0)
 	stop := time.Unix(int64(m.Stop), 0)
 
 	_ = d.Set("start", start.Format(time.RFC3339))
 	_ = d.Set("stop", stop.Format(time.RFC3339))
+
 	tags := make([]interface{}, 0)
 	if len(m.Tags) > 0 {
 		for _, t := range m.Tags {
@@ -142,6 +153,7 @@ func maintenanceRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	_ = d.Set("tags", tags)
+
 	return nil
 }
 
@@ -199,7 +211,6 @@ func loadMaintenance(ctxt *providerContext, cid api.CIDType) (circonusMaintenanc
 }
 
 func (m *circonusMaintenance) ParseConfig(d *schema.ResourceData) error {
-
 	if v, found := d.GetOk("account"); found && v.(string) != "" {
 		m.Item = v.(string)
 		m.Type = "account"

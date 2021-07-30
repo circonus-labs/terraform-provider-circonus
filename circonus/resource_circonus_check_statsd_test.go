@@ -51,7 +51,7 @@ func TestAccCirconusCheckStatsd_basic(t *testing.T) {
 
 const testAccCirconusCheckStatsdConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "app:consul", "author:terraform", "lifecycle:unittest", "source:statsd" ]
 }
 

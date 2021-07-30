@@ -185,12 +185,13 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 		f := make(map[string]interface{}, 3)
 		f["expression"] = formula.Expression.(string)
 		t := reflect.TypeOf(formula.RaiseSeverity)
-		if t.String() == "uint" {
+		switch t.String() {
+		case "uint":
 			f["raise_severity"] = int(formula.RaiseSeverity.(uint))
-		} else if t.String() == "string" {
+		case "string":
 			s, _ := strconv.ParseInt(formula.RaiseSeverity.(string), 10, 32)
 			f["raise_severity"] = s
-		} else {
+		default:
 			f["raise_severity"] = int(formula.RaiseSeverity.(float64))
 		}
 		f["wait"] = int(formula.Wait)
@@ -402,9 +403,11 @@ type conditionSorter struct {
 func (s *conditionSorter) Len() int {
 	return len(s.conditions)
 }
+
 func (s *conditionSorter) Swap(i, j int) {
 	s.conditions[i], s.conditions[j] = s.conditions[j], s.conditions[i]
 }
+
 func (s *conditionSorter) Less(i, j int) bool {
 	m := s.conditions[i].(map[string]interface{})
 	n := s.conditions[j].(map[string]interface{})
@@ -415,7 +418,6 @@ func (s *conditionSorter) Less(i, j int) bool {
 // Circonus RuleSetGroup object.  ParseConfig, ruleSetGroupRead(), and ruleSetGroupChecksum
 // must be kept in sync.
 func (rsg *circonusRuleSetGroup) ParseConfig(d *schema.ResourceData) error {
-
 	if v, found := d.GetOk("name"); found {
 		rsg.Name = v.(string)
 	}
@@ -501,7 +503,6 @@ func (rsg *circonusRuleSetGroup) Update(ctxt *providerContext) error {
 }
 
 func (rsg *circonusRuleSetGroup) Validate() error {
-
 	log.Printf("RuleSetGroup: %v\n", rsg)
 
 	return nil

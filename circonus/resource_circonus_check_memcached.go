@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// circonus_check.memcached.* resource attribute names
+	// circonus_check.memcached.* resource attribute names.
 	checkMemcachedPortAttr = "port"
 )
 
@@ -59,7 +59,7 @@ func checkAPIToStateMemcached(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckICMPPing creates a stable hash of the normalized values
+// hashCheckICMPPing creates a stable hash of the normalized values.
 func hashCheckMemcached(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -79,7 +79,7 @@ func hashCheckMemcached(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIMemcached(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIMemcached(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeMemcached)
 
 	// Iterate over all `memcached` attributes, even though we have a max of 1 in
@@ -90,7 +90,6 @@ func checkConfigToAPIMemcached(c *circonusCheck, l interfaceList) error {
 		if v, found := memcachedConfig[checkMemcachedPortAttr]; found {
 			c.Config[config.Port] = fmt.Sprintf("%d", v.(int))
 		}
-
 	}
 
 	return nil

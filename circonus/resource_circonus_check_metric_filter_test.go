@@ -59,7 +59,7 @@ func TestAccCirconusCheckMetricFilter_basic(t *testing.T) {
 
 const testAccCirconusCheckMetricFilterConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 resource "circonus_check" "metric_filter" {

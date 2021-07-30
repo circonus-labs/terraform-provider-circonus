@@ -121,9 +121,9 @@ func overlaySetCreate(d *schema.ResourceData, meta interface{}) error {
 func overlaySetExists(d *schema.ResourceData, meta interface{}) (bool, error) {
 	ctxt := meta.(*providerContext)
 
-	if graph_cid, found := d.GetOk("graph_cid"); found {
+	if graphCID, found := d.GetOk("graph_cid"); found {
 		id := d.Id()
-		s := graph_cid.(string)
+		s := graphCID.(string)
 		g, err := ctxt.client.FetchGraph(api.CIDType(&s))
 		if err != nil {
 			if strings.Contains(err.Error(), defaultCirconus404ErrorString) {
@@ -156,19 +156,19 @@ func overlaySetRead(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 
 	id := d.Id()
-	if graph_cid, found := d.GetOk("graph_cid"); found {
-		s := graph_cid.(string)
+	if graphCID, found := d.GetOk("graph_cid"); found {
+		s := graphCID.(string)
 		g, err := loadOverlaySet(ctxt, api.CIDType(&s), id)
 		if err != nil {
 			return err
 		}
 
-		_ = d.Set("graph_cid", graph_cid)
+		_ = d.Set("graph_cid", graphCID)
 		_ = d.Set("title", g.GraphOverlaySet.Title)
 
-		dOverlays := make([]map[string]interface{}, len(g.GraphOverlaySet.Overlays))
+		dOverlays := make([]map[string]interface{}, 0, len(g.GraphOverlaySet.Overlays))
 		for _, overlay := range g.GraphOverlaySet.Overlays {
-			this_overlay := make(map[string]interface{}, 4)
+			thisOverlay := make(map[string]interface{}, 4)
 
 			uiSpecs := make(map[string]interface{}, 5)
 			uiSpecs["decouple"] = overlay.UISpecs.Decouple
@@ -177,12 +177,12 @@ func overlaySetRead(d *schema.ResourceData, meta interface{}) error {
 			uiSpecs["id"] = overlay.UISpecs.ID
 			uiSpecs["z"] = overlay.UISpecs.Z
 
-			this_overlay["id"] = overlay.ID
-			this_overlay["title"] = overlay.Title
+			thisOverlay["id"] = overlay.ID
+			thisOverlay["title"] = overlay.Title
 
 			set := make([]map[string]interface{}, 1)
 			set[0] = uiSpecs
-			this_overlay["ui_specs"] = set
+			thisOverlay["ui_specs"] = set
 
 			dataOpts := make(map[string]interface{}, 3)
 			dataOpts["graph_title"] = overlay.DataOpts.GraphTitle
@@ -191,9 +191,9 @@ func overlaySetRead(d *schema.ResourceData, meta interface{}) error {
 
 			set = make([]map[string]interface{}, 1)
 			set[0] = dataOpts
-			this_overlay["data_opt"] = set
+			thisOverlay["data_opt"] = set
 
-			dOverlays = append(dOverlays, this_overlay)
+			dOverlays = append(dOverlays, thisOverlay)
 		}
 		_ = d.Set("overlays", dOverlays)
 		return nil
@@ -220,9 +220,9 @@ func overlaySetUpdate(d *schema.ResourceData, meta interface{}) error {
 func overlaySetDelete(d *schema.ResourceData, meta interface{}) error {
 	ctxt := meta.(*providerContext)
 
-	if graph_cid, found := d.GetOk("graph_cid"); found {
+	if graphCID, found := d.GetOk("graph_cid"); found {
 		id := d.Id()
-		s := graph_cid.(string)
+		s := graphCID.(string)
 		var graph *api.Graph
 		var err error
 		if graph, err = ctxt.client.FetchGraph(api.CIDType(&s)); err != nil {
@@ -260,9 +260,9 @@ func newOverlaySet() circonusOverlaySet {
 	return g
 }
 
-func loadOverlaySet(ctxt *providerContext, graph_cid api.CIDType, set_id string) (circonusOverlaySet, error) {
+func loadOverlaySet(ctxt *providerContext, graphCID api.CIDType, setID string) (circonusOverlaySet, error) {
 	var g circonusOverlaySet
-	ng, err := ctxt.client.FetchGraph(graph_cid)
+	ng, err := ctxt.client.FetchGraph(graphCID)
 	if err != nil {
 		return circonusOverlaySet{}, err
 	}
@@ -270,16 +270,15 @@ func loadOverlaySet(ctxt *providerContext, graph_cid api.CIDType, set_id string)
 		return circonusOverlaySet{}, nil
 	}
 
-	g.OverlaySetID = set_id
-	g.GraphOverlaySet = (*ng.OverlaySets)[set_id]
-	g.GraphCID = *graph_cid
+	g.OverlaySetID = setID
+	g.GraphOverlaySet = (*ng.OverlaySets)[setID]
+	g.GraphCID = *graphCID
 	return g, nil
 }
 
 // ParseConfig reads Terraform config data and stores the information into a
 // Circonus OverlaySet object.  ParseConfig and graphRead() must be kept in sync.
 func (g *circonusOverlaySet) ParseConfig(d *schema.ResourceData) error {
-
 	if v, found := d.GetOk("title"); found {
 		g.GraphOverlaySet.Title = v.(string)
 	}
@@ -339,7 +338,6 @@ func (g *circonusOverlaySet) ParseConfig(d *schema.ResourceData) error {
 }
 
 func (g *circonusOverlaySet) Create(ctxt *providerContext) error {
-
 	gg, err := ctxt.client.FetchGraph(api.CIDType(&g.GraphCID))
 	if err != nil {
 		return err

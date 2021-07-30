@@ -114,7 +114,7 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 
 const testAccCirconusCheckHTTPConfigFmt = `
 variable "http_check_tags" {
-  type = "list"
+  type = list(string)
   default = [ "app:circonus", "app:jezebel", "lifecycle:unittest", "source:circonus" ]
 }
 

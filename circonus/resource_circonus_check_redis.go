@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// circonus_check.redis.* resource attribute names
+	// circonus_check.redis.* resource attribute names.
 	checkRedisCommandAttr  = "command"
 	checkRedisDbIndexAttr  = "db_index"
 	checkRedisPasswordAttr = "password"
@@ -151,7 +151,7 @@ func hashCheckRedis(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIRedis(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIRedis(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeRedis)
 
 	// Iterate over all `tcp` attributes, even though we have a max of 1 in the
@@ -174,7 +174,6 @@ func checkConfigToAPIRedis(c *circonusCheck, l interfaceList) error {
 		if v, found := redisConfig[checkRedisPortAttr]; found {
 			c.Config[config.Port] = fmt.Sprintf("%d", v.(int))
 		}
-
 	}
 
 	return nil

@@ -11,15 +11,15 @@ import (
 )
 
 const (
-	// circonus_check.postgresql.* resource attribute names
+	// circonus_check.postgresql.* resource attribute names.
 	checkPostgreSQLDSNAttr = "dsn"
 	// checkPostgreSQLHostAttr      = "host"
 	// checkPostgreSQLNameAttr      = "name"
 	// checkPostgreSQLPasswordAttr  = "password"
-	// checkPostgreSQLPortAttr      = "port"
+	// checkPostgreSQLPortAttr      = "port".
 	checkPostgreSQLQueryAttr = "query"
 	// checkPostgreSQLSSLModeAttr   = "sslmode"
-	// checkPostgreSQLUserAttr      = "user"
+	// checkPostgreSQLUserAttr      = "user".
 )
 
 var checkPostgreSQLDescriptions = attrDescrs{
@@ -111,7 +111,7 @@ func checkAPIToStatePostgreSQL(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckPostgreSQL creates a stable hash of the normalized values
+// hashCheckPostgreSQL creates a stable hash of the normalized values.
 func hashCheckPostgreSQL(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -144,7 +144,7 @@ func hashCheckPostgreSQL(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPIPostgreSQL(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPIPostgreSQL(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypePostgreSQL)
 
 	// Iterate over all `postgres` attributes, even though we have a max of 1 in

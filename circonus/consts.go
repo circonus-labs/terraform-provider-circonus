@@ -1,16 +1,16 @@
 package circonus
 
 const (
-	// Provider-level constants
+	// Provider-level constants.
 
 	// defaultAutoTag determines the default behavior of circonus.auto_tag.
 	defaultAutoTag = false
 
 	// When auto_tag is enabled, the default tag category and value will be set to
-	// the following value unless overriden.
+	// the following value unless overridden.
 	defaultCirconusTag circonusTag = "author:terraform"
 
-	// When hashing a Set, default to a buffer this size
+	// When hashing a Set, default to a buffer this size.
 	defaultHashBufSize = 512
 
 	providerAPIURLAttr  = "api_url"
@@ -57,12 +57,12 @@ const (
 
 	defaultDashboardWidgets = 1
 
-	// defaultRuleSetLast       = "300s"
+	// defaultRuleSetLast       = "300s".
 	defaultRuleSetMetricType = "numeric"
 	defaultRuleSetRuleLen    = 4
 	defaultAlertSeverity     = 1
 	// defaultRuleSetWindowFunc = "average"
-	// ruleSetAbsentMin         = "70s"
+	// ruleSetAbsentMin         = "70s".
 
 	defaultWorkspaceFavourite = false
 )

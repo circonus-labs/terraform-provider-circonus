@@ -75,7 +75,7 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 				),
 			},
 			{ // force modification of graph description, test updating the graph
-				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, checkName, graphName, "foo"),
+				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, checkName, graphName, " foo"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "name", graphName),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "description", "Terraform Test: mixed graph foo"),
@@ -172,7 +172,7 @@ func checkGraphExists(c *providerContext, graphID api.CIDType) (bool, error) {
 
 const testAccCirconusGraphConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "author:terraform", "lifecycle:unittest" ]
 }
 
@@ -205,7 +205,7 @@ resource "circonus_check" "api_latency" {
 
 resource "circonus_graph" "mixed-points" {
   name = "%s"
-  description = "Terraform Test: mixed graph %s"
+  description = "Terraform Test: mixed graph%s"
   notes = "test notes"
   graph_style = "line"
   line_style = "stepped"

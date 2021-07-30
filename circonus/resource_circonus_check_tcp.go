@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// circonus_check.tcp.* resource attribute names
+	// circonus_check.tcp.* resource attribute names.
 	checkTCPBannerRegexpAttr = "banner_regexp"
 	checkTCPCAChainAttr      = "ca_chain"
 	checkTCPCertFileAttr     = "certificate_file"
@@ -169,7 +169,7 @@ func checkAPIToStateTCP(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckTCP creates a stable hash of the normalized values
+// hashCheckTCP creates a stable hash of the normalized values.
 func hashCheckTCP(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -208,7 +208,7 @@ func hashCheckTCP(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPITCP(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPITCP(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeTCP)
 
 	// Iterate over all `tcp` attributes, even though we have a max of 1 in the

@@ -7,11 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-type circonusTag string
-type circonusTags []circonusTag
+type (
+	circonusTag  string
+	circonusTags []circonusTag
+)
 
 // tagMakeConfigSchema returns a schema pointer to the necessary tag structure.
-func tagMakeConfigSchema(tagAttrName schemaAttr) *schema.Schema {
+func tagMakeConfigSchema(tagAttrName schemaAttr) *schema.Schema { //nolint:unparam
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,

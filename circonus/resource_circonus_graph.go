@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	// circonus_graph.* resource attribute names
+	// circonus_graph.* resource attribute names.
 	graphDescriptionAttr   = "description"
 	graphLeftAttr          = "left"
 	graphLineStyleAttr     = "line_style"
@@ -25,7 +26,7 @@ const (
 	graphTagsAttr          = "tags"
 	graphGuidesAttr        = "guide"
 
-	// circonus_graph.metric.* resource attribute names
+	// circonus_graph.metric.* resource attribute names.
 	graphMetricActiveAttr        = "active"
 	graphMetricAlphaAttr         = "alpha"
 	graphMetricAxisAttr          = "axis"
@@ -35,13 +36,13 @@ const (
 	graphMetricColorAttr         = "color"
 	graphMetricFormulaAttr       = "formula"
 	graphMetricFormulaLegendAttr = "legend_formula"
-	graphMetricFunctionAttr      = "function"
+	graphMetricFunctionAttr      = "function" // derive
 	graphMetricHumanNameAttr     = "name"
 	graphMetricMetricTypeAttr    = "metric_type"
 	graphMetricNameAttr          = "metric_name"
 	graphMetricStackAttr         = "stack"
 
-	// circonus_graph.metric_cluster.* resource attribute names
+	// circonus_graph.metric_cluster.* resource attribute names.
 	graphMetricClusterActiveAttr    = "active"
 	graphMetricClusterAggregateAttr = "aggregate"
 	graphMetricClusterAxisAttr      = "axis"
@@ -49,12 +50,12 @@ const (
 	graphMetricClusterQueryAttr     = "query"
 	graphMetricClusterHumanNameAttr = "name"
 
-	// circonus_graph.{left,right}.* resource attribute names
+	// circonus_graph.{left,right}.* resource attribute names.
 	graphAxisLogarithmicAttr = "logarithmic"
 	graphAxisMaxAttr         = "max"
 	graphAxisMinAttr         = "min"
 
-	// circonus_graph.guide.* resource attribute names
+	// circonus_graph.guide.* resource attribute names.
 	graphGuideHiddenAttr        = "hidden"
 	graphGuideColorAttr         = "color"
 	graphGuideFormulaAttr       = "formula"
@@ -648,6 +649,7 @@ func loadGraph(ctxt *providerContext, cid api.CIDType) (circonusGraph, error) {
 		return circonusGraph{}, err
 	}
 	g.Graph = *ng
+	log.Printf("[loadGraph] %#v\n", *ng)
 
 	return g, nil
 }
@@ -1061,6 +1063,8 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			g.Guides = append(g.Guides, guide)
 		}
 	}
+
+	log.Printf("[ParseConfig] %#v\n", g.Graph)
 
 	if err := g.Validate(); err != nil {
 		return err

@@ -8,14 +8,12 @@ package circonus
 // result to a struct.  Said differently, contained tedium should enable
 // compiler enforcement of types and easy verification.
 
-type apiCheckType string
-
-type attrDescr string
-type attrDescrs map[schemaAttr]attrDescr
-
-type schemaAttr string
-
-type metricID string
-
-type validString string
-type validStringValues []validString
+type (
+	apiCheckType      string
+	attrDescr         string
+	attrDescrs        map[schemaAttr]attrDescr
+	schemaAttr        string
+	metricID          string
+	validString       string
+	validStringValues []validString
+)

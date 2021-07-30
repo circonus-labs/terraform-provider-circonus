@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// circonus_check.consul.* resource attribute names
+	// circonus_check.consul.* resource attribute names.
 	checkConsulACLTokenAttr             = "acl_token"
 	checkConsulAllowStaleAttr           = "allow_stale"
 	checkConsulCAChainAttr              = "ca_chain"
@@ -257,7 +257,7 @@ func checkAPIToStateConsul(c *circonusCheck, d *schema.ResourceData) error {
 
 	saveStringConfigToState(config.KeyFile, checkConsulKeyFileAttr)
 
-	// Process the headers last in order to provide an escape hatch capible of
+	// Process the headers last in order to provide an escape hatch capable of
 	// overriding any other derived value above.
 	for k, v := range c.Config {
 		if len(k) <= headerPrefixLen {

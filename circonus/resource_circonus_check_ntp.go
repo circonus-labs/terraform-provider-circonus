@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// circonus_check.ntp.* resource attribute names
+	// circonus_check.ntp.* resource attribute names.
 	checkNTPPortAttr       = "port"
 	checkNTPUseControlAttr = "use_control"
 )
@@ -63,7 +63,7 @@ func checkAPIToStateNTP(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckNTP creates a stable hash of the normalized values
+// hashCheckNTP creates a stable hash of the normalized values.
 func hashCheckNTP(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -88,7 +88,7 @@ func hashCheckNTP(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPINTP(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPINTP(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeNTP)
 
 	mapRaw := l[0]

@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	// circonus_check.statsd.* resource attribute names
+	// circonus_check.statsd.* resource attribute names.
 	checkStatsdSourceIPAttr = "source_ip"
 )
 

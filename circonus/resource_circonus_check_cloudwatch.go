@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// circonus_check.cloudwatch.* resource attribute names
+	// circonus_check.cloudwatch.* resource attribute names.
 	checkCloudWatchAPIKeyAttr      = "api_key"
 	checkCloudWatchAPISecretAttr   = "api_secret"
 	checkCloudWatchDimmensionsAttr = "dimmensions"
@@ -161,7 +161,7 @@ func checkAPIToStateCloudWatch(c *circonusCheck, d *schema.ResourceData) error {
 	return nil
 }
 
-// hashCheckCloudWatch creates a stable hash of the normalized values
+// hashCheckCloudWatch creates a stable hash of the normalized values.
 func hashCheckCloudWatch(v interface{}) int {
 	m := v.(map[string]interface{})
 	b := &bytes.Buffer{}
@@ -209,7 +209,7 @@ func hashCheckCloudWatch(v interface{}) int {
 	return hashcode.String(s)
 }
 
-func checkConfigToAPICloudWatch(c *circonusCheck, l interfaceList) error {
+func checkConfigToAPICloudWatch(c *circonusCheck, l interfaceList) error { //nolint:unparam
 	c.Type = string(apiCheckTypeCloudWatchAttr)
 
 	// Iterate over all `cloudwatch` attributes, even though we have a max of 1 in the

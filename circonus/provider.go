@@ -33,7 +33,7 @@ var providerDescription = map[string]string{
 	providerKeyAttr:     "API token used to authenticate with the Circonus API",
 }
 
-// Constants that want to be a constant but can't in Go
+// Constants that want to be a constant but can't in Go.
 var (
 	validContactHTTPFormats = validStringValues{"json", "params"}
 	validContactHTTPMethods = validStringValues{"GET", "POST"}
@@ -47,17 +47,15 @@ type contactMethods string
 // NOTE(sean): This is done as a global variable because the diff suppress
 // functions does not have access to the providerContext, only the key, old, and
 // new values.
-var globalAutoTag bool
+var globalAutoTag bool //nolint:unused
 
 type providerContext struct {
 	// Circonus API client
 	client *api.API
-
-	// autoTag, when true, automatically appends defaultCirconusTag
-	autoTag bool
-
 	// defaultTag make up the tag to be used when autoTag tags a tag.
 	defaultTag circonusTag
+	// autoTag, when true, automatically appends defaultCirconusTag
+	autoTag bool
 }
 
 // Provider returns a terraform.ResourceProvider.
@@ -113,7 +111,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	globalAutoTag = d.Get(providerAutoTagAttr).(bool)
 
 	envLevel := os.Getenv("TF_LOG")
-	var debug = false
+	debug := false
 	if envLevel != "" {
 		debug = true
 	}

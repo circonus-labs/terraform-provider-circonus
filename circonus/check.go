@@ -17,7 +17,7 @@ type circonusCheck struct {
 type circonusCheckType string
 
 const (
-	// CheckBundle.Status can be one of these values
+	// CheckBundle.Status can be one of these values.
 	checkStatusActive   = "active"
 	checkStatusDisabled = "disabled"
 )
@@ -103,8 +103,7 @@ func (c *circonusCheck) Update(ctxt *providerContext) error {
 }
 
 func (c *circonusCheck) Fixup() error {
-	switch apiCheckType(c.Type) {
-	case apiCheckTypeCloudWatchAttr:
+	if apiCheckType(c.Type) == apiCheckTypeCloudWatchAttr {
 		switch c.Period {
 		case 60:
 			c.Config[config.Granularity] = "1"

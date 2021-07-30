@@ -10,14 +10,13 @@ import (
 
 func TestAccCirconusCheckCAQL_basic(t *testing.T) {
 	checkName := fmt.Sprintf("Consul's Go GC latency (Merged Histogram) - %s", acctest.RandString(5))
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckCAQLConfigFmt, checkName),
+				Config: fmt.Sprintf(string(testAccCirconusCheckCAQLConfigFmt), checkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "collector.#", "1"),
@@ -43,7 +42,7 @@ func TestAccCirconusCheckCAQL_basic(t *testing.T) {
 
 const testAccCirconusCheckCAQLConfigFmt = `
 variable "test_tags" {
-  type = "list"
+  type = list(string)
   default = [ "app:consul", "author:terraform", "lifecycle:unittest", "source:goruntime" ]
 }
 
