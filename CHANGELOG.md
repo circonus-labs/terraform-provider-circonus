@@ -1,3 +1,10 @@
+## 0.12.2 (September 15, 2021)
+
+CHANGES:
+
+* fix: rule set group expression can be string or numeric,
+  use interface for api, convert to string for state file
+
 ## 0.12.1 (September 15, 2021)
 
 CHANGES:
