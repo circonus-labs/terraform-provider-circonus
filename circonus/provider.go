@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -110,9 +111,8 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	globalAutoTag = d.Get(providerAutoTagAttr).(bool)
 
-	envLevel := os.Getenv("TF_LOG")
 	debug := false
-	if envLevel != "" {
+	if strings.Contains("TRACE|DEBUG", os.Getenv("TF_LOG")) { //nolint:gocritic
 		debug = true
 	}
 
@@ -123,12 +123,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	}
 
 	if debug {
-		config.Debug = true
-		config.Log = log.New(log.Writer(), "", log.LstdFlags)
-	}
-
-	// turn on logging if terraform log level set to debug
-	if os.Getenv("TF_LOG") == "DEBUG" {
 		config.Debug = true
 		config.Log = log.New(log.Writer(), "", log.LstdFlags)
 	}
