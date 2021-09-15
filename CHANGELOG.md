@@ -1,3 +1,24 @@
+## 0.12.1 (September 15, 2021)
+
+CHANGES:
+
+* fix: rule set group expression can be string or numeric, use interface
+* upd: var for update ruleset test
+* upd: var names for graph update test
+* upd: api debug log if TF_LOG DEBUG or TRACE
+* upd: lint errors/warnings
+* add: lint config
+
+UPDATES:
+
+* build(deps): bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.6.1 to 2.7.0
+* build(deps): bump github.com/circonus-labs/go-apiclient from 0.7.14 to 0.7.15
+* build(deps): bump github.com/circonus-labs/go-apiclient from 0.7.13 to 0.7.14
+* build(deps): bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.5.0 to 2.6.1
+* build(deps): bump github.com/circonus-labs/go-apiclient from 0.7.11 to 0.7.13
+* build(deps): bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.4.4 to 2.5.0
+* build(deps): bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.4.3 to 2.4.4
+
 ## 0.12.0 (March 19, 2021)
 
 CHANGES:
