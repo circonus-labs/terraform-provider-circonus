@@ -183,7 +183,7 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 	formulas := make([]interface{}, 0, 1)
 	for _, formula := range rsg.Formulas {
 		f := make(map[string]interface{}, 3)
-		f["expression"] = formula.Expression
+		f["expression"] = fmt.Sprintf("%v", formula.Expression)
 		t := reflect.TypeOf(formula.RaiseSeverity)
 		switch t.String() {
 		case "uint":
@@ -442,7 +442,7 @@ func (rsg *circonusRuleSetGroup) ParseConfig(d *schema.ResourceData) error {
 		for _, f := range x {
 			m := f.(map[string]interface{})
 			rsgf := api.RuleSetGroupFormula{}
-			rsgf.Expression = m["expression"].(string)
+			rsgf.Expression = m["expression"]
 			rsgf.RaiseSeverity = uint(m["raise_severity"].(int))
 			rsgf.Wait = uint(m["wait"].(int))
 			rsg.Formulas = append(rsg.Formulas, rsgf)
