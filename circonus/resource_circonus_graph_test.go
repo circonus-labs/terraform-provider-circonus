@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	graphName = fmt.Sprintf("Test Graph - %s", acctest.RandString(5))
-	checkName = fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
+	graphName      = fmt.Sprintf("Test Graph - %s", acctest.RandString(5))
+	graphCheckName = fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
 )
 
 func TestAccCirconusGraph_basic(t *testing.T) {
@@ -23,7 +23,7 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusGraph,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, checkName, graphName, ""),
+				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, graphCheckName, graphName, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "name", graphName),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "description", "Terraform Test: mixed graph"),
@@ -75,7 +75,7 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 				),
 			},
 			{ // force modification of graph description, test updating the graph
-				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, checkName, graphName, " foo"),
+				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, graphCheckName, graphName, " foo"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "name", graphName),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "description", "Terraform Test: mixed graph foo"),
