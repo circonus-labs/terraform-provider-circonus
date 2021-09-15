@@ -11,16 +11,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCirconusRuleSet_basic(t *testing.T) {
-	checkName := fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
+var rulesetCheckName = fmt.Sprintf("ICMP Ping check - %s", acctest.RandString(5))
 
+func TestAccCirconusRuleSet_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCirconusRuleSet,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusRuleSetConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusRuleSetConfigFmt, rulesetCheckName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "check"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "metric_name", "maximum"),
@@ -84,6 +84,42 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.#", "2"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.blank-user-json-test", "user_json", "{}"),
+
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.#", "3"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccCirconusRuleSetConfigUpdateFmt, rulesetCheckName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("circonus_rule_set.circ-6825", "check"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "metric_name", "average"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "metric_type", "numeric"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "notes", "CIRC-6825"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.#", "3"),
+
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.0.value.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.0.value.0.absent", "300"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.0.value.0.over.#", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.0.then.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.0.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.0.then.0.severity", "1"),
+
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.1.value.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.1.value.0.absent", "120"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.1.value.0.over.#", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.1.then.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.1.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.1.then.0.severity", "4"),
+
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.value.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.value.0.over.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.value.0.over.0.atleast", "0"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.value.0.over.0.last", "180"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.value.0.over.0.using", "average"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.value.0.max_value", "8000"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.then.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.then.0.notify.#", "1"),
+					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.2.then.0.severity", "2"),
 				),
 			},
 		},
@@ -150,6 +186,11 @@ resource "circonus_check" "api_latency" {
   }
 
   metric {
+    name = "average"
+    type = "numeric"
+  }
+
+  metric {
     name = "maximum"
     type = "numeric"
   }
@@ -193,7 +234,6 @@ EOF
   }
 
   if {
-
     value {
       over {
         atleast = "30"
@@ -289,6 +329,143 @@ EOF
         "/contact_group/4679"
       ]
       severity = 1
+    }
+  }
+
+  tags = "${var.test_tags}"
+}
+
+resource "circonus_rule_set" "circ-6825" {
+  check = "${circonus_check.api_latency.checks[0]}"
+  metric_name = "average"
+  notes = <<-EOF
+CIRC-6825
+EOF
+
+  if {
+    value {
+      absent = "300"
+    }
+    then {
+      severity = 1
+      notify = [
+        "/contact_group/4680",
+      ]
+    }
+  }
+  if {
+    value {
+      absent = "70"
+    }
+    then {
+      severity = 4
+      notify = [
+        "/contact_group/4680",
+      ]
+    }
+  }
+  if {
+    value {
+      max_value = "8000"
+      over {
+        atleast = "0"
+        last    = "180"
+        using   = "average"
+      }
+    }
+    then {
+      notify = [
+        "/contact_group/4680",
+      ]
+      severity = 2
+    }
+  }
+
+  tags = "${var.test_tags}"
+}
+`
+
+const testAccCirconusRuleSetConfigUpdateFmt = `
+variable "test_tags" {
+  type = list(string)
+  default = [ "author:terraform", "lifecycle:unittest" ]
+}
+
+resource "circonus_check" "api_latency" {
+  active = true
+  name = "%s"
+  period = "60s"
+
+  collector {
+    id = "/broker/1"
+  }
+
+  icmp_ping {
+    count = 1
+  }
+
+  metric {
+    name = "average"
+    type = "numeric"
+  }
+
+  metric {
+    name = "maximum"
+    type = "numeric"
+  }
+
+  metric {
+    name = "minimum"
+    type = "numeric"
+  }
+
+  tags = "${var.test_tags}"
+  target = "api.circonus.com"
+}
+
+resource "circonus_rule_set" "circ-6825" {
+  check = "${circonus_check.api_latency.checks[0]}"
+  metric_name = "average"
+  notes = <<-EOF
+CIRC-6825
+EOF
+
+  if {
+    value {
+      absent = "300"
+    }
+    then {
+      severity = 1
+      notify = [
+        "/contact_group/4680",
+      ]
+    }
+  }
+  if {
+    value {
+      absent = "120"
+    }
+    then {
+      severity = 4
+      notify = [
+        "/contact_group/4680",
+      ]
+    }
+  }
+  if {
+    value {
+      max_value = "8000"
+      over {
+        atleast = "0"
+        last    = "180"
+        using   = "average"
+      }
+    }
+    then {
+      notify = [
+        "/contact_group/4680",
+      ]
+      severity = 2
     }
   }
 
