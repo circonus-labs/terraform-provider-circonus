@@ -183,7 +183,7 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 	formulas := make([]interface{}, 0, 1)
 	for _, formula := range rsg.Formulas {
 		f := make(map[string]interface{}, 3)
-		f["expression"] = formula.Expression.(string)
+		f["expression"] = formula.Expression
 		t := reflect.TypeOf(formula.RaiseSeverity)
 		switch t.String() {
 		case "uint":
