@@ -1,10 +1,11 @@
 package circonus
 
 import (
-	"fmt"
+	"context"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -43,24 +44,10 @@ var accountDescription = map[schemaAttr]string{
 
 func dataSourceCirconusAccount() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCirconusAccountRead,
+		ReadContext: dataSourceCirconusAccountRead,
 
 		Schema: map[string]*schema.Schema{
-			accountAddress1Attr: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: accountDescription[accountAddress1Attr],
-			},
-			accountAddress2Attr: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: accountDescription[accountAddress2Attr],
-			},
-			accountCCEmailAttr: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: accountDescription[accountCCEmailAttr],
-			},
+			// _cid
 			accountIDAttr: {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -71,22 +58,7 @@ func dataSourceCirconusAccount() *schema.Resource {
 				),
 				Description: accountDescription[accountIDAttr],
 			},
-			accountCityAttr: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: accountDescription[accountCityAttr],
-			},
-			accountContactGroupsAttr: {
-				Type:        schema.TypeList,
-				Computed:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: accountDescription[accountContactGroupsAttr],
-			},
-			accountCountryAttr: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: accountDescription[accountCountryAttr],
-			},
+			// determines whether to pull /account/current or specific cid
 			accountCurrentAttr: {
 				Type:          schema.TypeBool,
 				Optional:      true,
@@ -94,11 +66,90 @@ func dataSourceCirconusAccount() *schema.Resource {
 				ConflictsWith: []string{accountIDAttr},
 				Description:   accountDescription[accountCurrentAttr],
 			},
+			// _countact_groups
+			accountContactGroupsAttr: {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: accountDescription[accountContactGroupsAttr],
+			},
+			// _owner
+			accountOwnerAttr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountOwnerAttr],
+			},
+			// _ui_base_url
+			accountUIBaseURLAttr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountUIBaseURLAttr],
+			},
+			// _usage
+			accountUsageAttr: {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: accountDescription[accountUsageAttr],
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// _limit
+						accountLimitAttr: {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: accountDescription[accountLimitAttr],
+						},
+						// _type
+						accountTypeAttr: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: accountDescription[accountTypeAttr],
+						},
+						// _used
+						accountUsedAttr: {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: accountDescription[accountUsedAttr],
+						},
+					},
+				},
+			},
+			// address1
+			accountAddress1Attr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountAddress1Attr],
+			},
+			// address2
+			accountAddress2Attr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountAddress2Attr],
+			},
+			// cc_email
+			accountCCEmailAttr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountCCEmailAttr],
+			},
+			// city
+			accountCityAttr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountCityAttr],
+			},
+			// country_code
+			accountCountryAttr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountCountryAttr],
+			},
+			// description
 			accountDescriptionAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: accountDescription[accountDescriptionAttr],
 			},
+			// invites
 			accountInvitesAttr: {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -118,55 +169,25 @@ func dataSourceCirconusAccount() *schema.Resource {
 					},
 				},
 			},
+			// name
 			accountNameAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: accountDescription[accountNameAttr],
 			},
-			accountOwnerAttr: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: accountDescription[accountOwnerAttr],
-			},
+			// state_prov
 			accountStateProvAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: accountDescription[accountStateProvAttr],
 			},
+			// timezone
 			accountTimezoneAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: accountDescription[accountTimezoneAttr],
 			},
-			accountUIBaseURLAttr: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: accountDescription[accountUIBaseURLAttr],
-			},
-			accountUsageAttr: {
-				Type:        schema.TypeList,
-				Computed:    true,
-				Description: accountDescription[accountUsageAttr],
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						accountLimitAttr: {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: accountDescription[accountLimitAttr],
-						},
-						accountTypeAttr: {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: accountDescription[accountTypeAttr],
-						},
-						accountUsedAttr: {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: accountDescription[accountUsedAttr],
-						},
-					},
-				},
-			},
+			// users
 			accountUsersAttr: {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -190,13 +211,12 @@ func dataSourceCirconusAccount() *schema.Resource {
 	}
 }
 
-func dataSourceCirconusAccountRead(d *schema.ResourceData, meta interface{}) error {
-	c := meta.(*providerContext)
+// dataSourceCirconusAccountRead - map account object from API to schema.ResourceData.
+func dataSourceCirconusAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*providerContext).client
+	var diags diag.Diagnostics
 
 	var cid string
-
-	var a *api.Account
-	var err error
 	if v, ok := d.GetOk(accountIDAttr); ok {
 		cid = v.(string)
 	}
@@ -207,64 +227,87 @@ func dataSourceCirconusAccountRead(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	a, err = c.client.FetchAccount(api.CIDType(&cid))
+	acct, err := client.FetchAccount(api.CIDType(&cid))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	invitesList := make([]interface{}, 0, len(a.Invites))
-	for i := range a.Invites {
-		invitesList = append(invitesList, map[string]interface{}{
-			accountEmailAttr: a.Invites[i].Email,
-			accountRoleAttr:  a.Invites[i].Role,
-		})
+	d.SetId(acct.CID)
+	if err := d.Set(accountIDAttr, acct.CID); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountContactGroupsAttr, acct.ContactGroups); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountOwnerAttr, acct.OwnerCID); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountUIBaseURLAttr, acct.UIBaseURL); err != nil {
+		return diag.FromErr(err)
 	}
 
-	usageList := make([]interface{}, 0, len(a.Usage))
-	for i := range a.Usage {
+	usageList := make([]interface{}, 0, len(acct.Usage))
+	for i := range acct.Usage {
 		usageList = append(usageList, map[string]interface{}{
-			accountLimitAttr: a.Usage[i].Limit,
-			accountTypeAttr:  a.Usage[i].Type,
-			accountUsedAttr:  a.Usage[i].Used,
+			accountLimitAttr: acct.Usage[i].Limit,
+			accountTypeAttr:  acct.Usage[i].Type,
+			accountUsedAttr:  acct.Usage[i].Used,
 		})
 	}
-
-	usersList := make([]interface{}, 0, len(a.Users))
-	for i := range a.Users {
-		usersList = append(usersList, map[string]interface{}{
-			accountUserIDAttr: a.Users[i].UserCID,
-			accountRoleAttr:   a.Users[i].Role,
-		})
-	}
-
-	d.SetId(a.CID)
-
-	_ = d.Set(accountAddress1Attr, a.Address1)
-	_ = d.Set(accountAddress2Attr, a.Address2)
-	_ = d.Set(accountCCEmailAttr, a.CCEmail)
-	_ = d.Set(accountIDAttr, a.CID)
-	_ = d.Set(accountCityAttr, a.City)
-	_ = d.Set(accountContactGroupsAttr, a.ContactGroups)
-	_ = d.Set(accountCountryAttr, a.Country)
-	_ = d.Set(accountDescriptionAttr, a.Description)
-
-	if err := d.Set(accountInvitesAttr, invitesList); err != nil {
-		return fmt.Errorf("Unable to store account %q attribute: %w", accountInvitesAttr, err)
-	}
-
-	_ = d.Set(accountNameAttr, a.Name)
-	_ = d.Set(accountOwnerAttr, a.OwnerCID)
-	_ = d.Set(accountStateProvAttr, a.StateProv)
-	_ = d.Set(accountTimezoneAttr, a.Timezone)
-	_ = d.Set(accountUIBaseURLAttr, a.UIBaseURL)
-
 	if err := d.Set(accountUsageAttr, usageList); err != nil {
-		return fmt.Errorf("Unable to store account %q attribute: %w", accountUsageAttr, err)
+		return diag.FromErr(err)
 	}
 
+	if err := d.Set(accountAddress1Attr, acct.Address1); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountAddress2Attr, acct.Address2); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountCCEmailAttr, acct.CCEmail); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountCityAttr, acct.City); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountCountryAttr, acct.Country); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountDescriptionAttr, acct.Description); err != nil {
+		return diag.FromErr(err)
+	}
+
+	invitesList := make([]interface{}, 0, len(acct.Invites))
+	for i := range acct.Invites {
+		invitesList = append(invitesList, map[string]interface{}{
+			accountEmailAttr: acct.Invites[i].Email,
+			accountRoleAttr:  acct.Invites[i].Role,
+		})
+	}
+	if err := d.Set(accountInvitesAttr, invitesList); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(accountNameAttr, acct.Name); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountStateProvAttr, acct.StateProv); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountTimezoneAttr, acct.Timezone); err != nil {
+		return diag.FromErr(err)
+	}
+
+	usersList := make([]interface{}, 0, len(acct.Users))
+	for i := range acct.Users {
+		usersList = append(usersList, map[string]interface{}{
+			accountUserIDAttr: acct.Users[i].UserCID,
+			accountRoleAttr:   acct.Users[i].Role,
+		})
+	}
 	if err := d.Set(accountUsersAttr, usersList); err != nil {
-		return fmt.Errorf("Unable to store account %q attribute: %w", accountUsersAttr, err)
+		return diag.FromErr(err)
 	}
 
-	return nil
+	return diags
 }

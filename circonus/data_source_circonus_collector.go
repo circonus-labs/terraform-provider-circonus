@@ -2,7 +2,6 @@ package circonus
 
 import (
 	"context"
-	"fmt"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
@@ -21,6 +20,7 @@ const (
 	collectorLongitudeAttr    = "longitude"
 	collectorMinVersionAttr   = "min_version"
 	collectorModulesAttr      = "modules"
+	collectorDetailNameAttr   = "name"
 	collectorNameAttr         = "name"
 	collectorPortAttr         = "port"
 	collectorSkewAttr         = "skew"
@@ -40,37 +40,58 @@ func dataSourceCirconusCollector() *schema.Resource {
 		ReadContext: dataSourceCirconusCollectorRead,
 
 		Schema: map[string]*schema.Schema{
+			// _cid
+			collectorIDAttr: {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateRegexp(collectorIDAttr, config.BrokerCIDRegex),
+				Description:  collectorDescription[collectorIDAttr],
+			},
+			// _details
 			collectorDetailsAttr: {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: collectorDescription[collectorDetailsAttr],
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						// cn
 						collectorCNAttr: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: collectorDescription[collectorCNAttr],
 						},
+						// name
+						collectorDetailNameAttr: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: collectorDescription[collectorDetailNameAttr],
+						},
+						// external_host
 						collectorExternalHostAttr: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: collectorDescription[collectorExternalHostAttr],
 						},
+						// external_port
 						collectorExternalPortAttr: {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: collectorDescription[collectorExternalPortAttr],
 						},
+						// ipaddress
 						collectorIPAttr: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: collectorDescription[collectorIPAttr],
 						},
+						// minimum_version_required
 						collectorMinVersionAttr: {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: collectorDescription[collectorMinVersionAttr],
 						},
+						// modules
 						collectorModulesAttr: {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -79,21 +100,25 @@ func dataSourceCirconusCollector() *schema.Resource {
 							},
 							Description: collectorDescription[collectorModulesAttr],
 						},
+						// port
 						collectorPortAttr: {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: collectorDescription[collectorPortAttr],
 						},
+						// skew
 						collectorSkewAttr: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: collectorDescription[collectorSkewAttr],
 						},
+						// status
 						collectorStatusAttr: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: collectorDescription[collectorStatusAttr],
 						},
+						// version
 						collectorVersionAttr: {
 							Type:        schema.TypeInt,
 							Computed:    true,
@@ -102,29 +127,27 @@ func dataSourceCirconusCollector() *schema.Resource {
 					},
 				},
 			},
-			collectorIDAttr: {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateRegexp(collectorIDAttr, config.BrokerCIDRegex),
-				Description:  collectorDescription[collectorIDAttr],
-			},
+			// _latitude
 			collectorLatitudeAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: collectorDescription[collectorLatitudeAttr],
 			},
+			// _longitude
 			collectorLongitudeAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: collectorDescription[collectorLongitudeAttr],
 			},
+			// name
 			collectorNameAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: collectorDescription[collectorNameAttr],
 			},
+			// _tags
 			collectorTagsAttr: tagMakeConfigSchema(collectorTagsAttr),
+			// _type
 			collectorTypeAttr: {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -138,41 +161,45 @@ func dataSourceCirconusCollectorRead(ctx context.Context, d *schema.ResourceData
 	client := meta.(*providerContext).client
 	var diags diag.Diagnostics
 
-	var collector *api.Broker
-	var err error
 	cid := d.Id()
 	if cidRaw, ok := d.GetOk(collectorIDAttr); ok {
 		cid = cidRaw.(string)
 	}
-	collector, err = client.FetchBroker(api.CIDType(&cid))
+	broker, err := client.FetchBroker(api.CIDType(&cid))
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Error fetching brokers",
-			Detail:   fmt.Sprintf("Unable to fetch brokers: %s", err),
-		})
-		return diags
+		diag.FromErr(err)
 	}
 
-	d.SetId(collector.CID)
-
-	if err := d.Set(collectorDetailsAttr, collectorDetailsToState(collector)); err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to store broker details",
-			Detail:   fmt.Sprintf("details (%q) attribute: %s", collectorDetailsAttr, err),
-		})
-		return diags
+	d.SetId(broker.CID)
+	if err := d.Set(collectorIDAttr, broker.CID); err != nil {
+		return diag.FromErr(err)
 	}
 
-	_ = d.Set(collectorIDAttr, collector.CID)
-	_ = d.Set(collectorLatitudeAttr, collector.Latitude)
-	_ = d.Set(collectorLongitudeAttr, collector.Longitude)
-	_ = d.Set(collectorNameAttr, collector.Name)
-	_ = d.Set(collectorTagsAttr, collector.Tags)
-	_ = d.Set(collectorTypeAttr, collector.Type)
+	if err := d.Set(collectorDetailsAttr, collectorDetailsToState(broker)); err != nil {
+		return diag.FromErr(err)
+	}
 
-	return nil
+	if err := d.Set(collectorLatitudeAttr, broker.Latitude); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(collectorLongitudeAttr, broker.Longitude); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(collectorNameAttr, broker.Name); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(collectorTagsAttr, broker.Tags); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(collectorTypeAttr, broker.Type); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diags
 }
 
 func collectorDetailsToState(c *api.Broker) []interface{} {
