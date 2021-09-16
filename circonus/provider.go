@@ -3,7 +3,6 @@ package circonus
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -131,12 +130,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	client, err := api.NewAPI(config)
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Error initializing Circonus",
-			Detail:   fmt.Sprintf("Unable to initialize Circonus API client: %s", err),
-		})
-		return nil, diags
+		return nil, diag.FromErr(err)
 	}
 
 	client.EnableExponentialBackoff()
