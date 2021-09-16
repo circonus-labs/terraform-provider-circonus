@@ -236,6 +236,8 @@ resource "circonus_metric" "myapp-duration" {
   that this rule set is active on.
 
 * `tags` - (Optional) A list of tags assigned to this rule set.
+   NOTE: tags are IGNORED - any tags returned with a rule_set are check tags.
+   Any tags submitted with a rule_set are dropped.
 
 ## `if` Configuration
 
@@ -280,16 +282,14 @@ Additionally, a `numeric` check can also evaluate data based on a windowing
 function versus the last measured value in the metric stream.  In order to have
 a rule evaluate on derived value from a window, include a nested `over`
 attribute inside of the `value` configuration block.  An `over` attribute needs
-two attributes:
+three attributes:
 
-* `last` - (Optional) A duration for the sliding window.  Default `300`.
-* `atleast` - (Optional) A duration for the minimum amount of data to consider in the 
-  sliding window.  Default `0`.
-
-* `using` - (Optional) The window function to use over the `last` interval.
+* `last` - (Required) A duration for the sliding window.
+* `atleast` - (Required) A duration for the minimum amount of data to consider in the
+  sliding window.
+* `using` - (Required) The window function to use over the `last` interval.
   Valid window functions include: `average` (the default), `stddev`, `derive`,
-  `derive_stddev`, `counter`, `counter_stddev`, `derive_2`, `derive_2_stddev`,
-  `counter_2`, and `counter_2_stddev`.
+  `derive_stddev`, `counter`, and `counter_stddev`.
 
 #### `text` Predicates
 

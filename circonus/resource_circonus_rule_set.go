@@ -26,7 +26,7 @@ const (
 	ruleSetMetricNameAttr    = "metric_name"
 	ruleSetMetricPatternAttr = "metric_pattern"
 	ruleSetMetricFilterAttr  = "metric_filter"
-	ruleSetTagsAttr          = "tags"
+	// ruleSetTagsAttr          = "tags".
 
 	// circonus_rule_set.if.* resource attribute names.
 	ruleSetThenAttr  = "then"
@@ -86,8 +86,8 @@ var ruleSetDescriptions = attrDescrs{
 	ruleSetMetricNameAttr:    "The name of the metric stream within a check to register the rule set with",
 	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
 	ruleSetMetricFilterAttr:  "The tag filter a pattern match ruleset will user",
-	ruleSetTagsAttr:          "Tags associated with this rule set",
-	ruleSetIDAttr:            "out",
+	// ruleSetTagsAttr:          "Tags associated with this rule set",
+	ruleSetIDAttr: "out",
 }
 
 var ruleSetIfDescriptions = attrDescrs{
@@ -273,18 +273,21 @@ func resourceRuleSet() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: convertToHelperSchema(ruleSetIfValueOverDescriptions, map[schemaAttr]*schema.Schema{
 												ruleSetLastAttr: {
-													Type:         schema.TypeString,
-													Optional:     true,
+													Type: schema.TypeString,
+													// Optional:     true,
+													Required:     true,
 													ValidateFunc: validateRegexp(ruleSetLastAttr, "^[0-9]+$"),
 												},
 												ruleSetAtLeastAttr: {
-													Type:         schema.TypeString,
-													Optional:     true,
+													Type: schema.TypeString,
+													// Optional:     true,
+													Required:     true,
 													ValidateFunc: validateRegexp(ruleSetAtLeastAttr, "^[0-9]+$"),
 												},
 												ruleSetUsingAttr: {
-													Type:         schema.TypeString,
-													Optional:     true,
+													Type: schema.TypeString,
+													// Optional:     true,
+													Required:     true,
 													ValidateFunc: validateStringIn(ruleSetUsingAttr, validRuleSetWindowFuncs),
 												},
 											}),
@@ -374,11 +377,11 @@ func resourceRuleSet() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricFilterAttr, `^.+$`),
 			},
-			ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
-			ruleSetIDAttr: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+			// ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
+			// ruleSetIDAttr: {
+			// 	Type:     schema.TypeString,
+			// 	Computed: true,
+			// },
 		}),
 	}
 }
@@ -527,9 +530,9 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	_ = d.Set(ruleSetParentAttr, indirect(rs.Parent))
 
-	if err := d.Set(ruleSetTagsAttr, tagsToState(apiToTags(rs.Tags))); err != nil {
-		return fmt.Errorf("Unable to store rule set %q attribute: %w", ruleSetTagsAttr, err)
-	}
+	// if err := d.Set(ruleSetTagsAttr, tagsToState(apiToTags(rs.Tags))); err != nil {
+	// 	return fmt.Errorf("Unable to store rule set %q attribute: %w", ruleSetTagsAttr, err)
+	// }
 
 	return nil
 }
@@ -827,9 +830,9 @@ func (rs *circonusRuleSet) ParseConfig(d *schema.ResourceData) error {
 		}
 	}
 
-	if v, found := d.GetOk(ruleSetTagsAttr); found {
-		rs.Tags = derefStringList(flattenSet(v.(*schema.Set)))
-	}
+	// if v, found := d.GetOk(ruleSetTagsAttr); found {
+	// 	rs.Tags = derefStringList(flattenSet(v.(*schema.Set)))
+	// }
 
 	if err := rs.Validate(); err != nil {
 		return err
