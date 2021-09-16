@@ -1,10 +1,12 @@
 package circonus
 
 import (
+	"context"
 	"fmt"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -35,7 +37,7 @@ var collectorDescription = map[schemaAttr]string{
 
 func dataSourceCirconusCollector() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCirconusCollectorRead,
+		ReadContext: dataSourceCirconusCollectorRead,
 
 		Schema: map[string]*schema.Schema{
 			collectorDetailsAttr: {
@@ -132,8 +134,9 @@ func dataSourceCirconusCollector() *schema.Resource {
 	}
 }
 
-func dataSourceCirconusCollectorRead(d *schema.ResourceData, meta interface{}) error {
-	ctxt := meta.(*providerContext)
+func dataSourceCirconusCollectorRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*providerContext).client
+	var diags diag.Diagnostics
 
 	var collector *api.Broker
 	var err error
@@ -141,15 +144,25 @@ func dataSourceCirconusCollectorRead(d *schema.ResourceData, meta interface{}) e
 	if cidRaw, ok := d.GetOk(collectorIDAttr); ok {
 		cid = cidRaw.(string)
 	}
-	collector, err = ctxt.client.FetchBroker(api.CIDType(&cid))
+	collector, err = client.FetchBroker(api.CIDType(&cid))
 	if err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error fetching brokers",
+			Detail:   fmt.Sprintf("Unable to fetch brokers: %s", err),
+		})
+		return diags
 	}
 
 	d.SetId(collector.CID)
 
 	if err := d.Set(collectorDetailsAttr, collectorDetailsToState(collector)); err != nil {
-		return fmt.Errorf("Unable to store collector %q attribute: %w", collectorDetailsAttr, err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Unable to store broker details",
+			Detail:   fmt.Sprintf("details (%q) attribute: %s", collectorDetailsAttr, err),
+		})
+		return diags
 	}
 
 	_ = d.Set(collectorIDAttr, collector.CID)
