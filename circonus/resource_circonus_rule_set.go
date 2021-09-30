@@ -1,6 +1,7 @@
 package circonus
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -26,7 +28,7 @@ const (
 	ruleSetMetricNameAttr    = "metric_name"
 	ruleSetMetricPatternAttr = "metric_pattern"
 	ruleSetMetricFilterAttr  = "metric_filter"
-	// ruleSetTagsAttr          = "tags".
+	ruleSetTagsAttr          = "tags"
 
 	// circonus_rule_set.if.* resource attribute names.
 	ruleSetThenAttr  = "then"
@@ -86,8 +88,8 @@ var ruleSetDescriptions = attrDescrs{
 	ruleSetMetricNameAttr:    "The name of the metric stream within a check to register the rule set with",
 	ruleSetMetricPatternAttr: "The pattern match (regex) of the metric stream within a check to register the rule set with",
 	ruleSetMetricFilterAttr:  "The tag filter a pattern match ruleset will user",
-	// ruleSetTagsAttr:          "Tags associated with this rule set",
-	ruleSetIDAttr: "out",
+	ruleSetTagsAttr:          "Tags associated with this rule set",
+	ruleSetIDAttr:            "out",
 }
 
 var ruleSetIfDescriptions = attrDescrs{
@@ -138,26 +140,32 @@ func resourceRuleSet() *schema.Resource {
 	*/
 
 	return &schema.Resource{
-		Create: ruleSetCreate,
-		Read:   ruleSetRead,
-		Update: ruleSetUpdate,
-		Delete: ruleSetDelete,
-		Exists: ruleSetExists,
+		CreateContext: ruleSetCreate,
+		ReadContext:   ruleSetRead,
+		UpdateContext: ruleSetUpdate,
+		DeleteContext: ruleSetDelete,
 		Importer: &schema.ResourceImporter{
 			State: importStatePassthroughUnescape,
 		},
-
 		Schema: convertToHelperSchema(ruleSetDescriptions, map[schemaAttr]*schema.Schema{
+			// _cid
+			ruleSetIDAttr: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			// check
 			ruleSetCheckAttr: {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetCheckAttr, config.CheckCIDRegex),
 			},
+			// name
 			ruleSetNameAttr: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			// rules
 			ruleSetIfAttr: {
 				Type:     schema.TypeList,
 				Required: true,
@@ -207,86 +215,73 @@ func resourceRuleSet() *schema.Resource {
 										Type:         schema.TypeString, // Applies to text or numeric metrics
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetAbsentAttr, "^[0-9]+$"),
-										// ConflictsWith: makeConflictsWith(ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetChangedAttr: {
 										Type:     schema.TypeString, // Applies to text or numeric metrics
 										Optional: true,
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetContainsAttr: {
 										Type:         schema.TypeString, // Applies to text metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetContainsAttr, `.+`),
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMatchAttr: {
 										Type:         schema.TypeString, // Applies to text metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetMatchAttr, `.+`),
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetNotMatchAttr: {
 										Type:         schema.TypeString, // Applies to text metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetNotMatchAttr, `.+`),
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMinValueAttr: {
 										Type:         schema.TypeString, // Applies to numeric metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetMinValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr),
 									},
 									ruleSetNotContainAttr: {
 										Type:         schema.TypeString, // Applies to text metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetNotContainAttr, `.+`),
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetOverAttr),
 									},
 									ruleSetMaxValueAttr: {
 										Type:         schema.TypeString, // Applies to numeric metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetMaxValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetEqValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
 									},
 									ruleSetEqValueAttr: {
 										Type:         schema.TypeString, // Applies to numeric metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetNotEqValueAttr, ruleSetNotContainAttr),
 									},
 									ruleSetNotEqValueAttr: {
 										Type:         schema.TypeString, // Applies to numeric metrics only
 										Optional:     true,
 										ValidateFunc: validateRegexp(ruleSetNotEqValueAttr, `.+`), // TODO(sean): improve this regexp to match int and float
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetMinValueAttr, ruleSetMaxValueAttr, ruleSetEqValueAttr, ruleSetNotContainAttr),
 									},
+									// windowing
 									ruleSetOverAttr: {
 										Type:     schema.TypeList,
 										Optional: true,
 										MaxItems: 1,
-										// ruleSetOverAttr is only compatible with checks of
-										// numeric type.  NOTE: It may be premature to conflict with
-										// ruleSetChangedAttr.
-										// ConflictsWith: makeConflictsWith(ruleSetAbsentAttr, ruleSetChangedAttr, ruleSetContainsAttr, ruleSetMatchAttr, ruleSetNotMatchAttr, ruleSetNotContainAttr),
 										Elem: &schema.Resource{
 											Schema: convertToHelperSchema(ruleSetIfValueOverDescriptions, map[schemaAttr]*schema.Schema{
+												// window_duration
 												ruleSetLastAttr: {
-													Type: schema.TypeString,
-													// Optional:     true,
+													Type:         schema.TypeString,
 													Required:     true,
 													ValidateFunc: validateRegexp(ruleSetLastAttr, "^[0-9]+$"),
 												},
+												// window_min_duration
 												ruleSetAtLeastAttr: {
-													Type: schema.TypeString,
-													// Optional:     true,
+													Type:         schema.TypeString,
 													Required:     true,
 													ValidateFunc: validateRegexp(ruleSetAtLeastAttr, "^[0-9]+$"),
 												},
+												// window_function
 												ruleSetUsingAttr: {
-													Type: schema.TypeString,
-													// Optional:     true,
+													Type:         schema.TypeString,
 													Required:     true,
 													ValidateFunc: validateStringIn(ruleSetUsingAttr, validRuleSetWindowFuncs),
 												},
@@ -299,24 +294,28 @@ func resourceRuleSet() *schema.Resource {
 					}),
 				},
 			},
+			// link
 			ruleSetLinkAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateHTTPURL(ruleSetLinkAttr, urlIsAbs|urlOptional),
 			},
+			// metric_type
 			ruleSetMetricTypeAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      defaultRuleSetMetricType,
 				ValidateFunc: validateStringIn(ruleSetMetricTypeAttr, validRuleSetMetricTypes),
 			},
+			// notes
 			ruleSetNotesAttr: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Computed:  true,
 				StateFunc: suppressWhitespace,
 			},
+			// user_json
 			ruleSetUserJSONAttr: {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -352,6 +351,7 @@ func resourceRuleSet() *schema.Resource {
 
 				Default: "{}",
 			},
+			// parent
 			ruleSetParentAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -359,80 +359,105 @@ func resourceRuleSet() *schema.Resource {
 				StateFunc:    suppressWhitespace,
 				ValidateFunc: validateRegexp(ruleSetParentAttr, `^([\d]+(_[\d\w]+)?)|(\/rule_set\/[\d]+)$`),
 			},
+			// metric_name
 			ruleSetMetricNameAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricNameAttr, `^.+$`),
 			},
+			// metric_pattern
 			ruleSetMetricPatternAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricPatternAttr, `^.+$`),
 			},
+			// filter
 			ruleSetMetricFilterAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateRegexp(ruleSetMetricFilterAttr, `^.+$`),
 			},
-			// ruleSetTagsAttr: tagMakeConfigSchema(ruleSetTagsAttr),
-			// ruleSetIDAttr: {
-			// 	Type:     schema.TypeString,
-			// 	Computed: true,
-			// },
+			// tags
+			ruleSetTagsAttr: {
+				Type:       schema.TypeSet,
+				Deprecated: "tags on rule_sets are ignored and dropped. tags returned with rule_sets are check tags.",
+				Optional:   true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateTag,
+				},
+			},
 		}),
 	}
 }
 
-func ruleSetCreate(d *schema.ResourceData, meta interface{}) error {
+func ruleSetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
 	rs := newRuleSet()
 
 	if err := rs.ParseConfig(d); err != nil {
-		return fmt.Errorf("error parsing rule set schema during create: %w", err)
+		return diag.FromErr(err)
 	}
 
 	if err := rs.Create(ctxt); err != nil {
-		return fmt.Errorf("error creating rule set: %w", err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(rs.CID)
 
-	return ruleSetRead(d, meta)
+	return ruleSetRead(ctx, d, meta)
 }
 
-func ruleSetExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	ctxt := meta.(*providerContext)
+// func ruleSetExists(d *schema.ResourceData, meta interface{}) (bool, error) {
+// 	ctxt := meta.(*providerContext)
 
-	cid := d.Id()
-	rs, err := ctxt.client.FetchRuleSet(api.CIDType(&cid))
-	if err != nil {
-		return false, err
-	}
+// 	cid := d.Id()
+// 	rs, err := ctxt.client.FetchRuleSet(api.CIDType(&cid))
+// 	if err != nil {
+// 		return false, err
+// 	}
 
-	if rs.CID == "" {
-		return false, nil
-	}
+// 	if rs.CID == "" {
+// 		return false, nil
+// 	}
 
-	return true, nil
-}
+// 	return true, nil
+// }
 
 // ruleSetRead pulls data out of the RuleSet object and stores it into the
 // appropriate place in the statefile.
-func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
-	ctxt := meta.(*providerContext)
+func ruleSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*providerContext).client
+	var diags diag.Diagnostics
 
 	cid := d.Id()
-	rs, err := loadRuleSet(ctxt, api.CIDType(&cid))
+	var rs circonusRuleSet
+	crs, err := client.FetchRuleSet(api.CIDType(&cid))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
+	}
+	rs.RuleSet = *crs
+
+	if rs.CID == "" {
+		d.SetId("")
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Rule set does not exist",
+			Detail:   fmt.Sprintf("Rule set (%q) was not found.", cid),
+		})
+		return diags
 	}
 
 	d.SetId(rs.CID)
-	_ = d.Set(ruleSetIDAttr, rs.CID)
-	_ = d.Set(ruleSetNameAttr, rs.Name)
+	if err = d.Set(ruleSetIDAttr, rs.CID); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set(ruleSetNameAttr, rs.Name); err != nil {
+		return diag.FromErr(err)
+	}
 
 	ifRules := make([]interface{}, 0, defaultRuleSetRuleLen)
 	for _, rule := range rs.Rules {
@@ -471,7 +496,12 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		case apiRuleSetNotMatch:
 			valueAttrs[string(ruleSetNotMatchAttr)] = rule.Value
 		default:
-			return fmt.Errorf("PROVIDER BUG: Unsupported criteria %q", rule.Criteria)
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Unsupported criteria",
+				Detail:   fmt.Sprintf("Unable to add rule, unknown/unsupported criteria: %q", rule.Criteria),
+			})
+			return diags
 		}
 
 		thenAttrs[string(ruleSetAfterAttr)] = fmt.Sprintf("%d", 60*rule.Wait)
@@ -505,21 +535,35 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 		ifRules = append(ifRules, ifAttrs)
 	}
 
-	_ = d.Set(ruleSetCheckAttr, rs.CheckCID)
-
-	s, _ := json.MarshalIndent(ifRules, "", "  ")
-	log.Printf("%s", s)
-
-	if err = d.Set(ruleSetIfAttr, ifRules); err != nil {
-		return fmt.Errorf("Unable to store rule set %q attribute: %w", ruleSetIfAttr, err)
+	if err = d.Set(ruleSetCheckAttr, rs.CheckCID); err != nil {
+		return diag.FromErr(err)
 	}
 
-	_ = d.Set(ruleSetLinkAttr, indirect(rs.Link))
-	_ = d.Set(ruleSetMetricNameAttr, rs.MetricName)
-	_ = d.Set(ruleSetMetricPatternAttr, rs.MetricPattern)
-	_ = d.Set(ruleSetMetricFilterAttr, rs.Filter)
-	_ = d.Set(ruleSetMetricTypeAttr, rs.MetricType)
-	_ = d.Set(ruleSetNotesAttr, indirect(rs.Notes))
+	if err = d.Set(ruleSetIfAttr, ifRules); err != nil {
+		s, _ := json.MarshalIndent(ifRules, "", "  ")
+		log.Printf("%s", s)
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set(ruleSetLinkAttr, indirect(rs.Link)); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set(ruleSetMetricNameAttr, rs.MetricName); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set(ruleSetMetricPatternAttr, rs.MetricPattern); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set(ruleSetMetricFilterAttr, rs.Filter); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set(ruleSetMetricTypeAttr, rs.MetricType); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set(ruleSetNotesAttr, indirect(rs.Notes)); err != nil {
+		return diag.FromErr(err)
+	}
+
 	j, err := rs.UserJSON.MarshalJSON()
 	rj := json.RawMessage(string(j))
 	log.Printf("%s", string(rj))
@@ -534,38 +578,39 @@ func ruleSetRead(d *schema.ResourceData, meta interface{}) error {
 	// 	return fmt.Errorf("Unable to store rule set %q attribute: %w", ruleSetTagsAttr, err)
 	// }
 
-	return nil
+	return diags
 }
 
-func ruleSetUpdate(d *schema.ResourceData, meta interface{}) error {
+func ruleSetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
 	rs := newRuleSet()
 
 	if err := rs.ParseConfig(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	rs.CID = d.Id()
 
 	if err := rs.Update(ctxt); err != nil {
-		return fmt.Errorf("unable to update rule set %q: %w", d.Id(), err)
+		diag.FromErr(err)
 	}
 
-	return ruleSetRead(d, meta)
+	return ruleSetRead(ctx, d, meta)
 }
 
-func ruleSetDelete(d *schema.ResourceData, meta interface{}) error {
+func ruleSetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
+	var diags diag.Diagnostics
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteRuleSetByCID(api.CIDType(&cid)); err != nil {
-		return fmt.Errorf("unable to delete rule set %q: %w", d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
 	_ = d.Set(ruleSetIDAttr, "")
 
-	return nil
+	return diags
 }
 
 type circonusRuleSet struct {
@@ -587,16 +632,16 @@ func newRuleSet() circonusRuleSet {
 	return rs
 }
 
-func loadRuleSet(ctxt *providerContext, cid api.CIDType) (circonusRuleSet, error) {
-	var rs circonusRuleSet
-	crs, err := ctxt.client.FetchRuleSet(cid)
-	if err != nil {
-		return circonusRuleSet{}, err
-	}
-	rs.RuleSet = *crs
+// func loadRuleSet(ctxt *providerContext, cid api.CIDType) (circonusRuleSet, error) {
+// 	var rs circonusRuleSet
+// 	crs, err := ctxt.client.FetchRuleSet(cid)
+// 	if err != nil {
+// 		return circonusRuleSet{}, err
+// 	}
+// 	rs.RuleSet = *crs
 
-	return rs, nil
-}
+// 	return rs, nil
+// }
 
 // ParseConfig reads Terraform config data and stores the information into a
 // Circonus RuleSet object.  ParseConfig and ruleSetRead()

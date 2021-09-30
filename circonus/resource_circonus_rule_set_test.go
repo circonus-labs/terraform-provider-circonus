@@ -81,8 +81,6 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.then.0.notify"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "if.6.then.0.severity", "0"),
 
-					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "tags.#", "2"),
-
 					resource.TestCheckResourceAttr("circonus_rule_set.blank-user-json-test", "user_json", "{}"),
 
 					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "if.#", "3"),
@@ -305,9 +303,6 @@ EOF
       severity = 0
     }
   }
-
-
-  tags = "${var.test_tags}"
 }
 
 resource "circonus_rule_set" "blank-user-json-test" {
@@ -331,8 +326,6 @@ EOF
       severity = 1
     }
   }
-
-  tags = "${var.test_tags}"
 }
 
 resource "circonus_rule_set" "circ-6825" {
@@ -380,8 +373,6 @@ EOF
       severity = 2
     }
   }
-
-  tags = "${var.test_tags}"
 }
 `
 
@@ -468,7 +459,5 @@ EOF
       severity = 2
     }
   }
-
-  tags = "${var.test_tags}"
 }
 `
