@@ -1,6 +1,7 @@
 package circonus
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"reflect"
@@ -9,16 +10,17 @@ import (
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceRuleSetGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: ruleSetGroupCreate,
-		Read:   ruleSetGroupRead,
-		Update: ruleSetGroupUpdate,
-		Delete: ruleSetGroupDelete,
-		Exists: ruleSetGroupExists,
+		CreateContext: ruleSetGroupCreate,
+		ReadContext:   ruleSetGroupRead,
+		UpdateContext: ruleSetGroupUpdate,
+		DeleteContext: ruleSetGroupDelete,
+		// Exists: ruleSetGroupExists,
 		Importer: &schema.ResourceImporter{
 			State: importStatePassthroughUnescape,
 		},
@@ -134,51 +136,65 @@ func resourceRuleSetGroup() *schema.Resource {
 	}
 }
 
-func ruleSetGroupCreate(d *schema.ResourceData, meta interface{}) error {
+func ruleSetGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
+	var diags diag.Diagnostics
+
 	rsg := newRuleSetGroup()
 
 	if err := rsg.ParseConfig(d); err != nil {
-		return fmt.Errorf("error parsing rule set group schema during create: %w", err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error parsing rule set group",
+			Detail:   fmt.Sprintf("error parsing rule set group schema during create: %s", err),
+		})
+		return diags
 	}
 
 	if err := rsg.Create(ctxt); err != nil {
-		return fmt.Errorf("error creating rule set group: %w", err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error creating rule set group",
+			Detail:   fmt.Sprintf("error creating rule set group: %s", err),
+		})
+		return diags
 	}
 
 	d.SetId(rsg.CID)
 
-	return ruleSetGroupRead(d, meta)
+	return ruleSetGroupRead(ctx, d, meta)
 }
 
-func ruleSetGroupExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	ctxt := meta.(*providerContext)
-
-	cid := d.Id()
-	rsg, err := ctxt.client.FetchRuleSetGroup(api.CIDType(&cid))
-	if err != nil {
-		return false, err
-	}
-
-	if rsg.CID == "" {
-		return false, nil
-	}
-
-	return true, nil
-}
-
-// ruleSetRead pulls data out of the RuleSet object and stores it into the
+// ruleSetGroupRead pulls data out of the RuleSet object and stores it into the
 // appropriate place in the statefile.
-func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
+func ruleSetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
+	var diags diag.Diagnostics
 
 	cid := d.Id()
-	rsg, err := loadRuleSetGroup(ctxt, api.CIDType(&cid))
+	rs, err := ctxt.client.FetchRuleSetGroup(api.CIDType(&cid))
 	if err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error fetching rule set group",
+			Detail:   fmt.Sprintf("error fetching rule set group: %s", err),
+		})
+		return diags
 	}
 
+	if rs.CID == "" {
+		d.SetId("")
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Rule set group does not exist",
+			Detail:   fmt.Sprintf("rule set group (%s) not found", cid),
+		})
+		return diags
+	}
+
+	rsg := *rs
 	d.SetId(rsg.CID)
+	_ = d.Set("name", rsg.Name)
 
 	formulas := make([]interface{}, 0, 1)
 	for _, formula := range rsg.Formulas {
@@ -198,7 +214,7 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 		formulas = append(formulas, f)
 	}
 	_ = d.Set("formula", formulas)
-	_ = d.Set("name", rsg.Name)
+
 	n := make([]interface{}, 0)
 	notify := make(map[string]interface{})
 	notify["sev1"] = rsg.ContactGroups[1]
@@ -207,8 +223,8 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 	notify["sev4"] = rsg.ContactGroups[4]
 	notify["sev5"] = rsg.ContactGroups[5]
 	n = append(n, notify)
-
 	_ = d.Set("notify", n)
+
 	conditions := make([]interface{}, 0, len(rsg.RuleSetConditions))
 	for idx, c := range rsg.RuleSetConditions {
 		cond := make(map[string]interface{}, 2)
@@ -230,35 +246,69 @@ func ruleSetGroupRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func ruleSetGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+func ruleSetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
+	var diags diag.Diagnostics
+
 	rs := newRuleSetGroup()
 
 	if err := rs.ParseConfig(d); err != nil {
-		return err
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error parsing rule set group",
+			Detail:   fmt.Sprintf("error parsing rule set group: %s", err),
+		})
+		return diags
 	}
 
 	rs.CID = d.Id()
 
 	if err := rs.Update(ctxt); err != nil {
-		return fmt.Errorf("unable to update rule set group %q: %w", d.Id(), err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error updating rule set group",
+			Detail:   fmt.Sprintf("unable to update rule set group (%q): %s", rs.CID, err),
+		})
+		return diags
 	}
 
-	return ruleSetGroupRead(d, meta)
+	return ruleSetGroupRead(ctx, d, meta)
 }
 
-func ruleSetGroupDelete(d *schema.ResourceData, meta interface{}) error {
+func ruleSetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
+	var diags diag.Diagnostics
 
 	cid := d.Id()
 	if _, err := ctxt.client.DeleteRuleSetGroupByCID(api.CIDType(&cid)); err != nil {
-		return fmt.Errorf("unable to delete rule set group %q: %w", d.Id(), err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error deleting rule set group",
+			Detail:   fmt.Sprintf("unable to delete rule set group (%q): %s", cid, err),
+		})
+		return diags
 	}
 
 	d.SetId("")
 
 	return nil
 }
+
+// func ruleSetGroupExists(d *schema.ResourceData, meta interface{}) (bool, error) {
+// 	ctxt := meta.(*providerContext)
+
+// 	cid := d.Id()
+// 	rsg, err := ctxt.client.FetchRuleSetGroup(api.CIDType(&cid))
+// 	if err != nil {
+// 		return false, err
+// 	}
+
+// 	if rsg.CID == "" {
+// 		return false, nil
+// 	}
+
+// 	return true, nil
+// }
 
 type circonusRuleSetGroup struct {
 	api.RuleSetGroup
@@ -270,130 +320,24 @@ func newRuleSetGroup() circonusRuleSetGroup {
 	}
 
 	rsg.ContactGroups = make(map[uint8][]string, config.NumSeverityLevels)
-	for i := uint8(0); i < config.NumSeverityLevels; i++ {
-		rsg.ContactGroups[i+1] = make([]string, 0, 1)
+	for i := uint8(1); i <= config.NumSeverityLevels; i++ {
+		rsg.ContactGroups[i] = make([]string, 0, 1)
 	}
 	rsg.Tags = make([]string, 0)
 
 	return rsg
 }
 
-func loadRuleSetGroup(ctxt *providerContext, cid api.CIDType) (circonusRuleSetGroup, error) {
-	var rs circonusRuleSetGroup
-	crs, err := ctxt.client.FetchRuleSetGroup(cid)
-	if err != nil {
-		return circonusRuleSetGroup{}, err
-	}
-	log.Printf("RuleSetGroup: %v\n", *crs)
-	rs.RuleSetGroup = *crs
-
-	return rs, nil
-}
-
-// func ruleSetGroupNotifyChecksum(v interface{}) int {
-// 	b := &bytes.Buffer{}
-// 	b.Grow(defaultHashBufSize)
-
-// 	writeStringArray := func(m map[string]interface{}, attrName string) {
-// 		if v, found := m[attrName]; found {
-// 			a := v.([]string)
-// 			if a != nil {
-// 				sort.Strings(a)
-// 				for _, s := range a {
-// 					fmt.Fprint(b, strings.TrimSpace(s))
-// 				}
-// 			}
-// 		}
+// func loadRuleSetGroup(ctxt *providerContext, cid api.CIDType) (circonusRuleSetGroup, error) {
+// 	var rs circonusRuleSetGroup
+// 	crs, err := ctxt.client.FetchRuleSetGroup(cid)
+// 	if err != nil {
+// 		return circonusRuleSetGroup{}, err
 // 	}
+// 	log.Printf("Fetched RuleSetGroup: %v\n", *crs)
+// 	rs.RuleSetGroup = *crs
 
-// 	m := v.(map[string]interface{})
-
-// 	writeStringArray(m, "sev1")
-// 	writeStringArray(m, "sev2")
-// 	writeStringArray(m, "sev3")
-// 	writeStringArray(m, "sev4")
-// 	writeStringArray(m, "sev5")
-
-// 	s := b.String()
-// 	return hashcode.String(s)
-// }
-
-// func ruleSetGroupFormulasChecksum(v interface{}) int {
-// 	b := &bytes.Buffer{}
-// 	b.Grow(defaultHashBufSize)
-
-// 	writeInt := func(m map[string]interface{}, attrName string) {
-// 		if v, found := m[attrName]; found {
-// 			i := v.(int)
-// 			if i != 0 {
-// 				fmt.Fprintf(b, "%x", i)
-// 			}
-// 		}
-// 	}
-
-// 	writeString := func(m map[string]interface{}, attrName string) {
-// 		if v, found := m[attrName]; found {
-// 			s := strings.TrimSpace(v.(string))
-// 			if s != "" {
-// 				fmt.Fprint(b, s)
-// 			}
-// 		}
-// 	}
-
-// 	m := v.([]map[string]interface{})
-// 	for _, f := range m {
-// 		writeString(f, "expression")
-// 		writeInt(f, "raise_severity")
-// 		writeInt(f, "wait")
-// 	}
-
-// 	s := b.String()
-// 	return hashcode.String(s)
-// }
-
-// func ruleSetGroupConditionsChecksum(v interface{}) int {
-// 	b := &bytes.Buffer{}
-// 	b.Grow(defaultHashBufSize)
-
-// 	writeInt := func(m map[string]interface{}, attrName string) {
-// 		if v, found := m[attrName]; found {
-// 			i := v.(int)
-// 			if i != 0 {
-// 				fmt.Fprintf(b, "%x", i)
-// 			}
-// 		}
-// 	}
-
-// 	writeString := func(m map[string]interface{}, attrName string) {
-// 		if v, found := m[attrName]; found {
-// 			s := strings.TrimSpace(v.(string))
-// 			if s != "" {
-// 				fmt.Fprint(b, s)
-// 			}
-// 		}
-// 	}
-
-// 	writeStringArray := func(m map[string]interface{}, attrName string) {
-// 		if v, found := m[attrName]; found {
-// 			a := v.([]string)
-// 			if a != nil {
-// 				sort.Strings(a)
-// 				for _, s := range a {
-// 					fmt.Fprint(b, strings.TrimSpace(s))
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	m := v.([]interface{})
-// 	for _, c := range m {
-// 		writeInt(c.(map[string]interface{}), "index")
-// 		writeString(c.(map[string]interface{}), "rule_set")
-// 		writeStringArray(c.(map[string]interface{}), "matching_severities")
-// 	}
-
-// 	s := b.String()
-// 	return hashcode.String(s)
+// 	return rs, nil
 // }
 
 type conditionSorter struct {
@@ -474,10 +418,10 @@ func (rsg *circonusRuleSetGroup) ParseConfig(d *schema.ResourceData) error {
 		rsg.Tags = derefStringList(flattenSet(v.(*schema.Set)))
 	}
 
-	log.Printf("RuleSetGroup: %v\n", rsg)
-	if err := rsg.Validate(); err != nil {
-		return err
-	}
+	log.Printf("Parsed RuleSetGroup: %v\n", rsg)
+	// if err := rsg.Validate(); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
@@ -485,7 +429,7 @@ func (rsg *circonusRuleSetGroup) ParseConfig(d *schema.ResourceData) error {
 func (rsg *circonusRuleSetGroup) Create(ctxt *providerContext) error {
 	crs, err := ctxt.client.CreateRuleSetGroup(&rsg.RuleSetGroup)
 	if err != nil {
-		return err
+		return fmt.Errorf("create rule set group: %w", err)
 	}
 
 	rsg.CID = crs.CID
@@ -496,14 +440,13 @@ func (rsg *circonusRuleSetGroup) Create(ctxt *providerContext) error {
 func (rsg *circonusRuleSetGroup) Update(ctxt *providerContext) error {
 	_, err := ctxt.client.UpdateRuleSetGroup(&rsg.RuleSetGroup)
 	if err != nil {
-		return fmt.Errorf("Unable to update rule set group %s: %w", rsg.CID, err)
+		return fmt.Errorf("update rule set group %s: %w", rsg.CID, err)
 	}
 
 	return nil
 }
 
-func (rsg *circonusRuleSetGroup) Validate() error {
-	log.Printf("RuleSetGroup: %v\n", rsg)
-
-	return nil
-}
+// func (rsg *circonusRuleSetGroup) Validate() error {
+// 	log.Printf("Validated RuleSetGroup: %v\n", rsg)
+// 	return nil
+// }
