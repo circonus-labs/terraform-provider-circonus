@@ -18,11 +18,13 @@ package circonus
  */
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	api "github.com/circonus-labs/go-apiclient"
 	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -165,23 +167,70 @@ var (
 
 func resourceCheck() *schema.Resource {
 	return &schema.Resource{
-		Create: checkCreate,
-		Read:   checkRead,
-		Update: checkUpdate,
-		Delete: checkDelete,
-		Exists: checkExists,
+		CreateContext: checkCreate,
+		ReadContext:   checkRead,
+		UpdateContext: checkUpdate,
+		DeleteContext: checkDelete,
+		// Exists: checkExists,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: convertToHelperSchema(checkDescriptions, map[schemaAttr]*schema.Schema{
-			checkActiveAttr: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+			// Out parameters
+			// _cid
+			checkOutIDAttr: {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
-			checkCAQLAttr:       schemaCheckCAQL,
-			checkCloudWatchAttr: schemaCheckCloudWatch,
+			// _brokers
+			checkOutByCollectorAttr: {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			// _check_uuids
+			checkOutCheckUUIDsAttr: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			// _checks
+			checkOutChecksAttr: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			// _created
+			checkOutCreatedAttr: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			// _last_modified
+			checkOutLastModifiedAttr: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			// _last_modified_by
+			checkOutLastModifiedByAttr: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			// _reverse_connection_urls
+			checkOutReverseConnectURLsAttr: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			// brokers
 			checkCollectorAttr: {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -196,40 +245,12 @@ func resourceCheck() *schema.Resource {
 					}),
 				},
 			},
-			checkConsulAttr:    schemaCheckConsul,
-			checkDNSAttr:       schemaCheckDNS,
-			checkExternalAttr:  schemaCheckExternal,
-			checkHTTPAttr:      schemaCheckHTTP,
-			checkHTTPTrapAttr:  schemaCheckHTTPTrap,
-			checkICMPPingAttr:  schemaCheckICMPPing,
-			checkJMXAttr:       schemaCheckJMX,
-			checkMemcachedAttr: schemaCheckMemcached,
-			checkNTPAttr:       schemaCheckNTP,
-			checkJSONAttr:      schemaCheckJSON,
-			checkMetricAttr: {
-				Type:     schema.TypeList,
+			// display_name
+			checkNameAttr: {
+				Type:     schema.TypeString,
 				Optional: true,
-				MinItems: 0,
-				Elem: &schema.Resource{
-					Schema: convertToHelperSchema(checkMetricDescriptions, map[schemaAttr]*schema.Schema{
-						metricActiveAttr: {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-						},
-						metricNameAttr: {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validateRegexp(metricNameAttr, `[\S]+`),
-						},
-						metricTypeAttr: {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validateMetricType,
-						},
-					}),
-				},
 			},
+			// metric_filters
 			checkMetricFilterAttr: {
 				Type:     schema.TypeList, // order matters here so use a List
 				Optional: true,
@@ -259,6 +280,7 @@ func resourceCheck() *schema.Resource {
 					}),
 				},
 			},
+			// metric_limit
 			checkMetricLimitAttr: {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -267,17 +289,39 @@ func resourceCheck() *schema.Resource {
 					validateIntMin(checkMetricLimitAttr, -1),
 				),
 			},
-			checkMySQLAttr: schemaCheckMySQL,
-			checkNameAttr: {
-				Type:     schema.TypeString,
+			// metrics
+			checkMetricAttr: {
+				Type:     schema.TypeList,
 				Optional: true,
+				MinItems: 0,
+				Elem: &schema.Resource{
+					Schema: convertToHelperSchema(checkMetricDescriptions, map[schemaAttr]*schema.Schema{
+						metricActiveAttr: {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						metricNameAttr: {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validateRegexp(metricNameAttr, `[\S]+`),
+						},
+						metricTypeAttr: {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validateMetricType,
+						},
+					}),
+				},
 			},
+			// notes
 			checkNotesAttr: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Computed:  true,
 				StateFunc: suppressWhitespace,
 			},
+			// period
 			checkPeriodAttr: {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -288,20 +332,22 @@ func resourceCheck() *schema.Resource {
 					validateDurationMax(checkPeriodAttr, defaultCirconusCheckPeriodMax),
 				),
 			},
-			checkPostgreSQLAttr: schemaCheckPostgreSQL,
-			checkPromTextAttr:   schemaCheckPromText,
-			checkRedisAttr:      schemaCheckRedis,
-			checkSMTPAttr:       schemaCheckSMTP,
-			checkSNMPAttr:       schemaCheckSNMP,
-			checkStatsdAttr:     schemaCheckStatsd,
-			checkTagsAttr:       tagMakeConfigSchema(checkTagsAttr),
+			// status
+			checkActiveAttr: {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			// tags
+			checkTagsAttr: tagMakeConfigSchema(checkTagsAttr),
+			// target
 			checkTargetAttr: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateRegexp(checkTargetAttr, `.+`),
 			},
-			checkTCPAttr: schemaCheckTCP,
+			// timeout
 			checkTimeoutAttr: {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -312,6 +358,7 @@ func resourceCheck() *schema.Resource {
 					validateDurationMax(checkTimeoutAttr, defaultCirconusTimeoutMax),
 				),
 			},
+			// type
 			checkTypeAttr: {
 				Type:         schema.TypeString,
 				Computed:     true,
@@ -319,97 +366,88 @@ func resourceCheck() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateCheckType,
 			},
-
-			// Out parameters
-			checkOutIDAttr: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			checkOutByCollectorAttr: {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			checkOutCheckUUIDsAttr: {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			checkOutChecksAttr: {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			checkOutCreatedAttr: {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			checkOutLastModifiedAttr: {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			checkOutLastModifiedByAttr: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			checkOutReverseConnectURLsAttr: {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
+			//
+			// specific check types, their attributes go into
+			// the check_bundle.config attribute
+			//
+			checkCAQLAttr:       schemaCheckCAQL,
+			checkCloudWatchAttr: schemaCheckCloudWatch,
+			checkConsulAttr:     schemaCheckConsul,
+			checkDNSAttr:        schemaCheckDNS,
+			checkExternalAttr:   schemaCheckExternal,
+			checkHTTPAttr:       schemaCheckHTTP,
+			checkHTTPTrapAttr:   schemaCheckHTTPTrap,
+			checkICMPPingAttr:   schemaCheckICMPPing,
+			checkJMXAttr:        schemaCheckJMX,
+			checkMemcachedAttr:  schemaCheckMemcached,
+			checkMySQLAttr:      schemaCheckMySQL,
+			checkNTPAttr:        schemaCheckNTP,
+			checkJSONAttr:       schemaCheckJSON,
+			checkPostgreSQLAttr: schemaCheckPostgreSQL,
+			checkPromTextAttr:   schemaCheckPromText,
+			checkRedisAttr:      schemaCheckRedis,
+			checkSMTPAttr:       schemaCheckSMTP,
+			checkSNMPAttr:       schemaCheckSNMP,
+			checkStatsdAttr:     schemaCheckStatsd,
+			checkTCPAttr:        schemaCheckTCP,
 		}),
 	}
 }
 
-func checkCreate(d *schema.ResourceData, meta interface{}) error {
+func checkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
 	c := newCheck()
 	if err := c.ParseConfig(d); err != nil {
-		return fmt.Errorf("error parsing check schema during create: %w", err)
+		return diag.FromErr(err)
 	}
 
 	if err := c.Create(ctxt); err != nil {
-		return fmt.Errorf("error creating check: %w", err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(c.CID)
 
-	return checkRead(d, meta)
+	return checkRead(ctx, d, meta)
 }
 
-func checkExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	ctxt := meta.(*providerContext)
+// checkRead now covers "existence"
+// func checkExists(d *schema.ResourceData, meta interface{}) (bool, error) {
+// 	ctxt := meta.(*providerContext)
 
-	cid := d.Id()
-	cb, err := ctxt.client.FetchCheckBundle(api.CIDType(&cid))
-	if err != nil {
-		return false, err
-	}
+// 	cid := d.Id()
+// 	cb, err := ctxt.client.FetchCheckBundle(api.CIDType(&cid))
+// 	if err != nil {
+// 		return false, err
+// 	}
 
-	if cb.CID == "" {
-		return false, nil
-	}
+// 	if cb.CID == "" {
+// 		return false, nil
+// 	}
 
-	return true, nil
-}
+// 	return true, nil
+// }
 
 // checkRead pulls data out of the CheckBundle object and stores it into the
 // appropriate place in the statefile.
-func checkRead(d *schema.ResourceData, meta interface{}) error {
+func checkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
+	var diags diag.Diagnostics
 
 	cid := d.Id()
+	var c circonusCheck
 	c, err := loadCheck(ctxt, api.CIDType(&cid))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
+	}
+
+	if c.CID == "" {
+		d.SetId("")
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Check Bundle does not exist",
+			Detail:   fmt.Sprintf("Check Bundle (%q) was not found.", cid),
+		})
+		return diags
 	}
 
 	d.SetId(c.CID)
@@ -458,91 +496,123 @@ func checkRead(d *schema.ResourceData, meta interface{}) error {
 	// Write the global circonus_check parameters followed by the check
 	// type-specific parameters.
 
-	_ = d.Set(checkActiveAttr, checkAPIStatusToBool(c.Status))
-
-	if err := d.Set(checkCollectorAttr, stringListToSet(c.Brokers, checkCollectorIDAttr)); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkCollectorAttr, err)
+	if err := d.Set(checkActiveAttr, checkAPIStatusToBool(c.Status)); err != nil {
+		return diag.FromErr(err)
 	}
 
-	_ = d.Set(checkMetricLimitAttr, c.MetricLimit)
-	_ = d.Set(checkNameAttr, c.DisplayName)
-	_ = d.Set(checkNotesAttr, c.Notes)
-	_ = d.Set(checkPeriodAttr, fmt.Sprintf("%ds", c.Period))
+	if err := d.Set(checkCollectorAttr, stringListToSet(c.Brokers, checkCollectorIDAttr)); err != nil {
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkCollectorAttr, err)
+	}
+
+	if err := d.Set(checkMetricLimitAttr, c.MetricLimit); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(checkNameAttr, c.DisplayName); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(checkNotesAttr, c.Notes); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(checkPeriodAttr, fmt.Sprintf("%ds", c.Period)); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := d.Set(checkMetricAttr, metrics); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkMetricAttr, err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkMetricAttr, err)
 	}
 
 	if err := d.Set(checkMetricFilterAttr, metricFilters); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkMetricFilterAttr, err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkMetricFilterAttr, err)
 	}
 
 	if err := d.Set(checkTagsAttr, c.Tags); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkTagsAttr, err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkTagsAttr, err)
 	}
 
-	_ = d.Set(checkTargetAttr, c.Target)
+	if err := d.Set(checkTargetAttr, c.Target); err != nil {
+		return diag.FromErr(err)
+	}
 
 	{
-		t, _ := time.ParseDuration(fmt.Sprintf("%fs", c.Timeout))
-		_ = d.Set(checkTimeoutAttr, t.String())
+		t, err := time.ParseDuration(fmt.Sprintf("%fs", c.Timeout))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err = d.Set(checkTimeoutAttr, t.String()); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
-	_ = d.Set(checkTypeAttr, c.Type)
+	if err := d.Set(checkTypeAttr, c.Type); err != nil {
+		return diag.FromErr(err)
+	}
 
 	// Last step: parse a check_bundle's config into the statefile.
 	if err := parseCheckTypeConfig(&c, d); err != nil {
-		return fmt.Errorf("Unable to parse check config: %w", err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to parse check config: %w", err)
 	}
 
 	// Out parameters
 	if err := d.Set(checkOutByCollectorAttr, checkIDsByCollector); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutByCollectorAttr, err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkOutByCollectorAttr, err)
 	}
 
 	if err := d.Set(checkOutCheckUUIDsAttr, c.CheckUUIDs); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutCheckUUIDsAttr, err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkOutCheckUUIDsAttr, err)
 	}
 
 	if err := d.Set(checkOutChecksAttr, c.Checks); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutChecksAttr, err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkOutChecksAttr, err)
 	}
 
 	if checkID != "" {
-		_ = d.Set(checkOutIDAttr, checkID)
+		if err := d.Set(checkOutIDAttr, checkID); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
-	_ = d.Set(checkOutCreatedAttr, c.Created)
-	_ = d.Set(checkOutLastModifiedAttr, c.LastModified)
-	_ = d.Set(checkOutLastModifiedByAttr, c.LastModifedBy)
+	if err := d.Set(checkOutCreatedAttr, c.Created); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(checkOutLastModifiedAttr, c.LastModified); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set(checkOutLastModifiedByAttr, c.LastModifedBy); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := d.Set(checkOutReverseConnectURLsAttr, c.ReverseConnectURLs); err != nil {
-		return fmt.Errorf("Unable to store check %q attribute: %w", checkOutReverseConnectURLsAttr, err)
+		return diag.FromErr(err) // fmt.Errorf("Unable to store check %q attribute: %w", checkOutReverseConnectURLsAttr, err)
 	}
 
 	return nil
 }
 
-func checkUpdate(d *schema.ResourceData, meta interface{}) error {
+func checkUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
 	c := newCheck()
 	if err := c.ParseConfig(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	c.CID = d.Id()
 	if err := c.Update(ctxt); err != nil {
-		return fmt.Errorf("unable to update check %q: %w", d.Id(), err)
+		return diag.FromErr(err) // fmt.Errorf("unable to update check %q: %w", d.Id(), err)
 	}
 
-	return checkRead(d, meta)
+	return checkRead(ctx, d, meta)
 }
 
-func checkDelete(d *schema.ResourceData, meta interface{}) error {
+func checkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ctxt := meta.(*providerContext)
 
 	if _, err := ctxt.client.Delete(d.Id()); err != nil {
-		return fmt.Errorf("unable to delete check %q: %w", d.Id(), err)
+		return diag.FromErr(err) // fmt.Errorf("unable to delete check %q: %w", d.Id(), err)
 	}
 
 	d.SetId("")
