@@ -1,3 +1,17 @@
+## 0.12.3 (October 6, 2021)
+
+CHANGES:
+
+* upd: deprecate tags on rule_set (they are just check tags, api ignores tags on rule_set objects)
+* upd: using `over` on rule_set REQUIRES all three attributes to be set
+
+UPDATES:
+
+* upd: terraform-plugin-sdk v2.8.0
+* add: rule_set_group test
+* upd: use diagnostics instead of errors in several resources (ongoing updates)
+* upd: use *Context methods in several resources (ongoing updates)
+
 ## 0.12.2 (September 15, 2021)
 
 CHANGES:
