@@ -35,7 +35,7 @@ func TestAccCirconusCheckMetricFilter_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.metric_filter", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.0.id", testAccBroker2),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.0.availability", "100"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.0.count", "5"),

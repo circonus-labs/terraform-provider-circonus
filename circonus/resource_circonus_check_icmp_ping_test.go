@@ -33,7 +33,7 @@ func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.loopback_latency", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.0.id", testAccBroker2),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.0.availability", "100"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.0.count", "5"),

@@ -33,7 +33,7 @@ func TestAccCirconusCheckDNS_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.google", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.google", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.google", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.google", "collector.0.id", testAccBroker2),
+					resource.TestCheckResourceAttr("circonus_check.google", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.google", "dns.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.google", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.google", "period", "300s"),
