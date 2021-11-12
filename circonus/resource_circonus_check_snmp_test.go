@@ -19,12 +19,12 @@ func TestAccCirconusCheckSNMP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckSNMPConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckSNMPConfigFmt, checkName, testAccBroker1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.snmp", "active", "true"),
 					resource.TestMatchResourceAttr("circonus_check.snmp", "check_id", regexp.MustCompile(config.CheckCIDRegex)),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.snmp", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.snmp", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "period", "300s"),
 					resource.TestCheckResourceAttr("circonus_check.snmp", "metric.#", "3"),
@@ -56,7 +56,7 @@ resource "circonus_check" "snmp" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   snmp {

@@ -22,7 +22,12 @@ func TestAccCirconusWorksheet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusWorksheet,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusWorksheetConfigFmt, checkName, graphName, worksheetName),
+				Config: fmt.Sprintf(testAccCirconusWorksheetConfigFmt,
+					checkName,
+					testAccBroker1,
+					graphName,
+					worksheetName,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_worksheet.test", "favorite"),
 				),
@@ -83,7 +88,7 @@ resource "circonus_check" "api_latency_2" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   icmp_ping {

@@ -19,7 +19,11 @@ func TestAccCirconusCheckDNS_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckDNSConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckDNSConfigFmt,
+					checkName,
+					testAccBroker1,
+					testAccBroker2,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.google", "active", "true"),
 					resource.TestCheckNoResourceAttr("circonus_check.google", "check_id"),
@@ -29,7 +33,7 @@ func TestAccCirconusCheckDNS_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.google", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.google", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.google", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.google", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.google", "collector.0.id", testAccBroker2),
 					resource.TestCheckResourceAttr("circonus_check.google", "dns.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.google", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.google", "period", "300s"),
@@ -54,11 +58,11 @@ resource "circonus_check" "google" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   collector {
-    id = "/broker/275"
+    id = "%s"
   }
 
   dns {

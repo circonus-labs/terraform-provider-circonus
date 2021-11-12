@@ -19,7 +19,11 @@ func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckICMPPingConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckICMPPingConfigFmt,
+					checkName,
+					testAccBroker1,
+					testAccBroker2,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "active", "true"),
 					resource.TestCheckNoResourceAttr("circonus_check.loopback_latency", "check_id"),
@@ -29,7 +33,7 @@ func TestAccCirconusCheckICMPPing_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.loopback_latency", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "collector.0.id", testAccBroker2),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.0.availability", "100"),
 					resource.TestCheckResourceAttr("circonus_check.loopback_latency", "icmp_ping.0.count", "5"),
@@ -75,11 +79,11 @@ resource "circonus_check" "loopback_latency" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   collector {
-    id = "/broker/275"
+    id = "%s"
   }
 
   icmp_ping {

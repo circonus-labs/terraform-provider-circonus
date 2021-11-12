@@ -19,7 +19,11 @@ func TestAccCirconusCheckNTP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckNTPConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckNTPConfigFmt,
+					checkName,
+					testAccBroker1,
+					testAccBroker2,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.clock", "active", "true"),
 					resource.TestCheckNoResourceAttr("circonus_check.clock", "check_id"),
@@ -29,7 +33,7 @@ func TestAccCirconusCheckNTP_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.clock", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.clock", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.clock", "collector.0.id", testAccBroker2),
 					resource.TestCheckResourceAttr("circonus_check.clock", "ntp.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.clock", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.clock", "period", "300s"),
@@ -54,11 +58,11 @@ resource "circonus_check" "clock" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   collector {
-    id = "/broker/275"
+    id = "%s"
   }
 
   ntp {

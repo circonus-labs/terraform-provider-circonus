@@ -29,7 +29,7 @@ func TestAccCirconusCheckJMX_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.something", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.something", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.something", "collector.1893401625.id", "/broker/1286"),
+					resource.TestCheckResourceAttr("circonus_check.something", "collector.1893401625.id", accEnterpriseBrokerCID),
 					resource.TestCheckResourceAttr("circonus_check.something", "jmx.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.something", "jmx.453641246.host", "127.0.0.1"),
 					resource.TestCheckResourceAttr("circonus_check.something", "jmx.453641246.port", "9999"),

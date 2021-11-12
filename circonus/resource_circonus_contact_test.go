@@ -17,7 +17,13 @@ func TestAccCirconusContactGroup_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusContactGroup,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCirconusContactGroupConfig,
+				Config: fmt.Sprintf(testAccCirconusContactGroupConfig,
+					testAccContactGroup1,
+					testAccContactGroup1,
+					testAccContactGroup1,
+					testAccContactGroup1,
+					testAccContactGroup1,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					// testAccContactGroupExists("circonus_contact_group.staging-sev3", "foo"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "name", "ops-staging-sev3"),
@@ -62,23 +68,23 @@ func TestAccCirconusContactGroup_basic(t *testing.T) {
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.severity", "1"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.reminder", "60s"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.escalate_after", "3600s"),
-					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.689365425.escalate_to", testAccContactGroup1),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.severity", "2"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.reminder", "120s"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.escalate_after", "7200s"),
-					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.551050940.escalate_to", testAccContactGroup1),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.severity", "3"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.reminder", "180s"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.escalate_after", "10800s"),
-					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1292974544.escalate_to", testAccContactGroup1),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.severity", "4"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.reminder", "240s"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.escalate_after", "14400s"),
-					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.1183354841.escalate_to", testAccContactGroup1),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.severity", "5"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.reminder", "300s"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.escalate_after", "18000s"),
-					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.escalate_to", "/contact_group/4661"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "alert_option.2942620849.escalate_to", testAccContactGroup1),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "long_message", "a long message"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "long_subject", "long subject"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "long_summary", "long summary"),
@@ -206,35 +212,35 @@ resource "circonus_contact_group" "staging-sev3" {
     severity = 1
     reminder = "60s"
     escalate_after = "3600s"
-    escalate_to = "/contact_group/4661"
+    escalate_to = "%s"
   }
 
   alert_option {
     severity = 2
     reminder = "2m"
     escalate_after = "2h"
-    escalate_to = "/contact_group/4661"
+    escalate_to = "%s"
   }
 
   alert_option {
     severity = 3
     reminder = "3m"
     escalate_after = "3h"
-    escalate_to = "/contact_group/4661"
+    escalate_to = "%s"
   }
 
   alert_option {
     severity = 4
     reminder = "4m"
     escalate_after = "4h"
-    escalate_to = "/contact_group/4661"
+    escalate_to = "%s"
   }
 
   alert_option {
     severity = 5
     reminder = "5m"
     escalate_after = "5h"
-    escalate_to = "/contact_group/4661"
+    escalate_to = "%s"
   }
 */
   // alert_formats: omit to use defaults

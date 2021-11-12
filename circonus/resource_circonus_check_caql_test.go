@@ -16,11 +16,14 @@ func TestAccCirconusCheckCAQL_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(string(testAccCirconusCheckCAQLConfigFmt), checkName),
+				Config: fmt.Sprintf(string(testAccCirconusCheckCAQLConfigFmt),
+					checkName,
+					testAccBroker4,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "collector.0.id", "/broker/1490"),
+					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "collector.0.id", testAccBroker4),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "caql.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "caql.0.query", `search:metric:histogram("*consul*runtime`+"`"+`gc_pause_ns* (active:1)") | histogram:merge() | histogram:percentile(99)`+"\n"),
 					resource.TestCheckResourceAttr("circonus_check.go_gc_latency", "name", checkName),
@@ -52,7 +55,7 @@ resource "circonus_check" "go_gc_latency" {
   period = "60s"
 
   collector {
-    id = "/broker/1490"
+    id = "%s"
   }
 
   caql {

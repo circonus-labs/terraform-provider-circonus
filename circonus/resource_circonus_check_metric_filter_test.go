@@ -20,7 +20,12 @@ func TestAccCirconusCheckMetricFilter_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckMetricFilterConfigFmt, checkName, target),
+				Config: fmt.Sprintf(testAccCirconusCheckMetricFilterConfigFmt,
+					checkName,
+					testAccBroker1,
+					testAccBroker2,
+					target,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "active", "true"),
 					resource.TestCheckNoResourceAttr("circonus_check.metric_filter", "check_id"),
@@ -30,7 +35,7 @@ func TestAccCirconusCheckMetricFilter_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("circonus_check.metric_filter", "check_id"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "check_by_collector.%", "2"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.#", "2"),
-					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.metric_filter", "collector.0.id", testAccBroker2),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.0.availability", "100"),
 					resource.TestCheckResourceAttr("circonus_check.metric_filter", "icmp_ping.0.count", "5"),
@@ -68,11 +73,11 @@ resource "circonus_check" "metric_filter" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   collector {
-    id = "/broker/275"
+    id = "%s"
   }
 
   icmp_ping {

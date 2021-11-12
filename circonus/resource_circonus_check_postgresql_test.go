@@ -17,11 +17,14 @@ func TestAccCirconusCheckPostgreSQL_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckPostgreSQLConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckPostgreSQLConfigFmt,
+					checkName,
+					testAccBroker1,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.0.dsn", "user=postgres host=pg1.example.org port=5432 password=12345 sslmode=require"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "postgresql.0.query", `SELECT 'tables', sum(n_tup_ins) as inserts, sum(n_tup_upd) as updates, sum(n_tup_del) as deletes, sum(idx_scan)  as index_scans, sum(seq_scan) as seq_scans, sum(idx_tup_fetch) as index_tup_fetch, sum(seq_tup_read) as seq_tup_read from pg_stat_all_tables`),
@@ -72,7 +75,7 @@ resource "circonus_check" "table_ops" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   postgresql {

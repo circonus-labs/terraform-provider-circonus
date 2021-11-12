@@ -17,11 +17,15 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt, checkName, 2),
+				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt,
+					checkName,
+					testAccBroker1,
+					2,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.code", `^200$`),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.extract", `HTTP/1.1 200 OK`),
@@ -63,11 +67,15 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt, checkName, 0),
+				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt,
+					checkName,
+					testAccBroker1,
+					0,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.code", `^200$`),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.extract", `HTTP/1.1 200 OK`),
@@ -145,7 +153,7 @@ resource "circonus_check" "jezebel" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   http {
