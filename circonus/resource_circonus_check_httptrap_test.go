@@ -17,11 +17,14 @@ func TestAccCirconusCheckHTTPTrap_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckHTTPTrapConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckHTTPTrapConfigFmt,
+					checkName,
+					testAccBroker3,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.consul", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.consul", "collector.0.id", "/broker/35"),
+					resource.TestCheckResourceAttr("circonus_check.consul", "collector.0.id", testAccBroker3),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.0.async_metrics", "false"),
 					resource.TestCheckResourceAttr("circonus_check.consul", "httptrap.0.secret", "12345"),
@@ -72,7 +75,7 @@ resource "circonus_check" "consul" {
   period = "60s"
 
   collector {
-    id = "/broker/35"
+    id = "%s"
   }
 
   httptrap {

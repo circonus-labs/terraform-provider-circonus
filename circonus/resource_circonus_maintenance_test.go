@@ -26,7 +26,7 @@ func TestAccCirconusMaintenance_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusMaintenance,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusMaintenanceConfigFmt, checkName, startTime, stopTime),
+				Config: fmt.Sprintf(testAccCirconusMaintenanceConfigFmt, checkName, testAccBroker1, startTime, stopTime),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_maintenance.check-maintenance", "check"),
 					resource.TestCheckResourceAttr("circonus_maintenance.check-maintenance", "start", startTime),
@@ -84,14 +84,14 @@ func checkMaintenanceExists(c *providerContext, maintenanceCID api.CIDType) (boo
 	return false, nil
 }
 
-const testAccCirconusMaintenanceConfigFmt = `
+var testAccCirconusMaintenanceConfigFmt = `
 resource "circonus_check" "api_latency" {
   active = true
   name = "%s"
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   icmp_ping {

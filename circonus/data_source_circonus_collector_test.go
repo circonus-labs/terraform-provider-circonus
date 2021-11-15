@@ -14,9 +14,11 @@ func TestAccDataSourceCirconusCollector(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceCirconusCollectorConfig,
+				Config: fmt.Sprintf(testAccDataSourceCirconusCollectorConfig,
+					testAccBroker1,
+				),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceCirconusCollectorCheck("data.circonus_collector.by_id", "/broker/1"),
+					testAccDataSourceCirconusCollectorCheck("data.circonus_collector.by_id", testAccBroker1),
 				),
 			},
 		},
@@ -42,6 +44,6 @@ func testAccDataSourceCirconusCollectorCheck(name, cid string) resource.TestChec
 
 const testAccDataSourceCirconusCollectorConfig = `
 data "circonus_collector" "by_id" {
-  id = "/broker/1"
+  id = "%s"
 }
 `

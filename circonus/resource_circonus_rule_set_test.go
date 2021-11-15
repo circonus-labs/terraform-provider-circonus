@@ -20,7 +20,20 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusRuleSet,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusRuleSetConfigFmt, rulesetCheckName),
+				Config: fmt.Sprintf(testAccCirconusRuleSetConfigFmt,
+					rulesetCheckName,
+					testAccBroker1,
+					testAccContactGroup3,
+					testAccContactGroup2,
+					testAccContactGroup2,
+					testAccContactGroup2,
+					testAccContactGroup2,
+					testAccContactGroup3,
+					testAccContactGroup2,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp-latency-alarm", "check"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp-latency-alarm", "metric_name", "maximum"),
@@ -87,7 +100,13 @@ func TestAccCirconusRuleSet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCirconusRuleSetConfigUpdateFmt, rulesetCheckName),
+				Config: fmt.Sprintf(testAccCirconusRuleSetConfigUpdateFmt,
+					rulesetCheckName,
+					testAccBroker1,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_rule_set.circ-6825", "check"),
 					resource.TestCheckResourceAttr("circonus_rule_set.circ-6825", "metric_name", "average"),
@@ -176,7 +195,7 @@ resource "circonus_check" "api_latency" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   icmp_ping {
@@ -224,8 +243,8 @@ EOF
 
     then {
       notify = [
-        "/contact_group/4680",
-        "/contact_group/4679"
+        "%s",
+        "%s"
       ]
       severity = 1
     }
@@ -242,7 +261,7 @@ EOF
     }
 
     then {
-      notify = [ "/contact_group/4679" ]
+      notify = [ "%s" ]
       severity = 2
     }
   }
@@ -259,7 +278,7 @@ EOF
     }
 
     then {
-      notify = [ "/contact_group/4679" ]
+      notify = [ "%s" ]
       severity = 3
     }
   }
@@ -270,7 +289,7 @@ EOF
     }
 
     then {
-      notify = [ "/contact_group/4679" ]
+      notify = [ "%s" ]
       after = "2400"
       severity = 4
     }
@@ -320,8 +339,8 @@ EOF
 
     then {
       notify = [
-        "/contact_group/4680",
-        "/contact_group/4679"
+        "%s",
+        "%s"
       ]
       severity = 1
     }
@@ -342,7 +361,7 @@ EOF
     then {
       severity = 1
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
     }
   }
@@ -353,7 +372,7 @@ EOF
     then {
       severity = 4
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
     }
   }
@@ -368,7 +387,7 @@ EOF
     }
     then {
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
       severity = 2
     }
@@ -388,7 +407,7 @@ resource "circonus_check" "api_latency" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   icmp_ping {
@@ -428,7 +447,7 @@ EOF
     then {
       severity = 1
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
     }
   }
@@ -439,7 +458,7 @@ EOF
     then {
       severity = 4
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
     }
   }
@@ -454,7 +473,7 @@ EOF
     }
     then {
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
       severity = 2
     }

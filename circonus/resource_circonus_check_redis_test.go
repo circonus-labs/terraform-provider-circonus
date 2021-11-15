@@ -17,11 +17,14 @@ func TestAccCirconusCheckRedis_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckRedisConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckRedisConfigFmt,
+					checkName,
+					testAccBroker1,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.redis", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.redis", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.redis", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.redis", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.redis", "redis.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.redis", "name", checkName),
 					resource.TestCheckResourceAttr("circonus_check.redis", "notes", "Check to grab redis metrics"),
@@ -50,7 +53,7 @@ resource "circonus_check" "redis" {
   target = "127.0.0.1"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   redis {

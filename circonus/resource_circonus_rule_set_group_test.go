@@ -20,7 +20,26 @@ func TestAccCirconusRuleSetGroup_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusRuleSetGroup,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusRuleSetGroupConfigFmt, rulesetGroupCheckName),
+				Config: fmt.Sprintf(testAccCirconusRuleSetGroupConfigFmt,
+					rulesetGroupCheckName,
+					testAccBroker1,
+					testAccContactGroup3,
+					testAccContactGroup2,
+					testAccContactGroup2,
+					testAccContactGroup2,
+					testAccContactGroup2,
+					testAccContactGroup3,
+					testAccContactGroup2,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+					testAccContactGroup3,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("circonus_rule_set.icmp_max_latency", "check"),
 					resource.TestCheckResourceAttr("circonus_rule_set.icmp_max_latency", "metric_name", "maximum"),
@@ -117,7 +136,7 @@ resource "circonus_check" "api_latency" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   icmp_ping {
@@ -155,8 +174,8 @@ resource "circonus_rule_set" "icmp_max_latency" {
 
     then {
       notify = [
-        "/contact_group/4680",
-        "/contact_group/4679"
+        "%s",
+        "%s"
       ]
       severity = 1
     }
@@ -173,7 +192,7 @@ resource "circonus_rule_set" "icmp_max_latency" {
     }
 
     then {
-      notify = [ "/contact_group/4679" ]
+      notify = [ "%s" ]
       severity = 2
     }
   }
@@ -190,7 +209,7 @@ resource "circonus_rule_set" "icmp_max_latency" {
     }
 
     then {
-      notify = [ "/contact_group/4679" ]
+      notify = [ "%s" ]
       severity = 3
     }
   }
@@ -201,7 +220,7 @@ resource "circonus_rule_set" "icmp_max_latency" {
     }
 
     then {
-      notify = [ "/contact_group/4679" ]
+      notify = [ "%s" ]
       after = "2400"
       severity = 4
     }
@@ -248,8 +267,8 @@ resource "circonus_rule_set" "icmp_min_latency" {
 
     then {
       notify = [
-        "/contact_group/4680",
-        "/contact_group/4679"
+        "%s",
+        "%s"
       ]
       severity = 3
     }
@@ -268,7 +287,7 @@ resource "circonus_rule_set" "icmp_avg_latency" {
     then {
       severity = 1
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
     }
   }
@@ -279,7 +298,7 @@ resource "circonus_rule_set" "icmp_avg_latency" {
     then {
       severity = 3
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
     }
   }
@@ -294,7 +313,7 @@ resource "circonus_rule_set" "icmp_avg_latency" {
     }
     then {
       notify = [
-        "/contact_group/4680",
+        "%s",
       ]
       severity = 2
     }
@@ -306,13 +325,13 @@ resource "circonus_rule_set_group" "icmp_latency_1" {
 
   notify {
     sev1 = [
-      "/contact_group/4680"
+      "%s"
     ]
     sev2 = [
-      "/contact_group/4680"
+      "%s"
     ]
     sev3 = [
-      "/contact_group/4680"
+      "%s"
     ]
   }
 
@@ -347,13 +366,13 @@ resource "circonus_rule_set_group" "icmp_latency_2" {
 
   notify {
     sev1 = [
-      "/contact_group/4680"
+      "%s"
     ]
     sev2 = [
-      "/contact_group/4680"
+      "%s"
     ]
     sev3 = [
-      "/contact_group/4680"
+      "%s"
     ]
   }
 

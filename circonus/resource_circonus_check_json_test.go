@@ -1,6 +1,7 @@
 package circonus
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -15,12 +16,12 @@ func TestAccCirconusCheckJSON_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCirconusCheckJSONConfig1,
+				Config: fmt.Sprintf(testAccCirconusCheckJSONConfig1, testAccBroker1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.usage", "active", "true"),
 					resource.TestMatchResourceAttr("circonus_check.usage", "check_id", regexp.MustCompile(config.CheckCIDRegex)),
 					resource.TestCheckResourceAttr("circonus_check.usage", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.usage", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.0.headers.%", "3"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.0.headers.Accept", "application/json"),
@@ -47,11 +48,11 @@ func TestAccCirconusCheckJSON_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCirconusCheckJSONConfig2,
+				Config: fmt.Sprintf(testAccCirconusCheckJSONConfig2, testAccBroker1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.usage", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.usage", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.usage", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.0.headers.%", "3"),
 					resource.TestCheckResourceAttr("circonus_check.usage", "json.0.headers.Accept", "application/json"),
@@ -99,7 +100,7 @@ resource "circonus_check" "usage" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   json {
@@ -148,7 +149,7 @@ resource "circonus_check" "usage" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   json {

@@ -17,11 +17,14 @@ func TestAccCirconusCheckTCP_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckTCPConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckTCPConfigFmt,
+					checkName,
+					testAccBroker1,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.tls_cert", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.0.host", "127.0.0.1"),
 					resource.TestCheckResourceAttr("circonus_check.tls_cert", "tcp.0.port", "443"),
@@ -92,7 +95,7 @@ resource "circonus_check" "tls_cert" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   tcp {

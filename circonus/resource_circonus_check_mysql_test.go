@@ -17,11 +17,14 @@ func TestAccCirconusCheckMySQL_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckMySQLConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckMySQLConfigFmt,
+					checkName,
+					testAccBroker1,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.table_ops", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "mysql.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "mysql.0.dsn", "user=mysql host=mydb1.example.org port=3306 password=12345 sslmode=require"),
 					resource.TestCheckResourceAttr("circonus_check.table_ops", "mysql.0.query", `select 'binlog', total from (select variable_value as total from information_schema.global_status where variable_name='BINLOG_CACHE_USE') total`),
@@ -55,7 +58,7 @@ resource "circonus_check" "table_ops" {
   period = "300s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   mysql {

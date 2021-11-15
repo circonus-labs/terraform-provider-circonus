@@ -29,11 +29,14 @@ func TestAccCirconusCheckCloudWatch_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusCheckBundle,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckCloudWatchConfigFmt, checkName),
+				Config: fmt.Sprintf(testAccCirconusCheckCloudWatchConfigFmt,
+					checkName,
+					testAccBroker1,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "active", "true"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "collector.#", "1"),
-					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "collector.0.id", "/broker/1"),
+					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "collector.0.id", testAccBroker1),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.#", "1"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.dimmensions.%", "1"),
 					resource.TestCheckResourceAttr("circonus_check.rds_metrics", "cloudwatch.0.dimmensions.DBInstanceIdentifier", "atlas-production"),
@@ -145,7 +148,7 @@ resource "circonus_check" "rds_metrics" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   target = "atlas-production.us-east-1.rds._aws"

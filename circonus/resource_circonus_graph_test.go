@@ -23,7 +23,12 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCirconusGraph,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, graphCheckName, graphName, ""),
+				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt,
+					graphCheckName,
+					testAccBroker1,
+					graphName,
+					"",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "name", graphName),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "description", "Terraform Test: mixed graph"),
@@ -75,7 +80,12 @@ func TestAccCirconusGraph_basic(t *testing.T) {
 				),
 			},
 			{ // force modification of graph description, test updating the graph
-				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt, graphCheckName, graphName, " foo"),
+				Config: fmt.Sprintf(testAccCirconusGraphConfigFmt,
+					graphCheckName,
+					testAccBroker1,
+					graphName,
+					" foo",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "name", graphName),
 					resource.TestCheckResourceAttr("circonus_graph.mixed-points", "description", "Terraform Test: mixed graph foo"),
@@ -182,7 +192,7 @@ resource "circonus_check" "api_latency" {
   period = "60s"
 
   collector {
-    id = "/broker/1"
+    id = "%s"
   }
 
   icmp_ping {
