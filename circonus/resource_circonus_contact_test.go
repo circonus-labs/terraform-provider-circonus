@@ -37,7 +37,7 @@ func TestAccCirconusContactGroup_basic(t *testing.T) {
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "email.343263208.user", ""),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.#", "0"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.#", "1"),
-					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.address", "https://www.example.org/post/endpoint"),
+					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.url", "https://www.example.org/post/endpoint"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.format", "json"),
 					// resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "http.1287846151.method", "POST"),
 					resource.TestCheckResourceAttr("circonus_contact_group.staging-sev3", "slack.#", "0"),
@@ -159,7 +159,7 @@ resource "circonus_contact_group" "staging-sev3" {
   }
 
   http {
-    address = "https://www.example.org/post/endpoint"
+    url = "https://www.example.org/post/endpoint"
     format = "json"
     method = "POST"
   }
