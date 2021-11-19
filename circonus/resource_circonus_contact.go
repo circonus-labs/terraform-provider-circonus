@@ -46,9 +46,9 @@ const (
 	// contactUserCIDAttr.
 
 	// circonus_contact.http attributes.
-	contactHTTPFormatAttr             = "format"
-	contactHTTPMethodAttr             = "method"
-	contactHTTPUrlAttr schemaAttr     = "url"
+	contactHTTPFormatAttr            = "format"
+	contactHTTPMethodAttr            = "method"
+	contactHTTPUrlAttr    schemaAttr = "url"
 
 	// circonus_contact.pager_duty attributes
 	// contactContactGroupFallbackAttr.
@@ -100,9 +100,9 @@ const (
 )
 
 type contactHTTPInfo struct {
-	Url     string `json:"url"`
-	Format  string `json:"format"`
-	Method  string `json:"method"`
+	Url    string `json:"url"`
+	Format string `json:"format"`
+	Method string `json:"method"`
 }
 
 type contactPagerDutyInfo struct {
@@ -166,9 +166,9 @@ var contactEmailDescriptions = attrDescrs{
 }
 
 var contactHTTPDescriptions = attrDescrs{
-	contactHTTPUrlAttr: "",
-	contactHTTPFormatAttr:  "",
-	contactHTTPMethodAttr:  "",
+	contactHTTPUrlAttr:    "",
+	contactHTTPFormatAttr: "",
+	contactHTTPMethodAttr: "",
 }
 
 var contactPagerDutyDescriptions = attrDescrs{
@@ -764,9 +764,9 @@ func contactGroupHTTPToState(cg *api.ContactGroup) ([]interface{}, error) {
 			}
 
 			httpContacts = append(httpContacts, map[string]interface{}{
-				string(contactHTTPUrlAttr): url.Url,
-				string(contactHTTPFormatAttr):  url.Format,
-				string(contactHTTPMethodAttr):  url.Method,
+				string(contactHTTPUrlAttr):    url.Url,
+				string(contactHTTPFormatAttr): url.Format,
+				string(contactHTTPMethodAttr): url.Method,
 			})
 		}
 	}
