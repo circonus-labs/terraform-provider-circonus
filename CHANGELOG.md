@@ -1,3 +1,11 @@
+## 0.12.4 (November 22, 2021)
+
+CHANGES:
+
+* fix: mismatch in http contact types (not reading format field and normalize url field)
+* upd: Added environment variable settings to the acceptance test suite so that
+it can be run in other environments.
+
 ## 0.12.3 (October 6, 2021)
 
 CHANGES:
