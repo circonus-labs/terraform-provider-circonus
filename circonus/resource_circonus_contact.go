@@ -46,9 +46,9 @@ const (
 	// contactUserCIDAttr.
 
 	// circonus_contact.http attributes.
-	contactHTTPFormatAttr             = "format"
-	contactHTTPMethodAttr             = "method"
-	contactHTTPAddressAttr schemaAttr = "address"
+	contactHTTPFormatAttr            = "format"
+	contactHTTPMethodAttr            = "method"
+	contactHTTPUrlAttr    schemaAttr = "url"
 
 	// circonus_contact.pager_duty attributes
 	// contactContactGroupFallbackAttr.
@@ -100,9 +100,9 @@ const (
 )
 
 type contactHTTPInfo struct {
-	Address string `json:"url"`
-	Format  string `json:"params"`
-	Method  string `json:"method"`
+	Url    string `json:"url"`
+	Format string `json:"format"`
+	Method string `json:"method"`
 }
 
 type contactPagerDutyInfo struct {
@@ -166,9 +166,9 @@ var contactEmailDescriptions = attrDescrs{
 }
 
 var contactHTTPDescriptions = attrDescrs{
-	contactHTTPAddressAttr: "",
-	contactHTTPFormatAttr:  "",
-	contactHTTPMethodAttr:  "",
+	contactHTTPUrlAttr:    "",
+	contactHTTPFormatAttr: "",
+	contactHTTPMethodAttr: "",
 }
 
 var contactPagerDutyDescriptions = attrDescrs{
@@ -300,10 +300,10 @@ func resourceContactGroup() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(contactHTTPDescriptions, map[schemaAttr]*schema.Schema{
-						contactHTTPAddressAttr: {
+						contactHTTPUrlAttr: {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateHTTPURL(contactHTTPAddressAttr, urlBasicCheck),
+							ValidateFunc: validateHTTPURL(contactHTTPUrlAttr, urlBasicCheck),
 						},
 						contactHTTPFormatAttr: {
 							Type:         schema.TypeString,
@@ -764,9 +764,9 @@ func contactGroupHTTPToState(cg *api.ContactGroup) ([]interface{}, error) {
 			}
 
 			httpContacts = append(httpContacts, map[string]interface{}{
-				string(contactHTTPAddressAttr): url.Address,
-				string(contactHTTPFormatAttr):  url.Format,
-				string(contactHTTPMethodAttr):  url.Method,
+				string(contactHTTPUrlAttr):    url.Url,
+				string(contactHTTPFormatAttr): url.Format,
+				string(contactHTTPMethodAttr): url.Method,
 			})
 		}
 	}
@@ -875,8 +875,8 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 
 			httpInfo := contactHTTPInfo{}
 
-			if v, ok := httpMap[string(contactHTTPAddressAttr)]; ok {
-				httpInfo.Address = v.(string)
+			if v, ok := httpMap[string(contactHTTPUrlAttr)]; ok {
+				httpInfo.Url = v.(string)
 			}
 
 			if v, ok := httpMap[string(contactHTTPFormatAttr)]; ok {
