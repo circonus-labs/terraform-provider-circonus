@@ -37,6 +37,7 @@ const (
 	apiCheckTypeRedis      circonusCheckType = "redis"
 	apiCheckTypeSMTP       circonusCheckType = "smtp"
 	apiCheckTypeSNMP       circonusCheckType = "snmp"
+	apiCheckTypeSSH2       circonusCheckType = "ssh2"
 	apiCheckTypeStatsd     circonusCheckType = "statsd"
 	apiCheckTypePostgreSQL circonusCheckType = "postgres"
 	apiCheckTypePromText   circonusCheckType = "promtext"

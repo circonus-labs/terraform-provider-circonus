@@ -49,6 +49,14 @@ const (
 
 	defaultCheckCloudWatchVersion = "2010-08-01"
 
+	defaultCheckSSH2Port          = "22"
+	defaultCheckSSH2MethodKex     = "diffie-hellman-group14-sha1"
+	defaultCheckSSH2MethodHostKey = "ssh-rsa"
+	defaultCheckSSH2MethodCompCS  = "none"
+	defaultCheckSSH2MethodCompSC  = "none"
+	defaultCheckSSH2MethodLangCS  = ""
+	defaultCheckSSH2MethodLangSC  = ""
+
 	defaultCollectorDetailAttrs = 10
 
 	defaultGraphDatapoints = 8

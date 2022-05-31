@@ -1,3 +1,9 @@
+## 0.12.7 (June 1, 2022)
+
+IMPROVEMENTS:
+
+* add: Added support for the ssh2 check type.
+
 ## 0.12.4 (November 22, 2021)
 
 CHANGES:
