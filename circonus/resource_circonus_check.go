@@ -56,6 +56,7 @@ const (
 	checkRedisAttr        = "redis"
 	checkSMTPAttr         = "smtp"
 	checkSNMPAttr         = "snmp"
+	checkSSH2Attr         = "ssh2"
 	checkStatsdAttr       = "statsd"
 	checkTCPAttr          = "tcp"
 	checkTagsAttr         = "tags"
@@ -103,6 +104,7 @@ const (
 	apiCheckTypeRedisAttr      apiCheckType = "redis"
 	apiCheckTypeSMTPAttr       apiCheckType = "smtp"
 	apiCheckTypeSNMPAttr       apiCheckType = "snmp"
+	apiCheckTypeSSH2Attr       apiCheckType = "ssh2"
 	apiCheckTypeStatsdAttr     apiCheckType = "statsd"
 	apiCheckTypeTCPAttr        apiCheckType = "tcp"
 )
@@ -134,6 +136,7 @@ var checkDescriptions = attrDescrs{
 	checkSMTPAttr:         "SMTP check configuration",
 	checkRedisAttr:        "Redis check configuration",
 	checkSNMPAttr:         "SNMP check configuration",
+	checkSSH2Attr:         "SSH2 check configuration",
 	checkStatsdAttr:       "statsd check configuration",
 	checkTCPAttr:          "TCP check configuration",
 	checkTagsAttr:         "A list of tags assigned to the check",
@@ -388,6 +391,7 @@ func resourceCheck() *schema.Resource {
 			checkRedisAttr:      schemaCheckRedis,
 			checkSMTPAttr:       schemaCheckSMTP,
 			checkSNMPAttr:       schemaCheckSNMP,
+			checkSSH2Attr:       schemaCheckSSH2,
 			checkStatsdAttr:     schemaCheckStatsd,
 			checkTCPAttr:        schemaCheckTCP,
 		}),
@@ -773,6 +777,7 @@ func checkConfigToAPI(c *circonusCheck, d *schema.ResourceData) error {
 		checkRedisAttr:      checkConfigToAPIRedis,
 		checkSMTPAttr:       checkConfigToAPISMTP,
 		checkSNMPAttr:       checkConfigToAPISNMP,
+		checkSSH2Attr:       checkConfigToAPISSH2,
 		checkStatsdAttr:     checkConfigToAPIStatsd,
 		checkTCPAttr:        checkConfigToAPITCP,
 	}
@@ -819,6 +824,7 @@ func parseCheckTypeConfig(c *circonusCheck, d *schema.ResourceData) error {
 		apiCheckTypeRedisAttr:      checkAPIToStateRedis,
 		apiCheckTypeSMTPAttr:       checkAPIToStateSMTP,
 		apiCheckTypeSNMPAttr:       checkAPIToStateSNMP,
+		apiCheckTypeSSH2Attr:       checkAPIToStateSSH2,
 		apiCheckTypeStatsdAttr:     checkAPIToStateStatsd,
 		apiCheckTypeTCPAttr:        checkAPIToStateTCP,
 	}
