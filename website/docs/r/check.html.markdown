@@ -135,6 +135,9 @@ resource "circonus_metric" "used" {
 * `redis` - (Optional) A Redis check.  See below for details on how to
   configure the `redis` check.
   
+* `ssh2` - (Optional) A SSH2 check.  See below for details on how to configure
+  the `ssh2` check.
+
 * `statsd` - (Optional) A statsd check.  See below for details on how to
   configure the `statsd` check.
 
@@ -595,6 +598,32 @@ Available metric names are dependent on the output of the `query` being run.
 
 * `db_index` - (Optional) Integer Which of the redis databases to gather 
   metrics about.  Default 0
+
+### `ssh2` Check Type Attributes
+
+* `port` - (Optional) The TCP port on which the remote server's ssh service is running. Default 22
+
+* `method_kex` - (Optional) The key exchange method to use. Default diffie-hellman-group14-sha1
+
+* `method_hostkey` - (Optional) The host key algorithm supported. Default ssh-rsa
+
+* `method_crypt_cs` - (Optional) The encryption algorithm used from client to server.
+
+* `method_crypt_sc` - (Optional) The encryption algorithm used from server to client.
+
+* `method_mac_cs` - (Optional) The message authentication code algorithm used from client to server.
+
+* `method_mac_sc` - (Optional) The message authentication code algorithm used from server to client.
+
+* `method_comp_sc` - (Optional) The compress algorithm used from client to server. Default none
+
+* `method_comp_cs` - (Optional) The compress algorithm used from server to client. Default none
+
+* `method_lang_sc` - (Optional) The language used from client to server.
+
+* `method_lang_cs` - (Optional) The language used from server to client.
+
+Available metrics depend on the metrics sent to the `ssh2` check.
 
 ### `statsd` Check Type Attributes
 
