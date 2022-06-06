@@ -1,3 +1,24 @@
+## 0.12.9 (June 6, 2022)
+
+CHANGES:
+
+* add: Adds the `default_dashboard_uuid` and `default_dashboard_type`
+attributes to the Account data source schema to support the new changes to
+the dashboard defaulting process.
+* upd: Removes the `account_default` attribute from the Dashboard resource
+schema to reflect the changes to the dashboard defaulting process since this
+field is no longer returned by the API.
+
+UPDATES:
+
+* upd: Updates the version of go-apiclient to v0.7.16.
+
+## 0.12.8 (June 6, 2022)
+
+UPDATES:
+
+* upd: Bumps github.com/hashicorp/terraform-plugin-sdk/v2 from 2.16.0 to 2.17.0.
+
 ## 0.12.7 (June 1, 2022)
 
 IMPROVEMENTS:

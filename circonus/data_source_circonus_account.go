@@ -10,36 +10,40 @@ import (
 )
 
 const (
-	accountAddress1Attr      = "address1"
-	accountAddress2Attr      = "address2"
-	accountCCEmailAttr       = "cc_email"
-	accountCityAttr          = "city"
-	accountContactGroupsAttr = "contact_groups"
-	accountCountryAttr       = "country"
-	accountCurrentAttr       = "current"
-	accountDescriptionAttr   = "description"
-	accountEmailAttr         = "email"
-	accountIDAttr            = "id"
-	accountInvitesAttr       = "invites"
-	accountLimitAttr         = "limit"
-	accountNameAttr          = "name"
-	accountOwnerAttr         = "owner"
-	accountRoleAttr          = "role"
-	accountStateProvAttr     = "state"
-	accountTimezoneAttr      = "timezone"
-	accountTypeAttr          = "type"
-	accountUIBaseURLAttr     = "ui_base_url"
-	accountUsageAttr         = "usage"
-	accountUsedAttr          = "used"
-	accountUserIDAttr        = "id"
-	accountUsersAttr         = "users"
+	accountAddress1Attr             = "address1"
+	accountAddress2Attr             = "address2"
+	accountCCEmailAttr              = "cc_email"
+	accountCityAttr                 = "city"
+	accountContactGroupsAttr        = "contact_groups"
+	accountCountryAttr              = "country"
+	accountCurrentAttr              = "current"
+	accountDefaultDashboardUUIDAttr = "default_dashboard_uuid"
+	accountDefaultDashboardTypeAttr = "default_dashboard_type"
+	accountDescriptionAttr          = "description"
+	accountEmailAttr                = "email"
+	accountIDAttr                   = "id"
+	accountInvitesAttr              = "invites"
+	accountLimitAttr                = "limit"
+	accountNameAttr                 = "name"
+	accountOwnerAttr                = "owner"
+	accountRoleAttr                 = "role"
+	accountStateProvAttr            = "state"
+	accountTimezoneAttr             = "timezone"
+	accountTypeAttr                 = "type"
+	accountUIBaseURLAttr            = "ui_base_url"
+	accountUsageAttr                = "usage"
+	accountUsedAttr                 = "used"
+	accountUserIDAttr               = "id"
+	accountUsersAttr                = "users"
 )
 
 var accountDescription = map[schemaAttr]string{
-	accountContactGroupsAttr: "Contact Groups in this account",
-	accountInvitesAttr:       "Outstanding invites attached to the account",
-	accountUsageAttr:         "Account's usage limits",
-	accountUsersAttr:         "Users attached to this account",
+	accountContactGroupsAttr:        "Contact Groups in this account",
+	accountInvitesAttr:              "Outstanding invites attached to the account",
+	accountUsageAttr:                "Account's usage limits",
+	accountUsersAttr:                "Users attached to this account",
+	accountDefaultDashboardUUIDAttr: "The UUID of the dashboard resource used as a default dashboard by this account",
+	accountDefaultDashboardTypeAttr: "The type of dashboard used as a default dashboard by this account",
 }
 
 func dataSourceCirconusAccount() *schema.Resource {
@@ -142,6 +146,18 @@ func dataSourceCirconusAccount() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: accountDescription[accountCountryAttr],
+			},
+			// default_dashboard_uuid
+			accountDefaultDashboardUUIDAttr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountDefaultDashboardUUIDAttr],
+			},
+			// default_dashboard_type
+			accountDefaultDashboardTypeAttr: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: accountDescription[accountDefaultDashboardTypeAttr],
 			},
 			// description
 			accountDescriptionAttr: {
@@ -271,6 +287,12 @@ func dataSourceCirconusAccountRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 	if err := d.Set(accountCountryAttr, acct.Country); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountDefaultDashboardUUIDAttr, acct.DefaultDashboardUUID); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set(accountDefaultDashboardTypeAttr, acct.DefaultDashboardType); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set(accountDescriptionAttr, acct.Description); err != nil {
