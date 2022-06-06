@@ -664,6 +664,7 @@ linters:
     - exhaustive
     - nestif
     # re-enable
+    - maintidx
     - wsl
     - stylecheck
     - goerr113
@@ -673,6 +674,7 @@ linters:
     - dupl
     - gochecknoinits
     - goconst
+    - varnamelen
   # presets:
   #   - bugs
   #   - unused

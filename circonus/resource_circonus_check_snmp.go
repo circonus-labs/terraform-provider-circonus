@@ -33,7 +33,6 @@ const (
 )
 
 var checkSNMPDescriptions = attrDescrs{
-
 	checkSNMPAuthPassphrase:    "The authentication passphrase to use. Only applicaable to SNMP Version 3.",
 	checkSNMPAuthProtocol:      "The authentication protocol to use. Only applicaable to SNMP Version 3.",
 	checkSNMPCommunity:         "The SNMP community string providing read access.",
