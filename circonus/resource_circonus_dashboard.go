@@ -38,11 +38,6 @@ func resourceDashboard() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"account_default": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"grid_layout": {
 				Type:     schema.TypeMap,
 				Required: true,
@@ -868,7 +863,6 @@ func dashboardRead(d *schema.ResourceData, meta interface{}) error {
 	gridLayoutAttrs["width"] = dash.GridLayout.Width
 	gridLayoutAttrs["height"] = dash.GridLayout.Height
 	_ = d.Set("grid_layout", gridLayoutAttrs)
-	_ = d.Set("account_default", dash.AccountDefault)
 	_ = d.Set("shared", dash.Shared)
 	_ = d.Set("title", dash.Title)
 	_ = d.Set("uuid", dash.UUID)
@@ -938,9 +932,6 @@ func (dash *circonusDashboard) ParseConfig(d *schema.ResourceData) error {
 	}
 	if v, found := d.GetOk("shared"); found {
 		dash.Shared = v.(bool)
-	}
-	if v, found := d.GetOk("account_default"); found {
-		dash.AccountDefault = v.(bool)
 	}
 
 	if v, found := d.GetOk("grid_layout"); found {

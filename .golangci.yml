@@ -662,8 +662,11 @@ linters:
     - gocognit
     - cyclop
     - exhaustive
+    - exhaustivestruct
+    - exhaustruct
     - nestif
     # re-enable
+    - maintidx
     - wsl
     - stylecheck
     - goerr113
@@ -673,6 +676,8 @@ linters:
     - dupl
     - gochecknoinits
     - goconst
+    - nonamedreturns
+    - varnamelen
   # presets:
   #   - bugs
   #   - unused

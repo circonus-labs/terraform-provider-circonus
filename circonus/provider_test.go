@@ -60,7 +60,6 @@ func init() {
 	if testAccContactGroup3 = os.Getenv("CIRCONUS_TEST_CONTACT_GROUP_3"); testAccContactGroup3 == "" {
 		testAccContactGroup3 = "/contact_group/4680"
 	}
-
 }
 
 func TestProvider(t *testing.T) {

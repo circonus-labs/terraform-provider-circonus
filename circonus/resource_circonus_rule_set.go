@@ -540,8 +540,10 @@ func ruleSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) 
 	}
 
 	if err = d.Set(ruleSetIfAttr, ifRules); err != nil {
-		s, _ := json.MarshalIndent(ifRules, "", "  ")
-		log.Printf("%s", s)
+		if s, errM := json.MarshalIndent(ifRules, "", "  "); errM == nil {
+			log.Printf("%s", s)
+		}
+
 		return diag.FromErr(err)
 	}
 

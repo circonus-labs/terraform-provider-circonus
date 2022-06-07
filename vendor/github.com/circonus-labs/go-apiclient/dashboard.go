@@ -212,18 +212,17 @@ type DashboardWidget struct {
 
 // Dashboard defines a dashboard. See https://login.circonus.com/resources/api/calls/dashboard for more information.
 type Dashboard struct {
-	CID            string              `json:"_cid,omitempty"`
-	CreatedBy      string              `json:"_created_by,omitempty"`
-	Title          string              `json:"title"`
-	UUID           string              `json:"_dashboard_uuid,omitempty"`
-	Widgets        []DashboardWidget   `json:"widgets"`
-	Options        DashboardOptions    `json:"options"`
-	GridLayout     DashboardGridLayout `json:"grid_layout"`
-	Created        uint                `json:"_created,omitempty"`
-	LastModified   uint                `json:"_last_modified,omitempty"`
-	AccountDefault bool                `json:"account_default"`
-	Active         bool                `json:"_active,omitempty"`
-	Shared         bool                `json:"shared"`
+	CID          string              `json:"_cid,omitempty"`
+	CreatedBy    string              `json:"_created_by,omitempty"`
+	Title        string              `json:"title"`
+	UUID         string              `json:"_dashboard_uuid,omitempty"`
+	Widgets      []DashboardWidget   `json:"widgets"`
+	Options      DashboardOptions    `json:"options"`
+	GridLayout   DashboardGridLayout `json:"grid_layout"`
+	Created      uint                `json:"_created,omitempty"`
+	LastModified uint                `json:"_last_modified,omitempty"`
+	Active       bool                `json:"_active,omitempty"`
+	Shared       bool                `json:"shared"`
 }
 
 // NewDashboard returns a new Dashboard (with defaults, if applicable)
