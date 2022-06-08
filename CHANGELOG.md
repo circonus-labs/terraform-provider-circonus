@@ -1,3 +1,11 @@
+## 0.12.10 (June 8, 2022)
+
+CHANGES:
+
+* upd: Removes support from the circonus_contact_group resource for external
+contact methods that are no longer supported: irc and xmpp. Updates the
+documentation to remove these methods as well.
+
 ## 0.12.9 (June 6, 2022)
 
 CHANGES:

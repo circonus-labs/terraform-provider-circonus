@@ -64,10 +64,6 @@ resource "circonus_contact_group" "myteam-alerts" {
     warning = 3
   }
 
-  xmpp {
-    user = "/user/9876"
-  }
-
   aggregation_window = "5m"
 
   alert_option {
@@ -175,7 +171,7 @@ mechanisms).
 
 ## Supported Contact Group `http` Attributes
 
-* `address` - (Required) URL to send a webhook request to.
+* `url` - (Required) URL to send a webhook request to.
 
 * `format` - (Optional) The payload of the request is a JSON-encoded payload
   when the `format` is set to `json` (the default).  The alternate payload
@@ -183,11 +179,6 @@ mechanisms).
 
 * `method` - (Optional) The HTTP verb to use when making a request.  Either
   `GET` or `POST` may be specified. The default verb is `POST`.
-
-## Supported Contact Group `irc` Attributes
-
-* `user` - (Required) When a user has configured IRC on their user account, they
-  will receive an IRC notification.
 
 ## Supported Contact Group `pager_duty` Attributes
 
@@ -248,15 +239,6 @@ mechanisms).
 * `info` - (Required)
 * `team` - (Required)
 * `warning` - (Required)
-
-## Supported Contact Group `xmpp` Attributes
-
-Either an `address` or `user` attribute is required.
-
-* `address` - (Optional) XMPP address to send a short notification to.
-
-* `user` - (Optional) An XMPP notification will be sent to the XMPP address of
-  record for the corresponding user ID (e.g. `/user/1234`).
 
 ## Import Example
 
