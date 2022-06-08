@@ -33,7 +33,6 @@ const (
 	contactSlackAttr             = "slack"
 	contactTagsAttr              = "tags"
 	contactVictorOpsAttr         = "victorops"
-	contactXMPPAttr              = "xmpp"
 
 	// circonus_contact.alert_option attributes.
 	contactEscalateAfterAttr = "escalate_after"
@@ -75,10 +74,6 @@ const (
 	contactVictorOpsTeamAttr     = "team"
 	contactVictorOpsWarningAttr  = "warning"
 
-	// circonus_contact.victorops attributes
-	// contactUserCIDAttr.
-	contactXMPPAddressAttr = "address"
-
 	// circonus_contact read-only attributes.
 	contactLastModifiedAttr   = "last_modified"
 	contactLastModifiedByAttr = "last_modified_by"
@@ -96,7 +91,6 @@ const (
 	circonusMethodSlack     = "slack"
 	circonusMethodSMS       = "sms"
 	circonusMethodVictorOps = "victorops"
-	circonusMethodXMPP      = "xmpp"
 )
 
 type contactHTTPInfo struct {
@@ -150,7 +144,6 @@ var contactGroupDescriptions = attrDescrs{
 	contactSlackAttr:                "",
 	contactTagsAttr:                 "",
 	contactVictorOpsAttr:            "",
-	contactXMPPAttr:                 "",
 }
 
 var contactAlertDescriptions = attrDescrs{
@@ -198,11 +191,6 @@ var contactVictorOpsDescriptions = attrDescrs{
 	contactVictorOpsInfoAttr:        "",
 	contactVictorOpsTeamAttr:        "",
 	contactVictorOpsWarningAttr:     "",
-}
-
-var contactXMPPDescriptions = attrDescrs{
-	contactUserCIDAttr:     "",
-	contactXMPPAddressAttr: "",
 }
 
 func resourceContactGroup() *schema.Resource {
@@ -481,26 +469,6 @@ func resourceContactGroup() *schema.Resource {
 					}),
 				},
 			},
-			contactXMPPAttr: {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: convertToHelperSchema(contactXMPPDescriptions, map[schemaAttr]*schema.Schema{
-						contactXMPPAddressAttr: {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{contactXMPPAttr + "." + contactUserCIDAttr},
-						},
-						contactUserCIDAttr: {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ValidateFunc:  validateUserCID(contactUserCIDAttr),
-							ConflictsWith: []string{contactXMPPAttr + "." + contactXMPPAddressAttr},
-						},
-					}),
-				},
-			},
 
 			// OUT parameters
 			contactLastModifiedAttr: {
@@ -594,11 +562,6 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	xmppState, err := contactGroupXMPPToState(cg)
-	if err != nil {
-		return err
-	}
-
 	_ = d.Set(contactAggregationWindowAttr, fmt.Sprintf("%ds", cg.AggregationWindow))
 	_ = d.Set(contactAlwaysSendClearAttr, cg.AlwaysSendClear)
 	_ = d.Set(contactGroupTypeAttr, cg.GroupType)
@@ -641,10 +604,6 @@ func contactGroupRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err := d.Set(contactVictorOpsAttr, victorOpsState); err != nil {
 		return fmt.Errorf("Unable to store contact %q attribute: %w", contactVictorOpsAttr, err)
-	}
-
-	if err := d.Set(contactXMPPAttr, xmppState); err != nil {
-		return fmt.Errorf("Unable to store contact %q attribute: %w", contactXMPPAttr, err)
 	}
 
 	// Out parameters
@@ -1066,27 +1025,6 @@ func getContactGroupInput(d *schema.ResourceData) (*api.ContactGroup, error) {
 		}
 	}
 
-	if v, ok := d.GetOk(contactXMPPAttr); ok {
-		xmppListRaw := v.(*schema.Set).List()
-		for _, xmppMapRaw := range xmppListRaw {
-			xmppMap := xmppMapRaw.(map[string]interface{})
-
-			if v, ok := xmppMap[contactXMPPAddressAttr]; ok && v.(string) != "" {
-				cg.Contacts.External = append(cg.Contacts.External, api.ContactGroupContactsExternal{
-					Info:   v.(string),
-					Method: circonusMethodXMPP,
-				})
-			}
-
-			if v, ok := xmppMap[contactUserCIDAttr]; ok && v.(string) != "" {
-				cg.Contacts.Users = append(cg.Contacts.Users, api.ContactGroupContactsUser{
-					Method:  circonusMethodXMPP,
-					UserCID: v.(string),
-				})
-			}
-		}
-	}
-
 	if v, ok := d.GetOk(contactLongMessageAttr); ok {
 		msg := v.(string)
 		cg.AlertFormats.LongMessage = &msg
@@ -1232,28 +1170,6 @@ func contactGroupVictorOpsToState(cg *api.ContactGroup) ([]interface{}, error) {
 	}
 
 	return victorOpsContacts, nil
-}
-
-func contactGroupXMPPToState(cg *api.ContactGroup) ([]interface{}, error) { //nolint:unparam
-	xmppContacts := make([]interface{}, 0, len(cg.Contacts.Users)+len(cg.Contacts.External))
-
-	for _, ext := range cg.Contacts.External {
-		if ext.Method == circonusMethodXMPP {
-			xmppContacts = append(xmppContacts, map[string]interface{}{
-				contactXMPPAddressAttr: ext.Info,
-			})
-		}
-	}
-
-	for _, user := range cg.Contacts.Users {
-		if user.Method == circonusMethodXMPP {
-			xmppContacts = append(xmppContacts, map[string]interface{}{
-				contactUserCIDAttr: user.UserCID,
-			})
-		}
-	}
-
-	return xmppContacts, nil
 }
 
 // contactGroupAlertOptionsChecksum creates a stable hash of the normalized values.
