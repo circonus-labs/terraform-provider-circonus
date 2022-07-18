@@ -23,7 +23,6 @@ linters:
     - golint # revivie
     # others
     #- prealloc
-    - gci
     - nosnakecase
     - nolintlint
     - wrapcheck
