@@ -445,3 +445,8 @@ func (rsg *circonusRuleSetGroup) Update(ctxt *providerContext) error {
 
 	return nil
 }
+
+// func (rsg *circonusRuleSetGroup) Validate() error {
+// 	log.Printf("Validated RuleSetGroup: %v\n", rsg)
+// 	return nil
+// }

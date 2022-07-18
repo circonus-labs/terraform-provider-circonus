@@ -44,6 +44,7 @@ linters:
     - exhaustruct
     - nestif
     # re-enable
+    - gci
     - maintidx
     - wsl
     - godox
