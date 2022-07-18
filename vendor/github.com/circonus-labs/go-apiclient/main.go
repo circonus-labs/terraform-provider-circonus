@@ -99,6 +99,7 @@ type Config struct {
 	MinRetryDelay  string
 	MaxRetryDelay  string
 	MaxRetries     uint
+	DisableRetries bool
 	Debug          bool
 }
 
@@ -190,6 +191,11 @@ func New(ac *Config) (*API, error) {
 	if ac.MaxRetries > 0 {
 		a.maxRetries = ac.MaxRetries
 	}
+
+	if ac.DisableRetries {
+		a.maxRetries = 0
+	}
+
 	a.minRetryDelay = minRetryWait
 	if ac.MinRetryDelay != "" {
 		mr, err := time.ParseDuration(ac.MinRetryDelay)
@@ -198,6 +204,7 @@ func New(ac *Config) (*API, error) {
 		}
 		a.minRetryDelay = mr
 	}
+
 	a.maxRetryDelay = maxRetryWait
 	if ac.MaxRetryDelay != "" {
 		mr, err := time.ParseDuration(ac.MaxRetryDelay)
