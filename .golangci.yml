@@ -47,16 +47,10 @@ linters:
     # re-enable
     - maintidx
     - wsl
-    - stylecheck
-    - goerr113
-    - errorlint
-    - revive
     - godox
     - dupl
     - gochecknoinits
     - goconst
-    - nonamedreturns
-    - varnamelen
   # presets:
   #   - bugs
   #   - unused
