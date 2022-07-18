@@ -24,7 +24,6 @@ linters:
     # others
     #- prealloc
     - tenv
-    - gci
     - nosnakecase
     - nolintlint
     - wrapcheck
