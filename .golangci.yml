@@ -646,6 +646,7 @@ linters:
     - golint # revivie
     # others
     #- prealloc
+    - nosnakecase
     - nolintlint
     - wrapcheck
     - testpackage
