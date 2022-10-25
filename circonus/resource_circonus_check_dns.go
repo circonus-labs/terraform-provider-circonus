@@ -20,7 +20,7 @@ const (
 
 var checkDNSDescriptions = attrDescrs{
 	checkDNSCTypeAttr:      "The DNS class of the query. IN: Internet, CH: Chaos, HS: Hesoid.",
-	checkDNSNameserverAttr: "The domain name server to query. If the name of the check is in-addr.arpa, the system default nameserver is used. Otherwise, the nameserver is the %[target] of the the check.",
+	checkDNSNameserverAttr: "The domain name server to query. If the name of the check is in-addr.arpa, the system default nameserver is used. Otherwise, the nameserver is the %[target] of the check.",
 	checkDNSQueryAttr:      "The query to send. If the name of the check is in-addr.arpa, the reverse IP octet notation of in-addr.arpa syntax is synthesized by default. Otherwise the default query is the name of the check itself.",
 	checkDNSRTypeAttr:      "The DNS resource record type of the query. If the name of the check is in-addr.arpa, the default is PTR, otherwise it is A.",
 }
