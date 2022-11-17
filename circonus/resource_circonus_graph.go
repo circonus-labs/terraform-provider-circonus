@@ -522,40 +522,50 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	leftAxisMap := make(map[string]interface{}, 3)
-	if g.LogLeftY != nil {
-		leftAxisMap[string(graphAxisLogarithmicAttr)] = fmt.Sprintf("%d", *g.LogLeftY)
+	if g.LogLeftY != nil && g.LogLeftY.(string) != "" {
+		leftAxisMap[string(graphAxisLogarithmicAttr)] = fmt.Sprintf("%v", g.LogLeftY)
 	}
 
-	if g.MaxLeftY != nil {
-		leftAxisMap[string(graphAxisMaxAttr)] = strconv.FormatFloat(*g.MaxLeftY, 'f', -1, 64)
+	if g.MaxLeftY != nil && g.MaxLeftY.(string) != "" {
+		leftAxisMap[string(graphAxisMaxAttr)] = fmt.Sprintf("%v", g.MaxLeftY)
 	}
 
-	if g.MinLeftY != nil {
-		leftAxisMap[string(graphAxisMinAttr)] = strconv.FormatFloat(*g.MinLeftY, 'f', -1, 64)
+	if g.MinLeftY != nil && g.MinLeftY.(string) != "" {
+		leftAxisMap[string(graphAxisMinAttr)] = fmt.Sprintf("%v", g.MinLeftY)
 	}
 
 	rightAxisMap := make(map[string]interface{}, 3)
-	if g.LogRightY != nil {
-		rightAxisMap[string(graphAxisLogarithmicAttr)] = fmt.Sprintf("%d", *g.LogRightY)
+	if g.LogRightY != nil && g.LogRightY.(string) != "" {
+		rightAxisMap[string(graphAxisLogarithmicAttr)] = fmt.Sprintf("%v", g.LogRightY)
 	}
 
-	if g.MaxRightY != nil {
-		rightAxisMap[string(graphAxisMaxAttr)] = strconv.FormatFloat(*g.MaxRightY, 'f', -1, 64)
+	if g.MaxRightY != nil && g.MaxRightY.(string) != "" {
+		rightAxisMap[string(graphAxisMaxAttr)] = fmt.Sprintf("%v", g.MaxRightY)
 	}
 
-	if g.MinRightY != nil {
-		rightAxisMap[string(graphAxisMinAttr)] = strconv.FormatFloat(*g.MinRightY, 'f', -1, 64)
+	if g.MinRightY != nil && g.MinRightY.(string) != "" {
+		rightAxisMap[string(graphAxisMinAttr)] = fmt.Sprintf("%v", g.MinRightY)
 	}
 
-	_ = d.Set(graphDescriptionAttr, g.Description)
+	if g.Description != "" {
+		_ = d.Set(graphDescriptionAttr, g.Description)
+	}
 
 	if err := d.Set(graphLeftAttr, leftAxisMap); err != nil {
 		return fmt.Errorf("Unable to store graph %q attribute: %w", graphLeftAttr, err)
 	}
 
-	_ = d.Set(graphLineStyleAttr, g.LineStyle)
-	_ = d.Set(graphNameAttr, g.Title)
-	_ = d.Set(graphNotesAttr, indirect(g.Notes))
+	if g.Title != "" {
+		_ = d.Set(graphNameAttr, g.Title)
+	}
+
+	if g.LineStyle != nil && *g.LineStyle != "" {
+		_ = d.Set(graphLineStyleAttr, g.LineStyle)
+	}
+
+	if g.Notes != nil && *g.Notes != "" {
+		_ = d.Set(graphNotesAttr, indirect(g.Notes))
+	}
 
 	if err := d.Set(graphRightAttr, rightAxisMap); err != nil {
 		return fmt.Errorf("Unable to store graph %q attribute: %w", graphRightAttr, err)
@@ -569,10 +579,14 @@ func graphRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Unable to store graph %q attribute: %w", graphMetricClusterAttr, err)
 	}
 
-	_ = d.Set(graphStyleAttr, g.Style)
+	if g.Style != nil && *g.Style != "" {
+		_ = d.Set(graphStyleAttr, g.Style)
+	}
 
-	if err := d.Set(graphTagsAttr, tagsToState(apiToTags(g.Tags))); err != nil {
-		return fmt.Errorf("Unable to store graph %q attribute: %w", graphTagsAttr, err)
+	if len(g.Tags) > 0 {
+		if err := d.Set(graphTagsAttr, tagsToState(apiToTags(g.Tags))); err != nil {
+			return fmt.Errorf("Unable to store graph %q attribute: %w", graphTagsAttr, err)
+		}
 	}
 
 	guides := make([]interface{}, 0, len(g.Guides))
@@ -658,6 +672,11 @@ func loadGraph(ctxt *providerContext, cid api.CIDType) (circonusGraph, error) {
 // Circonus Graph object.  ParseConfig and graphRead() must be kept in sync.
 func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 	g.Datapoints = make([]api.GraphDatapoint, 0, defaultGraphDatapoints)
+	g.Tags = make([]string, 0)
+	g.AccessKeys = make([]api.GraphAccessKey, 0)
+	g.Composites = make([]api.GraphComposite, 0)
+	g.Guides = make([]api.GraphGuide, 0)
+	g.MetricClusters = make([]api.GraphMetricCluster, 0)
 
 	if v, found := d.GetOk(graphLeftAttr); found {
 		listRaw := v.(map[string]interface{})
@@ -666,21 +685,27 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			leftAxisMap[k] = v
 		}
 
-		if v, ok := leftAxisMap[string(graphAxisLogarithmicAttr)]; ok {
-			i64, _ := strconv.ParseInt(v.(string), 10, 64)
-			i := int(i64)
-			g.LogLeftY = &i
+		if v, ok := leftAxisMap[string(graphAxisLogarithmicAttr)]; ok && v != nil {
+			g.LogLeftY = v.(string)
+		} else {
+			g.LogLeftY = ""
 		}
 
-		if v, ok := leftAxisMap[string(graphAxisMaxAttr)]; ok && v.(string) != "" {
-			f, _ := strconv.ParseFloat(v.(string), 64)
-			g.MaxLeftY = &f
+		if v, ok := leftAxisMap[string(graphAxisMaxAttr)]; ok && v != nil {
+			g.MaxLeftY = v.(string)
+		} else {
+			g.MaxLeftY = ""
 		}
 
-		if v, ok := leftAxisMap[string(graphAxisMinAttr)]; ok && v.(string) != "" {
-			f, _ := strconv.ParseFloat(v.(string), 64)
-			g.MinLeftY = &f
+		if v, ok := leftAxisMap[string(graphAxisMinAttr)]; ok && v != nil {
+			g.MinLeftY = v.(string)
+		} else {
+			g.MinLeftY = ""
 		}
+	} else {
+		g.LogLeftY = ""
+		g.MaxLeftY = ""
+		g.MinLeftY = ""
 	}
 
 	if v, found := d.GetOk(graphRightAttr); found {
@@ -690,25 +715,33 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 			rightAxisMap[k] = v
 		}
 
-		if v, ok := rightAxisMap[string(graphAxisLogarithmicAttr)]; ok {
-			i64, _ := strconv.ParseInt(v.(string), 10, 64)
-			i := int(i64)
-			g.LogRightY = &i
+		if v, ok := rightAxisMap[string(graphAxisLogarithmicAttr)]; ok && v != nil {
+			g.LogRightY = v.(string)
+		} else {
+			g.LogRightY = ""
 		}
 
-		if v, ok := rightAxisMap[string(graphAxisMaxAttr)]; ok && v.(string) != "" {
-			f, _ := strconv.ParseFloat(v.(string), 64)
-			g.MaxRightY = &f
+		if v, ok := rightAxisMap[string(graphAxisMaxAttr)]; ok && v != nil {
+			g.MaxRightY = v.(string)
+		} else {
+			g.MaxRightY = ""
 		}
 
-		if v, ok := rightAxisMap[string(graphAxisMinAttr)]; ok && v.(string) != "" {
-			f, _ := strconv.ParseFloat(v.(string), 64)
-			g.MinRightY = &f
+		if v, ok := rightAxisMap[string(graphAxisMinAttr)]; ok && v != nil {
+			g.MinRightY = v.(string)
+		} else {
+			g.MinRightY = ""
 		}
+	} else {
+		g.LogRightY = ""
+		g.MaxRightY = ""
+		g.MinRightY = ""
 	}
 
 	if v, found := d.GetOk(graphDescriptionAttr); found {
 		g.Description = v.(string)
+	} else {
+		g.Description = ""
 	}
 
 	if v, found := d.GetOk(graphLineStyleAttr); found {
@@ -721,15 +754,23 @@ func (g *circonusGraph) ParseConfig(d *schema.ResourceData) error {
 		default:
 			return fmt.Errorf("PROVIDER BUG: unsupported type for %q: %T", graphLineStyleAttr, v)
 		}
+	} else {
+		g.LineStyle = new(string)
+		*g.LineStyle = ""
 	}
 
 	if v, found := d.GetOk(graphNameAttr); found {
 		g.Title = v.(string)
+	} else {
+		g.Title = ""
 	}
 
-	if v, found := d.GetOk(graphNotesAttr); found {
+	if v, found := d.GetOk(graphNotesAttr); found && v != nil {
 		s := v.(string)
 		g.Notes = &s
+	} else {
+		g.Notes = new(string)
+		*g.Notes = ""
 	}
 
 	if listRaw, found := d.GetOk(graphMetricAttr); found {

@@ -1,3 +1,10 @@
+## 0.12.13 (November 16, 2022)
+
+CHANGES:
+
+* upd: Updates the behavior of the graph resource to allow values removed
+from terraform files to be correctly cleared by the terraform provider.
+
 ## 0.12.10 (June 8, 2022)
 
 CHANGES:
