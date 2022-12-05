@@ -166,11 +166,11 @@ resource "circonus_check" "jezebel" {
       Host = "127.0.0.1",
     }
     version     = "1.1"
-	auth_method = "Basic"
+    auth_method = "Basic"
     method      = "GET"
     read_limit  = 1048576
-	url         = "http://127.0.0.1:8083/resmon"
-	redirects   = "%d"
+    url         = "http://127.0.0.1:8083/resmon"
+    redirects   = "%d"
   }
 
   metric {
