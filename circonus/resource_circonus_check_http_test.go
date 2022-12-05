@@ -2,6 +2,7 @@ package circonus
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -32,6 +33,7 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.headers.%", "1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.headers.Host", "127.0.0.1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.version", "1.1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.auth_method", "Basic"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.method", "GET"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.read_limit", "1048576"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.url", "http://127.0.0.1:8083/resmon"),
@@ -67,7 +69,7 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCirconusCheckHTTPConfigFmt,
+				Config: fmt.Sprintf(strings.Replace(testAccCirconusCheckHTTPConfigFmt, `auth_method = "Basic"`, "", 1),
 					checkName,
 					testAccBroker1,
 					0,
@@ -82,6 +84,7 @@ func TestAccCirconusCheckHTTP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.headers.%", "1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.headers.Host", "127.0.0.1"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.version", "1.1"),
+					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.auth_method", ""),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.method", "GET"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.read_limit", "1048576"),
 					resource.TestCheckResourceAttr("circonus_check.jezebel", "http.0.url", "http://127.0.0.1:8083/resmon"),
@@ -163,6 +166,7 @@ resource "circonus_check" "jezebel" {
       Host = "127.0.0.1",
     }
     version     = "1.1"
+	auth_method = "Basic"
     method      = "GET"
     read_limit  = 1048576
 	url         = "http://127.0.0.1:8083/resmon"

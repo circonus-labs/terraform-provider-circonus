@@ -1,3 +1,10 @@
+## 0.12.13 (December 5, 2022)
+
+CHANGES:
+
+* upd: Updates the behavior of the HTTP check resource to scan through the
+list of check type interfaces to find the correct configuration values.
+
 ## 0.12.13 (November 16, 2022)
 
 CHANGES:
