@@ -1,3 +1,7 @@
+# v0.7.21
+
+* feat: add `_c3_data_url` support to account endpoint
+
 # v0.7.20
 
 * upd: Changes the type of some of the fields of the Graph type to interface{}.
