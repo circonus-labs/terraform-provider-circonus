@@ -57,6 +57,7 @@ resource "circonus_check" "redis" {
   }
 
   redis {
+    db_index = 1
   }
 
   metric_filter {
