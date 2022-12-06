@@ -317,15 +317,27 @@ func checkConfigToAPIHTTP(c *circonusCheck, l interfaceList) error {
 	// which, with this arbitrary for loop results in the configuration being
 	// overwritten with all blank values. (resulting in an API error for missing config attributes)
 	//
-	// just use the first one in the list if there are > 0 elements
+	// This searches all values in the interfaceList to find one containing the
+	// proper configuration data and uses that.
 
 	if len(l) == 0 {
 		return fmt.Errorf("%d http configs found in list", len(l))
 	}
 
-	httpConfig := newInterfaceMap(l[0])
-	// for _, mapRaw := range l {
-	// 	httpConfig := newInterfaceMap(mapRaw)
+	var httpConfig interfaceMap
+
+	for _, mapRaw := range l {
+		if v, found := newInterfaceMap(mapRaw)[checkHTTPURLAttr]; found &&
+			v.(string) != "" {
+			httpConfig = newInterfaceMap(mapRaw)
+
+			break
+		}
+	}
+
+	if len(httpConfig) == 0 {
+		return fmt.Errorf("http config url not set, or http config not found")
+	}
 
 	if v, found := httpConfig[checkHTTPAuthMethodAttr]; found {
 		c.Config[config.AuthMethod] = v.(string)
@@ -405,7 +417,6 @@ func checkConfigToAPIHTTP(c *circonusCheck, l interfaceList) error {
 	if v, found := httpConfig[checkHTTPRedirectsAttr]; found {
 		c.Config[config.Redirects] = v.(string)
 	}
-	// }
 
 	return nil
 }
