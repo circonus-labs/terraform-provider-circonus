@@ -3,7 +3,7 @@ module github.com/circonus-labs/terraform-provider-circonus
 go 1.18
 
 require (
-	github.com/circonus-labs/go-apiclient v0.7.21
+	github.com/circonus-labs/go-apiclient v0.7.22
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
 )

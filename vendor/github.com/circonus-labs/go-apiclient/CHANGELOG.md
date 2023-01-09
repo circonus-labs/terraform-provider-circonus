@@ -1,3 +1,7 @@
+# v0.7.22
+
+* feat: add `Cache-Control: no-store` to prevent caching of list responses
+
 # v0.7.21
 
 * feat: add `_c3_data_url` support to account endpoint
