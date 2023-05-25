@@ -1,13 +1,14 @@
 package circonus
 
 import (
+	"bytes"
 	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/circonus-labs/go-apiclient/config"
+	"github.com/circonus-labs/terraform-provider-circonus/internal/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -131,9 +132,10 @@ var schemaCheckSNMP = &schema.Schema{
 				ValidateFunc: validateRegexp(checkSNMPVersion, `(1|2c|3)`),
 			},
 			checkSNMPOID: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
+				Set:      hashCheckSNMPOID,
 				Elem: &schema.Resource{
 					Schema: convertToHelperSchema(checkSNMPOIDDescriptions, map[schemaAttr]*schema.Schema{
 						checkSNMPOIDName: {
@@ -156,6 +158,27 @@ var schemaCheckSNMP = &schema.Schema{
 			},
 		}),
 	},
+}
+
+// hashCheckSNMPOID creates a stable hash of the normalized OID values.
+func hashCheckSNMPOID(v interface{}) int {
+	m := v.(map[string]interface{})
+
+	b := &bytes.Buffer{}
+
+	b.Grow(defaultHashBufSize)
+
+	writeString := func(attrName schemaAttr) {
+		if v, ok := m[string(attrName)]; ok && v.(string) != "" {
+			fmt.Fprint(b, strings.TrimSpace(v.(string)))
+		}
+	}
+
+	writeString(checkSNMPOIDName)
+
+	s := b.String()
+
+	return hashcode.String(s)
 }
 
 // checkAPIToStateSNMP reads the Config data out of circonusCheck.CheckBundle into the
@@ -246,15 +269,8 @@ func checkAPIToStateSNMP(c *circonusCheck, d *schema.ResourceData) error {
 		}
 	}
 
-	sort.Slice(oidList, func(i, j int) bool {
-		if oidList[i] != nil && oidList[j] != nil {
-			y := oidList[i].(map[string]interface{})
-			z := oidList[j].(map[string]interface{})
-			return y[string(checkSNMPOIDName)].(string) < z[string(checkSNMPOIDName)].(string)
-		}
-		return true
-	})
-	snmpConfig[string(checkSNMPOID)] = oidList
+	snmpConfig[string(checkSNMPOID)] = schema.NewSet(hashCheckSNMPOID,
+		oidList)
 
 	whitelistedConfigKeys := map[config.Key]struct{}{
 		config.ReverseSecretKey: {},
@@ -333,7 +349,9 @@ func checkConfigToAPISNMP(c *circonusCheck, l interfaceList) error { //nolint:un
 		}
 
 		if v, found := snmpConfig[checkSNMPOID]; found {
-			m := v.([]interface{})
+			ss := v.(*schema.Set)
+
+			m := ss.List()
 			for _, ll := range m {
 				if ll == nil {
 					continue
