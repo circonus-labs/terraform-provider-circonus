@@ -2,7 +2,7 @@
 
 CHANGES:
 
-* feat(CIRC-10300): Change the type of the OID configurations for SNMP checks
+* fix(CIRC-10300): Change the type of the OID configurations for SNMP checks
 from TypeList to TypeSet. This ensures the state is always ordered the same
 regardless of how the API returns the configuration keys. This should resolve
 issues of OID's changing positions in the state when applying SNMP checks.
