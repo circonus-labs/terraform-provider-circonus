@@ -70,16 +70,16 @@ resource "circonus_check" "snmp" {
     security_level = "authNoPriv"
 
     oid {
-      name = "upsBatCapacity"
-      path = ".1.3.6.1.4.1.318.1.1.1.2.2.1.0"
+      name = "upsBatVoltage"
+      path = ".1.3.6.1.4.1.318.1.1.1.2.2.8.0"
     }
     oid {
       name = "upsBatTimeRemaining"
       path = ".1.3.6.1.4.1.318.1.1.1.2.2.3.0"
     }
     oid {
-      name = "upsBatVoltage"
-      path = ".1.3.6.1.4.1.318.1.1.1.2.2.8.0"
+      name = "upsBatCapacity"
+      path = ".1.3.6.1.4.1.318.1.1.1.2.2.1.0"
     }
   }
 
