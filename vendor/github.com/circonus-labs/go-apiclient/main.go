@@ -39,7 +39,7 @@ func init() {
 		rnd = rand.New(rand.NewSource(time.Now().UTC().UnixNano())) //nolint:gosec //G404
 		return
 	}
-	rand.New(rand.NewSource(n.Int64())) //nolint:gosec //G404
+	rnd = rand.New(rand.NewSource(n.Int64())) //nolint:gosec //G404
 }
 
 const (
