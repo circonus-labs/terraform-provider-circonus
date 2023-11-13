@@ -21,8 +21,9 @@ linters:
     - scopelint # exportloopref
     - interfacer
     - golint # revivie
+    - ifshort
     # others
-    #- prealloc
+    - depguard
     - nosnakecase
     - nolintlint
     - wrapcheck
@@ -43,7 +44,6 @@ linters:
     - exhaustivestruct
     - exhaustruct
     - nestif
-    # re-enable
     - gci
     - maintidx
     - wsl
@@ -51,7 +51,4 @@ linters:
     - dupl
     - gochecknoinits
     - goconst
-  # presets:
-  #   - bugs
-  #   - unused
   fast: true
